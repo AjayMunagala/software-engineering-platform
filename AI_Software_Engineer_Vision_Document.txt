@@ -1,0 +1,259 @@
+Project Vision Document
+
+Project Codename: Aegis CodeMind (Working Name)
+
+Vision
+
+Build the world’s most capable AI Software Engineer—an AI created
+exclusively for software engineering.
+
+This is not a general-purpose chatbot. It is not designed to write
+emails, summarize articles, or answer trivia. Its only mission is to
+understand software systems deeply, identify the true root cause of
+problems, and help engineers build and maintain high-quality software.
+
+The long-term objective is to create an AI that works like a Senior
+Staff Engineer rather than an autocomplete engine.
+
+------------------------------------------------------------------------
+
+Mission
+
+Create an AI that can:
+
+-   Understand entire codebases containing millions of lines of code.
+-   Understand architecture rather than isolated files.
+-   Identify the exact root cause of bugs.
+-   Produce the smallest correct fix instead of rewriting large
+    sections.
+-   Read databases, logs, APIs, configuration, documentation, Git
+    history, and tests when necessary.
+-   Validate its own changes before suggesting them.
+-   Continuously improve while preserving engineering quality.
+
+------------------------------------------------------------------------
+
+Core Principles
+
+1.  Evidence before conclusions.
+2.  Root cause before code generation.
+3.  Minimal changes over large rewrites.
+4.  Preserve architecture.
+5.  Verify every change.
+6.  Safety first for automated actions.
+7.  Models are replaceable; the platform is permanent.
+
+------------------------------------------------------------------------
+
+Problem Statement
+
+Today’s coding assistants are usually built on general-purpose language
+models.
+
+Common limitations: - Guess instead of investigate. - Lack complete
+understanding of large repositories. - Ignore architecture. - Rewrite
+too much code. - Rarely verify changes. - Forget project history.
+
+Our platform is intended to solve these problems.
+
+------------------------------------------------------------------------
+
+Long-Term Goal
+
+An engineer should be able to report:
+
+“Login API returns HTTP 500 after yesterday’s merge.”
+
+The platform should automatically:
+
+1.  Understand the repository.
+2.  Locate affected modules.
+3.  Read recent commits.
+4.  Inspect logs.
+5.  Understand database schema.
+6.  Trace execution.
+7.  Generate hypotheses.
+8.  Verify each hypothesis.
+9.  Identify the root cause.
+10. Produce the smallest valid patch.
+11. Run builds.
+12. Execute tests.
+13. Produce a review-ready change.
+
+------------------------------------------------------------------------
+
+Scope
+
+The platform focuses only on software engineering.
+
+Supported areas include:
+
+-   Source code
+-   Databases
+-   APIs
+-   CI/CD
+-   Git
+-   Documentation
+-   Build systems
+-   Logs
+-   Configuration
+-   Tests
+-   Architecture
+
+It intentionally excludes general assistant features.
+
+------------------------------------------------------------------------
+
+Product Philosophy
+
+The platform is not a chatbot.
+
+It is an AI Operating System for Software Engineering.
+
+The language model is only one component.
+
+The platform itself provides: - repository intelligence - reasoning -
+planning - memory - validation - execution
+
+------------------------------------------------------------------------
+
+High-Level Architecture
+
+User Interface
+
+↓
+
+Planner
+
+↓
+
+Repository Intelligence
+
+↓
+
+Knowledge Layer
+
+↓
+
+Reasoning Engine
+
+↓
+
+Validation Engine
+
+↓
+
+Model Adapter
+
+↓
+
+Coding Model
+
+------------------------------------------------------------------------
+
+Major Components
+
+Repository Scanner - Index repositories - Detect languages - Build
+project metadata
+
+Language Intelligence - AST parsing - Symbol extraction - Dependency
+analysis
+
+Architecture Engine - Call graphs - Import graphs - Service
+relationships
+
+Database Intelligence - Schema understanding - Constraints -
+Procedures - Relationships
+
+Git Intelligence - Commit analysis - Blame - Change history
+
+Log Intelligence - Stack traces - Runtime failures - Error correlation
+
+Reasoning Engine - Evidence collection - Hypothesis generation -
+Root-cause ranking
+
+Patch Generator - Minimal edits - Architectural consistency
+
+Validation Engine - Build - Lint - Tests - Static analysis
+
+Memory - Project knowledge - Previous investigations - Design decisions
+
+------------------------------------------------------------------------
+
+Technology Direction
+
+Frontend - React - TypeScript - Tauri
+
+Backend - Go
+
+AI Layer - Python
+
+Storage - PostgreSQL - Qdrant
+
+Parsing - Tree-sitter - Language-specific AST libraries
+
+Deployment - Linux - Docker
+
+Inference - Model-agnostic via adapter layer.
+
+------------------------------------------------------------------------
+
+Why Model Agnostic?
+
+The platform should never depend on one specific LLM.
+
+Today: - Qwen - DeepSeek - Llama
+
+Tomorrow: - Better coding model - Fine-tuned internal model
+
+Changing models should require replacing only the model adapter, not
+rebuilding the platform.
+
+------------------------------------------------------------------------
+
+Development Roadmap
+
+Phase 1 - Repository scanner - Code indexing - Project search
+
+Phase 2 - AST parsing - Dependency graph - Architecture graph
+
+Phase 3 - Database understanding - Git analysis - Log analysis
+
+Phase 4 - Root-cause reasoning - Patch generation - Validation
+
+Phase 5 - Long-term memory - Multi-repository intelligence - Autonomous
+engineering workflows
+
+------------------------------------------------------------------------
+
+Success Criteria
+
+The platform should:
+
+-   Understand projects without manual explanation.
+-   Produce accurate root-cause analyses.
+-   Suggest minimal fixes.
+-   Respect architecture.
+-   Pass builds and tests before proposing changes.
+-   Improve over time through accumulated engineering knowledge.
+
+------------------------------------------------------------------------
+
+Future Vision
+
+Eventually the platform may include a specialized coding model trained
+on high-quality engineering datasets collected from real debugging
+sessions and validated fixes.
+
+However, the primary investment is the platform itself. The reasoning
+engine, repository intelligence, memory, validation pipeline, and
+engineering workflow should remain valuable regardless of which language
+model is used.
+
+------------------------------------------------------------------------
+
+Guiding Statement
+
+“We are not building another AI chatbot.
+
+We are building the world’s most trusted AI Software Engineer.”
