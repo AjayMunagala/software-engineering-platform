@@ -8,8 +8,6 @@ import (
 	"time"
 )
 
-const SchemaVersion = "0.7.0"
-
 // Pipeline executes an ordered, configurable sequence of RIE engines.
 type Pipeline struct {
 	engines []Engine
@@ -82,11 +80,6 @@ func (pipeline *Pipeline) Run(ctx context.Context, run *RunContext) (err error) 
 			Sections: []SummarySectionStatus{}, Capabilities: []SummaryCapabilityStatus{},
 		},
 	}
-	if run.CompletedEngines == nil {
-		run.CompletedEngines = make(map[string]string)
-	} else {
-		clear(run.CompletedEngines)
-	}
 	if run.Artifacts == nil {
 		run.Artifacts = NewArtifactStore()
 	} else {
@@ -120,7 +113,6 @@ func (pipeline *Pipeline) Run(ctx context.Context, run *RunContext) (err error) 
 			})
 			return fmt.Errorf("execute %s %s: %w", engine.Name(), engine.Version(), err)
 		}
-		run.CompletedEngines[engine.Name()] = engine.Version()
 		run.Report.Scan.Engines = append(run.Report.Scan.Engines, EngineMetadata{
 			Name: engine.Name(), Version: engine.Version(), Description: engine.Description(),
 		})

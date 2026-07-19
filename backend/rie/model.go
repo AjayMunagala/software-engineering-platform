@@ -5,12 +5,13 @@ import "time"
 // RunContext carries authorized scan input, internal pipeline artifacts, and
 // the public report assembled by the registered engines.
 type RunContext struct {
-	RepositoryPath   string
-	Config           Config
-	Entries          []RepositoryEntry
-	CompletedEngines map[string]string
-	Artifacts        *ArtifactStore
-	Report           Report
+	RepositoryPath string
+	Config         Config
+	// Entries is the internal Discovery-to-Ignore compatibility bridge.
+	// New repository-level engines must consume RepositorySnapshot instead.
+	Entries   []RepositoryEntry
+	Artifacts *ArtifactStore
+	Report    Report
 }
 
 // RepositoryEntry is the normalized, repository-relative artifact produced

@@ -1,19 +1,19 @@
 # Development Roadmap
 
-## Phase 0 — Foundation
+## Phase 0 — Foundation ✅
 
 - Establish project structure and documentation.
 - Confirm working name and Version 1 scope.
 - Record architectural and technology decisions.
 
-## Phase 1 — Repository Scanner
+## Phase 1 — Repository Intelligence Engine 1.0.0 ✅
 
-- Define report schema and fixtures.
-- Implement repository traversal and ignore handling.
-- Add language, manifest, configuration, framework, and tooling detection.
-- Test against small Go, React/TypeScript, and SQL-oriented sample repositories.
+- Immutable artifact pipeline from Discovery through Repository Intelligence Summary.
+- Versioned JSON schema and artifact contracts.
+- Deterministic repository, language, framework, build, workspace, metadata, and summary intelligence.
+- Regression, coverage, performance, memory, API, dependency, and documentation audits.
 
-## Phase 2 — Code Intelligence
+## Phase 2 — Language Intelligence (next; not started)
 
 - Add Tree-sitter parsing, symbols, imports, and dependency relationships.
 - Create searchable repository metadata.

@@ -1,23 +1,36 @@
-# Repository Report Format
+# RIE 1.0.0 Report Format
 
 ## Principles
 
-The JSON report is the canonical output. Every inference includes evidence paths and a rule identifier. Counts may be zero; unknown values must be represented as `unknown`, never guessed.
+The JSON report is the canonical presentation output. Deterministic detections retain location-aware evidence in their owning sections and immutable artifacts. Counts may be zero; unavailable intelligence is identified explicitly and is never guessed.
 
 ```json
 {
-  "schemaVersion": "1.0",
-  "repository": { "name": "ERP", "rootPath": "D:/Projects/ERP" },
-  "summary": { "totalFiles": 3248, "totalDirectories": 412 },
-  "languages": [{ "name": "Go", "fileCount": 1420, "evidence": ["go.mod"] }],
-  "manifests": [{ "path": "go.mod", "type": "go-module" }],
-  "dependencies": [{ "name": "github.com/gin-gonic/gin", "source": "go.mod" }],
-  "frameworks": [{ "name": "Gin", "rule": "go-module:gin", "evidence": ["go.mod"] }],
-  "tooling": { "build": [], "test": [], "docker": [], "ciCd": [] },
-  "layout": { "controllers": 0, "services": 0, "repositories": 0, "sqlTables": 0, "storedProcedures": 0 },
-  "configFiles": [],
-  "warnings": []
+  "schema_version": "1.0.0",
+  "scan": {
+    "id": "...",
+    "started_at": "...",
+    "finished_at": "...",
+    "duration_ms": 12.5,
+    "engines": []
+  },
+  "repository": { "name": "ERP", "root_path": "D:/Projects/ERP", "git": true },
+  "statistics": { "files": 3248, "folders": 412 },
+  "ignore": {},
+  "languages": {},
+  "frameworks": {},
+  "build": {},
+  "metadata": {},
+  "summary": {
+    "artifact": { "name": "repository-intelligence-summary", "version": "1.0.0" },
+    "repository_metadata": { "name": "repository-metadata", "version": "1.0.0" },
+    "sections": [],
+    "capabilities": []
+  },
+  "metrics": { "files_per_second": 0 },
+  "warnings": [],
+  "errors": []
 }
 ```
 
-The layout counts are optional capabilities: they are omitted or marked `unknown` until their extraction rules are implemented and tested.
+The report schema is additive within RIE 1.x. Engines consume typed artifacts, never presentation fields. Controllers, services, tests, coverage, and complete cross-engine diagnostics remain explicit unavailable capabilities until their owning intelligence engines exist.

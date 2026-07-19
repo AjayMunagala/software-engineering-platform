@@ -10,7 +10,16 @@ This is not a general-purpose chatbot. The first release is deliberately narrow:
 
 ## Status
 
-Foundation and product design. No production code has been started.
+Repository Intelligence Engine **1.0.0** is implemented and frozen. It deterministically discovers a local repository, applies ignore rules, detects languages/frameworks/build tooling, synthesizes repository metadata, and publishes an immutable executive summary. It does not use an LLM or execute repository code.
+
+## Run RIE
+
+```powershell
+cd backend
+go run ./cmd/rie -path D:\Projects\MyRepository
+```
+
+The command emits the versioned JSON schema `1.0.0`.
 
 ## Documentation
 
@@ -21,7 +30,10 @@ Foundation and product design. No production code has been started.
 - [Technology decisions](docs/Architecture/TECHNOLOGY_STACK.md)
 - [Module map](docs/Architecture/MODULES.md)
 - [Roadmap](docs/Roadmap/DEVELOPMENT_ROADMAP.md)
+- [Artifact dependency graph](docs/Architecture/ARTIFACT_DEPENDENCY_GRAPH.md)
+- [RIE public API](docs/API/RIE_PUBLIC_API_V1.md)
+- [RIE stabilization report](docs/Roadmap/RIE_STABILIZATION_REPORT.md)
 
-## First coding milestone
+## Next milestone
 
-Build a repository scanner that produces factual metadata only: repository name, languages, directory structure, files, manifests, configuration files, frameworks, build tools, and dependencies. It will not use an LLM.
+Language Intelligence Engine design begins only after the RIE 1.0.0 release is accepted. No LLM, AST, dependency graph, or code modification capability is part of RIE.

@@ -40,9 +40,8 @@ func (config Config) Validate() error {
 // NewRunContext creates an initialized pipeline context.
 func NewRunContext(repositoryPath string, config Config) *RunContext {
 	return &RunContext{
-		RepositoryPath:   repositoryPath,
-		Config:           config,
-		CompletedEngines: make(map[string]string),
-		Artifacts:        NewArtifactStore(),
+		RepositoryPath: repositoryPath,
+		Config:         config,
+		Artifacts:      NewArtifactStore(),
 	}
 }

@@ -9,8 +9,8 @@ import (
 	metadataengine "github.com/AjayMunagala/software-engineering-platform/backend/rie/metadata"
 )
 
-// CompositionEngine creates the immutable repository-intelligence entry point.
-type CompositionEngine struct{ config Config }
+// compositionEngine creates the immutable repository-intelligence entry point.
+type compositionEngine struct{ config Config }
 
 func New(configs ...Config) Engine {
 	config := DefaultConfig()
@@ -18,16 +18,16 @@ func New(configs ...Config) Engine {
 		config = configs[0]
 	}
 	config.UnavailableCapabilities = append([]CapabilityDefinition(nil), config.UnavailableCapabilities...)
-	return CompositionEngine{config: config}
+	return compositionEngine{config: config}
 }
 
-func (CompositionEngine) Name() string    { return "repository-intelligence-summary" }
-func (CompositionEngine) Version() string { return "0.7.0" }
-func (CompositionEngine) Description() string {
+func (compositionEngine) Name() string    { return "repository-intelligence-summary" }
+func (compositionEngine) Version() string { return "0.7.0" }
+func (compositionEngine) Description() string {
 	return "Composes repository metadata and explicit intelligence availability without duplicating source artifacts"
 }
 
-func (engine CompositionEngine) Execute(ctx context.Context, run *rie.RunContext) error {
+func (engine compositionEngine) Execute(ctx context.Context, run *rie.RunContext) error {
 	if run == nil {
 		return rie.ErrRunContextRequired
 	}

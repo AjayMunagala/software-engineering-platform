@@ -53,7 +53,7 @@ func main() {
 		os.Exit(1)
 	}
 	if err := pipeline.Run(context.Background(), run); err != nil {
-		fmt.Fprintln(os.Stderr, "RIE v0.7 scan error:", err)
+		fmt.Fprintln(os.Stderr, "RIE "+rie.Version+" scan error:", err)
 		os.Exit(1)
 	}
 
@@ -67,7 +67,7 @@ func main() {
 		output, err = json.Marshal(run.Report)
 	}
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "RIE v0.7 export error:", err)
+		fmt.Fprintln(os.Stderr, "RIE "+rie.Version+" export error:", err)
 		os.Exit(1)
 	}
 

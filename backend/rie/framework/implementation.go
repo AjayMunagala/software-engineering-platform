@@ -18,8 +18,8 @@ import (
 	languageengine "github.com/AjayMunagala/software-engineering-platform/backend/rie/language"
 )
 
-// ManifestEngine detects frameworks from declared manifest dependencies.
-type ManifestEngine struct {
+// manifestEngine detects frameworks from declared manifest dependencies.
+type manifestEngine struct {
 	config        Config
 	manifestNames map[string]struct{}
 }
@@ -37,19 +37,19 @@ func New(configs ...Config) Engine {
 			names[name] = struct{}{}
 		}
 	}
-	return ManifestEngine{config: config, manifestNames: names}
+	return manifestEngine{config: config, manifestNames: names}
 }
 
-func (ManifestEngine) Name() string { return "framework" }
+func (manifestEngine) Name() string { return "framework" }
 
-func (ManifestEngine) Version() string { return "0.4.2" }
+func (manifestEngine) Version() string { return "0.4.2" }
 
-func (ManifestEngine) Description() string {
+func (manifestEngine) Description() string {
 	return "Detects frameworks deterministically from supported dependency manifests"
 }
 
 // Execute inspects recognized manifests retained by Ignore Engine.
-func (engine ManifestEngine) Execute(ctx context.Context, run *rie.RunContext) error {
+func (engine manifestEngine) Execute(ctx context.Context, run *rie.RunContext) error {
 	if run == nil {
 		return rie.ErrRunContextRequired
 	}
@@ -126,7 +126,7 @@ func (engine ManifestEngine) Execute(ctx context.Context, run *rie.RunContext) e
 	return nil
 }
 
-func (engine ManifestEngine) manifestCandidates(snapshot rie.RepositorySnapshot) []string {
+func (engine manifestEngine) manifestCandidates(snapshot rie.RepositorySnapshot) []string {
 	candidates := make([]string, 0)
 	seen := make(map[string]struct{})
 	_ = snapshot.ForEachEntry(func(entry rie.RepositoryEntry) error {

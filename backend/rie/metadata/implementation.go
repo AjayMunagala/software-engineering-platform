@@ -13,24 +13,24 @@ import (
 	languageengine "github.com/AjayMunagala/software-engineering-platform/backend/rie/language"
 )
 
-// SynthesisEngine creates the repository cover page from frozen artifacts.
-type SynthesisEngine struct{ config Config }
+// synthesisEngine creates the repository cover page from frozen artifacts.
+type synthesisEngine struct{ config Config }
 
 func New(configs ...Config) Engine {
 	config := DefaultConfig()
 	if len(configs) > 0 {
 		config = configs[0]
 	}
-	return SynthesisEngine{config: config}
+	return synthesisEngine{config: config}
 }
 
-func (SynthesisEngine) Name() string    { return "repository-metadata" }
-func (SynthesisEngine) Version() string { return "0.6.0" }
-func (SynthesisEngine) Description() string {
+func (synthesisEngine) Name() string    { return "repository-metadata" }
+func (synthesisEngine) Version() string { return "0.6.0" }
+func (synthesisEngine) Description() string {
 	return "Synthesizes an executive repository summary from frozen RIE artifacts"
 }
 
-func (engine SynthesisEngine) Execute(ctx context.Context, run *rie.RunContext) error {
+func (engine synthesisEngine) Execute(ctx context.Context, run *rie.RunContext) error {
 	if run == nil {
 		return rie.ErrRunContextRequired
 	}

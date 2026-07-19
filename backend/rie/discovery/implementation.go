@@ -13,8 +13,8 @@ import (
 	"github.com/AjayMunagala/software-engineering-platform/backend/rie"
 )
 
-// FileSystemEngine discovers repository entries using the local filesystem.
-type FileSystemEngine struct {
+// fileSystemEngine discovers repository entries using the local filesystem.
+type fileSystemEngine struct {
 	config Config
 }
 
@@ -24,24 +24,19 @@ func New(configs ...Config) Engine {
 	if len(configs) > 0 {
 		config = configs[0]
 	}
-	return FileSystemEngine{config: config}
+	return fileSystemEngine{config: config}
 }
 
-// NewFileSystemScanner is retained as a compatibility alias for New.
-func NewFileSystemScanner() Engine {
-	return New()
-}
+func (fileSystemEngine) Name() string { return "discovery" }
 
-func (FileSystemEngine) Name() string { return "discovery" }
+func (fileSystemEngine) Version() string { return "0.1.1" }
 
-func (FileSystemEngine) Version() string { return "0.1.1" }
-
-func (FileSystemEngine) Description() string {
+func (fileSystemEngine) Description() string {
 	return "Discovers repository identity and normalized local filesystem entries"
 }
 
 // Execute discovers repository entries and stores them for later engines.
-func (engine FileSystemEngine) Execute(ctx context.Context, run *rie.RunContext) error {
+func (engine fileSystemEngine) Execute(ctx context.Context, run *rie.RunContext) error {
 	if run == nil {
 		return rie.ErrRunContextRequired
 	}
@@ -65,7 +60,7 @@ func (engine FileSystemEngine) Execute(ctx context.Context, run *rie.RunContext)
 }
 
 // Scan runs Discovery Engine by itself and returns a complete RIE report.
-func (engine FileSystemEngine) Scan(repositoryPath string) (Report, error) {
+func (engine fileSystemEngine) Scan(repositoryPath string) (Report, error) {
 	run := rie.NewRunContext(repositoryPath, rie.DefaultConfig())
 	pipeline := rie.New()
 	if err := pipeline.Register(engine); err != nil {
@@ -106,7 +101,7 @@ func symbolicRefName(filePath, prefix string) string {
 	return strings.TrimPrefix(line, "ref: "+prefix)
 }
 
-func (engine FileSystemEngine) discover(ctx context.Context, repositoryPath string) (Report, []Entry, error) {
+func (engine fileSystemEngine) discover(ctx context.Context, repositoryPath string) (Report, []Entry, error) {
 	if repositoryPath == "" {
 		return Report{}, nil, ErrRepositoryPathRequired
 	}

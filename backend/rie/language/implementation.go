@@ -10,8 +10,8 @@ import (
 	"github.com/AjayMunagala/software-engineering-platform/backend/rie"
 )
 
-// ExtensionEngine identifies languages from normalized file extensions.
-type ExtensionEngine struct {
+// extensionEngine identifies languages from normalized file extensions.
+type extensionEngine struct {
 	config Config
 }
 
@@ -22,19 +22,19 @@ func New(configs ...Config) Engine {
 		config = configs[0]
 	}
 	config.Extensions = normalizedMappings(config.Extensions)
-	return ExtensionEngine{config: config}
+	return extensionEngine{config: config}
 }
 
-func (ExtensionEngine) Name() string { return "language" }
+func (extensionEngine) Name() string { return "language" }
 
-func (ExtensionEngine) Version() string { return "0.3.2" }
+func (extensionEngine) Version() string { return "0.3.2" }
 
-func (ExtensionEngine) Description() string {
+func (extensionEngine) Description() string {
 	return "Detects repository languages deterministically from file extensions"
 }
 
 // Execute detects languages in entries retained by Ignore Engine.
-func (engine ExtensionEngine) Execute(ctx context.Context, run *rie.RunContext) error {
+func (engine extensionEngine) Execute(ctx context.Context, run *rie.RunContext) error {
 	if run == nil {
 		return rie.ErrRunContextRequired
 	}

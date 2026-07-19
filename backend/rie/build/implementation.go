@@ -17,26 +17,26 @@ import (
 	"github.com/AjayMunagala/software-engineering-platform/backend/rie"
 )
 
-// IntelligenceEngine inventories build and package facts from RepositorySnapshot.
-type IntelligenceEngine struct{ config Config }
+// intelligenceEngine inventories build and package facts from RepositorySnapshot.
+type intelligenceEngine struct{ config Config }
 
 func New(configs ...Config) Engine {
 	config := DefaultConfig()
 	if len(configs) > 0 {
 		config = configs[0]
 	}
-	return IntelligenceEngine{config: config}
+	return intelligenceEngine{config: config}
 }
 
-func (IntelligenceEngine) Name() string { return "build-package" }
+func (intelligenceEngine) Name() string { return "build-package" }
 
-func (IntelligenceEngine) Version() string { return "0.5.0" }
+func (intelligenceEngine) Version() string { return "0.5.0" }
 
-func (IntelligenceEngine) Description() string {
+func (intelligenceEngine) Description() string {
 	return "Deterministically discovers build systems, package managers, workspaces, lock files, and toolchains"
 }
 
-func (engine IntelligenceEngine) Execute(ctx context.Context, run *rie.RunContext) error {
+func (engine intelligenceEngine) Execute(ctx context.Context, run *rie.RunContext) error {
 	if run == nil {
 		return rie.ErrRunContextRequired
 	}

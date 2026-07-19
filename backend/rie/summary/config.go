@@ -16,6 +16,6 @@ func DefaultConfig() Config {
 		{ID: "services", Label: "Services", Reason: "requires architecture classification", FutureOwner: "Architecture Intelligence"},
 		{ID: "tests", Label: "Tests", Reason: "requires test-file and test-symbol intelligence", FutureOwner: "Test Intelligence"},
 		{ID: "coverage", Label: "Coverage", Reason: "requires approved coverage execution or imported results", FutureOwner: "Validation Intelligence"},
-		{ID: "diagnostics", Label: "Complete diagnostics", Reason: "requires a cross-engine diagnostic artifact", FutureOwner: "RIE Stabilization"},
+		{ID: "diagnostics", Label: "Complete diagnostics", Reason: "requires a cross-engine diagnostic artifact", FutureOwner: "RIE Evolution"},
 	}}
 }

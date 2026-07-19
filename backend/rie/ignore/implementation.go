@@ -14,8 +14,8 @@ import (
 	"github.com/AjayMunagala/software-engineering-platform/backend/rie"
 )
 
-// RuleEngine applies ordered repository ignore rules to discovered entries.
-type RuleEngine struct {
+// ruleEngine applies ordered repository ignore rules to discovered entries.
+type ruleEngine struct {
 	config Config
 }
 
@@ -25,19 +25,19 @@ func New(configs ...Config) Engine {
 	if len(configs) > 0 {
 		config = configs[0]
 	}
-	return RuleEngine{config: config}
+	return ruleEngine{config: config}
 }
 
-func (RuleEngine) Name() string { return "ignore" }
+func (ruleEngine) Name() string { return "ignore" }
 
-func (RuleEngine) Version() string { return "0.2.1" }
+func (ruleEngine) Version() string { return "0.2.1" }
 
-func (RuleEngine) Description() string {
+func (ruleEngine) Description() string {
 	return "Loads ordered ignore rules and excludes matching repository entries"
 }
 
 // Execute filters Discovery Engine entries and recomputes public statistics.
-func (engine RuleEngine) Execute(ctx context.Context, run *rie.RunContext) error {
+func (engine ruleEngine) Execute(ctx context.Context, run *rie.RunContext) error {
 	if run == nil {
 		return rie.ErrRunContextRequired
 	}
@@ -87,7 +87,7 @@ func (engine RuleEngine) Execute(ctx context.Context, run *rie.RunContext) error
 	return run.Artifacts.Put(snapshot)
 }
 
-func (engine RuleEngine) loadRules(ctx context.Context, run *rie.RunContext) ([]rule, []string) {
+func (engine ruleEngine) loadRules(ctx context.Context, run *rie.RunContext) ([]rule, []string) {
 	ignoreFiles := engine.findIgnoreFiles(run.Entries)
 	rules := make([]rule, 0, len(ignoreFiles)*8+len(run.Config.IgnorePatterns))
 	sources := make([]string, 0, len(ignoreFiles)+1)
@@ -125,7 +125,7 @@ func (engine RuleEngine) loadRules(ctx context.Context, run *rie.RunContext) ([]
 	return rules, sources
 }
 
-func (engine RuleEngine) findIgnoreFiles(entries []rie.RepositoryEntry) []string {
+func (engine ruleEngine) findIgnoreFiles(entries []rie.RepositoryEntry) []string {
 	names := make(map[string]struct{}, len(engine.config.IgnoreFileNames))
 	for _, name := range engine.config.IgnoreFileNames {
 		names[name] = struct{}{}
