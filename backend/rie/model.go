@@ -31,6 +31,7 @@ type Report struct {
 	Frameworks    FrameworkSummary          `json:"frameworks"`
 	Build         BuildSummary              `json:"build"`
 	Metadata      RepositoryMetadataSummary `json:"metadata"`
+	Summary       IntelligenceSummaryReport `json:"summary"`
 	Metrics       Metrics                   `json:"metrics"`
 	Warnings      []Diagnostic              `json:"warnings"`
 	Errors        []Diagnostic              `json:"errors"`
@@ -208,6 +209,28 @@ type MetadataBuildSummary struct {
 type ArtifactReference struct {
 	Name    string `json:"name"`
 	Version string `json:"version"`
+}
+
+// IntelligenceSummaryReport indexes repository intelligence without repeating it.
+type IntelligenceSummaryReport struct {
+	Artifact           ArtifactReference         `json:"artifact"`
+	RepositoryMetadata ArtifactReference         `json:"repository_metadata"`
+	Sections           []SummarySectionStatus    `json:"sections"`
+	Capabilities       []SummaryCapabilityStatus `json:"capabilities"`
+}
+
+type SummarySectionStatus struct {
+	ID     string            `json:"id"`
+	Status string            `json:"status"`
+	Source ArtifactReference `json:"source"`
+}
+
+type SummaryCapabilityStatus struct {
+	ID          string `json:"id"`
+	Label       string `json:"label"`
+	Status      string `json:"status"`
+	Reason      string `json:"reason"`
+	FutureOwner string `json:"future_owner"`
 }
 
 // Metrics records measured scan behavior. Future engines can add metrics

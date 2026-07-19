@@ -23,6 +23,10 @@ Repository Metadata Engine consumes:
     ├── FrameworkInventory 1.0.0
     └── BuildInventory 1.0.0
             └── RepositoryMetadata 1.0.0
+
+Repository Intelligence Summary consumes:
+    └── RepositoryMetadata 1.0.0
+            └── RepositoryIntelligenceSummary 1.0.0
 ```
 
 ## Rules
