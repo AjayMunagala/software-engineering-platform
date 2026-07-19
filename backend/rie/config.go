@@ -43,5 +43,6 @@ func NewRunContext(repositoryPath string, config Config) *RunContext {
 		RepositoryPath:   repositoryPath,
 		Config:           config,
 		CompletedEngines: make(map[string]string),
+		Artifacts:        NewArtifactStore(),
 	}
 }

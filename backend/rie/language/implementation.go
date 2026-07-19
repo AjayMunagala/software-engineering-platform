@@ -27,7 +27,7 @@ func New(configs ...Config) Engine {
 
 func (ExtensionEngine) Name() string { return "language" }
 
-func (ExtensionEngine) Version() string { return "0.3.0" }
+func (ExtensionEngine) Version() string { return "0.3.1" }
 
 func (ExtensionEngine) Description() string {
 	return "Detects repository languages deterministically from file extensions"
@@ -43,6 +43,9 @@ func (engine ExtensionEngine) Execute(ctx context.Context, run *rie.RunContext) 
 	}
 	if len(engine.config.Extensions) == 0 {
 		return ErrNoExtensionMappings
+	}
+	if run.Artifacts == nil {
+		run.Artifacts = rie.NewArtifactStore()
 	}
 
 	counts := make(map[string]int)
@@ -67,25 +70,35 @@ func (engine ExtensionEngine) Execute(ctx context.Context, run *rie.RunContext) 
 	for _, count := range counts {
 		detectedFiles += count
 	}
-	items := make([]Detection, 0, len(counts))
+	items := make([]LanguageItem, 0, len(counts))
 	for name, count := range counts {
 		percentage := 0.0
 		if detectedFiles > 0 {
 			percentage = math.Round((float64(count)/float64(detectedFiles))*10000) / 100
 		}
-		items = append(items, Detection{Name: name, FileCount: count, Percentage: percentage})
+		items = append(items, LanguageItem{Name: name, Count: count, Percentage: percentage})
 	}
 	sort.Slice(items, func(i, j int) bool {
-		if items[i].FileCount == items[j].FileCount {
+		if items[i].Count == items[j].Count {
 			return items[i].Name < items[j].Name
 		}
-		return items[i].FileCount > items[j].FileCount
+		return items[i].Count > items[j].Count
 	})
 
-	run.Report.Languages = Summary{
-		DetectedFiles: detectedFiles,
-		UnknownFiles:  unknownFiles,
-		Items:         items,
+	inventory := newLanguageInventory(items, LanguageSummary{
+		DetectedFiles: detectedFiles, UnknownFiles: unknownFiles,
+	})
+	if err := run.Artifacts.Put(inventory); err != nil {
+		return err
+	}
+	reportItems := make([]rie.Language, 0, len(items))
+	for _, item := range items {
+		reportItems = append(reportItems, rie.Language{
+			Name: item.Name, FileCount: item.Count, Percentage: item.Percentage,
+		})
+	}
+	run.Report.Languages = rie.LanguageSummary{
+		DetectedFiles: detectedFiles, UnknownFiles: unknownFiles, Items: reportItems,
 	}
 	return nil
 }

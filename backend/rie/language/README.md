@@ -16,6 +16,15 @@ Language Engine consumes entries retained by Ignore Engine and detects programmi
 
 The versioned report records detected files, unknown files, and each language's file count and percentage of recognized language files. Results are sorted by descending count and then by name.
 
+Future engines consume the immutable `LanguageInventory` artifact, not the JSON-oriented report summary. The artifact contract is version `1.0.0`; its item slice is private and returned only through defensive-copy accessors.
+
+## Unknown-file policy
+
+- Unknown extensions and files without extensions are counted.
+- Unknown files are not treated as errors.
+- Unknown files do not generate diagnostics.
+- Future engines may classify them later.
+
 ## Package standard
 
 - `interface.go` — public engine contract

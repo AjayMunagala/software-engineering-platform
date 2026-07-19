@@ -38,17 +38,22 @@ func TestLanguageEngineDetectsFilteredRepositoryLanguages(t *testing.T) {
 	if run.Report.Languages.UnknownFiles != 2 { // .gitignore and README.md
 		t.Errorf("UnknownFiles = %d, want 2", run.Report.Languages.UnknownFiles)
 	}
-	want := []Detection{
-		{Name: "Go", FileCount: 2, Percentage: 50},
-		{Name: "SQL", FileCount: 1, Percentage: 25},
-		{Name: "TypeScript", FileCount: 1, Percentage: 25},
+	want := []LanguageItem{
+		{Name: "Go", Count: 2, Percentage: 50},
+		{Name: "SQL", Count: 1, Percentage: 25},
+		{Name: "TypeScript", Count: 1, Percentage: 25},
 	}
-	if len(run.Report.Languages.Items) != len(want) {
-		t.Fatalf("Items = %#v", run.Report.Languages.Items)
+	inventory, exists := InventoryFrom(run)
+	if !exists {
+		t.Fatal("LanguageInventory artifact was not published")
+	}
+	items := inventory.Items()
+	if len(items) != len(want) {
+		t.Fatalf("Items = %#v", items)
 	}
 	for index := range want {
-		if run.Report.Languages.Items[index] != want[index] {
-			t.Errorf("Items[%d] = %#v, want %#v", index, run.Report.Languages.Items[index], want[index])
+		if items[index] != want[index] {
+			t.Errorf("Items[%d] = %#v, want %#v", index, items[index], want[index])
 		}
 	}
 }
@@ -121,8 +126,84 @@ func TestLanguageEngineMetadata(t *testing.T) {
 	t.Parallel()
 
 	engine := New()
-	if engine.Name() != "language" || engine.Version() != "0.3.0" || engine.Description() == "" {
+	if engine.Name() != "language" || engine.Version() != "0.3.1" || engine.Description() == "" {
 		t.Errorf("unexpected metadata: %s %s %q", engine.Name(), engine.Version(), engine.Description())
+	}
+}
+
+func TestLanguageInventoryIsImmutableToConsumers(t *testing.T) {
+	t.Parallel()
+
+	run := rie.NewRunContext(t.TempDir(), rie.DefaultConfig())
+	run.CompletedEngines["ignore"] = "0.2.0"
+	run.Entries = []rie.RepositoryEntry{{Path: "main.go"}}
+	if err := New().Execute(context.Background(), run); err != nil {
+		t.Fatalf("Execute() error = %v", err)
+	}
+	inventory, exists := InventoryFrom(run)
+	if !exists {
+		t.Fatal("LanguageInventory artifact was not published")
+	}
+	items := inventory.Items()
+	items[0].Name = "Modified"
+	if inventory.Items()[0].Name != "Go" {
+		t.Error("consumer mutation changed LanguageInventory")
+	}
+	metadata := inventory.Metadata()
+	if metadata.Version != LanguageInventoryArtifactVersion || metadata.EngineVersion != "0.3.1" {
+		t.Errorf("Metadata = %#v", metadata)
+	}
+}
+
+func TestLanguageEngineEmptyRepository(t *testing.T) {
+	t.Parallel()
+
+	run := rie.NewRunContext(t.TempDir(), rie.DefaultConfig())
+	run.CompletedEngines["ignore"] = "0.2.0"
+	if err := New().Execute(context.Background(), run); err != nil {
+		t.Fatalf("Execute() error = %v", err)
+	}
+	inventory, exists := InventoryFrom(run)
+	if !exists || inventory.Summary() != (LanguageSummary{}) || len(inventory.Items()) != 0 {
+		t.Errorf("Inventory = %#v, exists = %v", inventory, exists)
+	}
+}
+
+func TestLanguageEngineCountsExtensionlessAndUnknownFiles(t *testing.T) {
+	t.Parallel()
+
+	run := rie.NewRunContext(t.TempDir(), rie.DefaultConfig())
+	run.CompletedEngines["ignore"] = "0.2.0"
+	run.Entries = []rie.RepositoryEntry{
+		{Path: "abc.xyz"}, {Path: "myfile"}, {Path: "data.custom"},
+	}
+	if err := New().Execute(context.Background(), run); err != nil {
+		t.Fatalf("Execute() error = %v", err)
+	}
+	inventory, _ := InventoryFrom(run)
+	if inventory.Summary().UnknownFiles != 3 || inventory.Summary().DetectedFiles != 0 {
+		t.Errorf("Summary = %#v", inventory.Summary())
+	}
+	if len(run.Report.Warnings) != 0 || len(run.Report.Errors) != 0 {
+		t.Errorf("unknown files created diagnostics: %#v %#v", run.Report.Warnings, run.Report.Errors)
+	}
+}
+
+func TestLanguageEngineDefaultMappingIsCaseInsensitive(t *testing.T) {
+	t.Parallel()
+
+	run := rie.NewRunContext(t.TempDir(), rie.DefaultConfig())
+	run.CompletedEngines["ignore"] = "0.2.0"
+	run.Entries = []rie.RepositoryEntry{
+		{Path: "main.go"}, {Path: "MAIN.GO"}, {Path: "Main.Go"},
+	}
+	if err := New().Execute(context.Background(), run); err != nil {
+		t.Fatalf("Execute() error = %v", err)
+	}
+	inventory, _ := InventoryFrom(run)
+	items := inventory.Items()
+	if len(items) != 1 || items[0].Name != "Go" || items[0].Count != 3 {
+		t.Errorf("Items = %#v", items)
 	}
 }
 

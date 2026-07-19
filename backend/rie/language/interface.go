@@ -7,3 +7,11 @@ import "github.com/AjayMunagala/software-engineering-platform/backend/rie"
 type Engine interface {
 	rie.Engine
 }
+
+// InventoryFrom retrieves the stable LanguageInventory artifact for later engines.
+func InventoryFrom(run *rie.RunContext) (LanguageInventory, bool) {
+	if run == nil {
+		return LanguageInventory{}, false
+	}
+	return rie.ArtifactAs[LanguageInventory](run.Artifacts, LanguageInventoryArtifactName)
+}

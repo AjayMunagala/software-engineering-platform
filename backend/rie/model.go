@@ -9,6 +9,7 @@ type RunContext struct {
 	Config           Config
 	Entries          []RepositoryEntry
 	CompletedEngines map[string]string
+	Artifacts        *ArtifactStore
 	Report           Report
 }
 
