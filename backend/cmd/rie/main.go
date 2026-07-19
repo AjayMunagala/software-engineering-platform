@@ -9,6 +9,7 @@ import (
 
 	"github.com/AjayMunagala/software-engineering-platform/backend/rie"
 	"github.com/AjayMunagala/software-engineering-platform/backend/rie/discovery"
+	frameworkengine "github.com/AjayMunagala/software-engineering-platform/backend/rie/framework"
 	ignoreengine "github.com/AjayMunagala/software-engineering-platform/backend/rie/ignore"
 	languageengine "github.com/AjayMunagala/software-engineering-platform/backend/rie/language"
 )
@@ -32,8 +33,12 @@ func main() {
 		fmt.Fprintln(os.Stderr, "RIE engine registration error:", err)
 		os.Exit(1)
 	}
+	if err := pipeline.Register(frameworkengine.New()); err != nil {
+		fmt.Fprintln(os.Stderr, "RIE engine registration error:", err)
+		os.Exit(1)
+	}
 	if err := pipeline.Run(context.Background(), run); err != nil {
-		fmt.Fprintln(os.Stderr, "RIE v0.3 scan error:", err)
+		fmt.Fprintln(os.Stderr, "RIE v0.4 scan error:", err)
 		os.Exit(1)
 	}
 
@@ -47,7 +52,7 @@ func main() {
 		output, err = json.Marshal(run.Report)
 	}
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "RIE v0.3 export error:", err)
+		fmt.Fprintln(os.Stderr, "RIE v0.4 export error:", err)
 		os.Exit(1)
 	}
 

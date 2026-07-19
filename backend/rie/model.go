@@ -22,15 +22,16 @@ type RepositoryEntry struct {
 
 // Report is the versioned, additive JSON contract for RIE scan results.
 type Report struct {
-	SchemaVersion string          `json:"schema_version"`
-	Scan          ScanMetadata    `json:"scan"`
-	Repository    Repository      `json:"repository"`
-	Statistics    Statistics      `json:"statistics"`
-	Ignore        IgnoreSummary   `json:"ignore"`
-	Languages     LanguageSummary `json:"languages"`
-	Metrics       Metrics         `json:"metrics"`
-	Warnings      []Diagnostic    `json:"warnings"`
-	Errors        []Diagnostic    `json:"errors"`
+	SchemaVersion string           `json:"schema_version"`
+	Scan          ScanMetadata     `json:"scan"`
+	Repository    Repository       `json:"repository"`
+	Statistics    Statistics       `json:"statistics"`
+	Ignore        IgnoreSummary    `json:"ignore"`
+	Languages     LanguageSummary  `json:"languages"`
+	Frameworks    FrameworkSummary `json:"frameworks"`
+	Metrics       Metrics          `json:"metrics"`
+	Warnings      []Diagnostic     `json:"warnings"`
+	Errors        []Diagnostic     `json:"errors"`
 }
 
 // ScanMetadata identifies one pipeline run and records its timing.
@@ -82,6 +83,19 @@ type Language struct {
 	Name       string  `json:"name"`
 	FileCount  int     `json:"file_count"`
 	Percentage float64 `json:"percentage"`
+}
+
+// FrameworkSummary is the presentation-oriented framework report.
+type FrameworkSummary struct {
+	ManifestsInspected int         `json:"manifests_inspected"`
+	Items              []Framework `json:"items"`
+}
+
+// Framework records one deterministic detection and its manifest evidence.
+type Framework struct {
+	Name      string   `json:"name"`
+	Ecosystem string   `json:"ecosystem"`
+	Evidence  []string `json:"evidence"`
 }
 
 // Metrics records measured scan behavior. Future engines can add metrics
