@@ -40,6 +40,25 @@ func TestIgnoreEngineFiltersRepositoryEntries(t *testing.T) {
 	if run.Report.Ignore.Rules != 3 {
 		t.Errorf("Ignore.Rules = %d, want 3", run.Report.Ignore.Rules)
 	}
+	snapshot, exists := rie.RepositorySnapshotFrom(run)
+	if !exists {
+		t.Fatal("RepositorySnapshot was not published")
+	}
+	if snapshot.ArtifactVersion() != "1.0.0" || snapshot.Metadata().EngineVersion != "0.2.1" {
+		t.Errorf("snapshot metadata = %#v", snapshot.Metadata())
+	}
+	entries := snapshot.Entries()
+	entries[0].Path = "changed"
+	_ = snapshot.ForEachEntry(func(entry rie.RepositoryEntry) error {
+		entry.Path = "visitor-change"
+		return nil
+	})
+	if snapshot.Entries()[0].Path == "changed" || snapshot.Statistics().Files != 3 {
+		t.Error("RepositorySnapshot is mutable to consumers")
+	}
+	if snapshot.Entries()[0].Path == "visitor-change" {
+		t.Error("RepositorySnapshot visitor exposed mutable state")
+	}
 }
 
 func TestIgnoreEngineAppliesNestedRulesAndConfigOverrides(t *testing.T) {
@@ -101,7 +120,7 @@ func TestIgnoreEngineMetadata(t *testing.T) {
 	t.Parallel()
 
 	engine := New()
-	if engine.Name() != "ignore" || engine.Version() != "0.2.0" || engine.Description() == "" {
+	if engine.Name() != "ignore" || engine.Version() != "0.2.1" || engine.Description() == "" {
 		t.Errorf("unexpected metadata: %s %s %q", engine.Name(), engine.Version(), engine.Description())
 	}
 }

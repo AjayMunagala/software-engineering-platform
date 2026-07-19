@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-const SchemaVersion = "0.4.1"
+const SchemaVersion = "0.5.0"
 
 // Pipeline executes an ordered, configurable sequence of RIE engines.
 type Pipeline struct {
@@ -63,6 +63,11 @@ func (pipeline *Pipeline) Run(ctx context.Context, run *RunContext) (err error) 
 		},
 		Frameworks: FrameworkSummary{
 			Items: []Framework{},
+		},
+		Build: BuildSummary{
+			PackageManagers: []BuildTool{}, BuildSystems: []BuildTool{},
+			Workspaces: []BuildWorkspace{}, LockFiles: []BuildLockFile{},
+			Toolchains: []BuildToolchain{},
 		},
 	}
 	if run.CompletedEngines == nil {

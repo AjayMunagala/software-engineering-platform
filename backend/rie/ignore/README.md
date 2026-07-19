@@ -1,6 +1,6 @@
 # RIE v0.2 — Ignore Engine
 
-Ignore Engine consumes normalized entries from Discovery Engine, loads ordered `.gitignore` files and shared configuration patterns, applies last-match-wins rules including negation, and recomputes repository statistics.
+Ignore Engine consumes normalized entries from Discovery Engine, loads ordered `.gitignore` files and shared configuration patterns, applies last-match-wins rules including negation, recomputes repository statistics, and freezes the canonical repository artifact.
 
 ## Inputs
 
@@ -11,10 +11,13 @@ Ignore Engine consumes normalized entries from Discovery Engine, loads ordered `
 
 ## Outputs
 
-- Filtered entries for later engines
+- Immutable `RepositorySnapshot 1.0.0` containing the authorized root, filtered entries, statistics, and diagnostics
+- Filtered `RunContext.Entries` retained temporarily for compatibility with pre-snapshot engines
 - Final file and folder counts
 - Rule/source/ignored-entry summary
 - Standardized warnings for unreadable files or unsupported patterns
+
+Later repository-level engines consume `RepositorySnapshot` through the artifact store and never modify it. The compatibility fields in `RunContext` are not the contract for new engines.
 
 ## Supported patterns
 

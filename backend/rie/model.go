@@ -29,6 +29,7 @@ type Report struct {
 	Ignore        IgnoreSummary    `json:"ignore"`
 	Languages     LanguageSummary  `json:"languages"`
 	Frameworks    FrameworkSummary `json:"frameworks"`
+	Build         BuildSummary     `json:"build"`
 	Metrics       Metrics          `json:"metrics"`
 	Warnings      []Diagnostic     `json:"warnings"`
 	Errors        []Diagnostic     `json:"errors"`
@@ -104,6 +105,44 @@ type Evidence struct {
 	File  string `json:"file"`
 	Rule  string `json:"rule"`
 	Value string `json:"value"`
+}
+
+// BuildSummary is the presentation-oriented BuildInventory projection.
+type BuildSummary struct {
+	PackageManagers []BuildTool      `json:"package_managers"`
+	BuildSystems    []BuildTool      `json:"build_systems"`
+	Workspaces      []BuildWorkspace `json:"workspaces"`
+	LockFiles       []BuildLockFile  `json:"lock_files"`
+	Toolchains      []BuildToolchain `json:"toolchains"`
+}
+
+type BuildTool struct {
+	ID       string     `json:"id"`
+	Name     string     `json:"name"`
+	Location string     `json:"location"`
+	Evidence []Evidence `json:"evidence"`
+}
+
+type BuildWorkspace struct {
+	ID       string     `json:"id"`
+	Kind     string     `json:"kind"`
+	Location string     `json:"location"`
+	Members  []string   `json:"members"`
+	Evidence []Evidence `json:"evidence"`
+}
+
+type BuildLockFile struct {
+	PackageManagerID string     `json:"package_manager_id"`
+	Path             string     `json:"path"`
+	Location         string     `json:"location"`
+	Evidence         []Evidence `json:"evidence"`
+}
+
+type BuildToolchain struct {
+	Tool       string     `json:"tool"`
+	Constraint string     `json:"constraint"`
+	Location   string     `json:"location"`
+	Evidence   []Evidence `json:"evidence"`
 }
 
 // Metrics records measured scan behavior. Future engines can add metrics

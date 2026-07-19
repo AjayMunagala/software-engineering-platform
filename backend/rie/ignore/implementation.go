@@ -30,7 +30,7 @@ func New(configs ...Config) Engine {
 
 func (RuleEngine) Name() string { return "ignore" }
 
-func (RuleEngine) Version() string { return "0.2.0" }
+func (RuleEngine) Version() string { return "0.2.1" }
 
 func (RuleEngine) Description() string {
 	return "Loads ordered ignore rules and excludes matching repository entries"
@@ -78,7 +78,13 @@ func (engine RuleEngine) Execute(ctx context.Context, run *rie.RunContext) error
 	run.Entries = kept
 	run.Report.Statistics = statistics
 	run.Report.Ignore = summary
-	return nil
+	if run.Artifacts == nil {
+		run.Artifacts = rie.NewArtifactStore()
+	}
+	snapshot := rie.NewRepositorySnapshot(
+		run.Report.Repository.RootPath, kept, statistics, run.Report.Warnings, engine.Version(),
+	)
+	return run.Artifacts.Put(snapshot)
 }
 
 func (engine RuleEngine) loadRules(ctx context.Context, run *rie.RunContext) ([]rule, []string) {
