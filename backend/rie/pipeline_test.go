@@ -49,6 +49,9 @@ func TestPipelineExecutesConfiguredOrder(t *testing.T) {
 	if run.Report.Scan.ID == "" || run.Report.Scan.FinishedAt.IsZero() {
 		t.Error("scan metadata was not completed")
 	}
+	if len(run.Report.Scan.Engines) != 3 || run.Report.Scan.Engines[1].Name != "ignore" {
+		t.Errorf("Scan.Engines = %#v", run.Report.Scan.Engines)
+	}
 	if run.Report.Warnings == nil || run.Report.Errors == nil {
 		t.Error("diagnostic collections must be initialized")
 	}
