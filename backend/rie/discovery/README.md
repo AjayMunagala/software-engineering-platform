@@ -6,7 +6,9 @@ This package provides the first capability of the Repository Intelligence Engine
 
 Input: a readable directory path.
 
-Output: a schema-versioned report containing scan identity/timing, repository name, cleaned root path, file count, folder count, Git presence, metrics, warnings, and errors. The `.git` directory is detected but excluded from file and folder counts.
+Output: immutable `DiscoveryInventory 1.0.0` plus a schema-versioned report containing scan identity/timing, repository name, cleaned root path, file count, folder count, Git presence, metrics, warnings, and errors. The `.git` directory is detected but excluded from file and folder counts.
+
+`DiscoveryInventory` records repository identity, Git presence, and symbolic current/default branches when available from bounded local Git metadata reads. It never executes Git and never infers a default branch when `origin/HEAD` is unavailable.
 
 The engine exposes `Name`, `Version`, `Description`, and `Execute`, allowing it to run in an ordered data-driven RIE pipeline.
 

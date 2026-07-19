@@ -40,7 +40,7 @@ func newLanguageInventory(items []LanguageItem, summary LanguageSummary) Languag
 	return LanguageInventory{
 		metadata: Metadata{
 			Name: LanguageInventoryArtifactName, Version: LanguageInventoryArtifactVersion,
-			EngineName: "language", EngineVersion: "0.3.1",
+			EngineName: "language", EngineVersion: "0.3.2",
 		},
 		items:   append([]LanguageItem(nil), items...),
 		summary: summary,

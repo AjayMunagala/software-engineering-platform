@@ -17,12 +17,14 @@ func BenchmarkLanguageEngineExecute(b *testing.B) {
 		})
 	}
 	engine := New()
+	snapshot := rie.NewRepositorySnapshot("benchmark", entries, rie.Statistics{Files: len(entries)}, nil, "0.2.1")
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		run := rie.NewRunContext("benchmark", rie.DefaultConfig())
-		run.CompletedEngines["ignore"] = "0.2.0"
-		run.Entries = entries
+		if err := run.Artifacts.Put(snapshot); err != nil {
+			b.Fatal(err)
+		}
 		if err := engine.Execute(context.Background(), run); err != nil {
 			b.Fatal(err)
 		}

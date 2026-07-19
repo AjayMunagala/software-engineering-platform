@@ -42,7 +42,7 @@ func New(configs ...Config) Engine {
 
 func (ManifestEngine) Name() string { return "framework" }
 
-func (ManifestEngine) Version() string { return "0.4.1" }
+func (ManifestEngine) Version() string { return "0.4.2" }
 
 func (ManifestEngine) Description() string {
 	return "Detects frameworks deterministically from supported dependency manifests"
@@ -56,6 +56,10 @@ func (engine ManifestEngine) Execute(ctx context.Context, run *rie.RunContext) e
 	if _, available := languageengine.InventoryFrom(run); !available {
 		return ErrLanguageRequired
 	}
+	snapshot, available := rie.RepositorySnapshotFrom(run)
+	if !available {
+		return ErrSnapshotRequired
+	}
 	if len(engine.manifestNames) == 0 {
 		return ErrNoManifestNames
 	}
@@ -66,14 +70,14 @@ func (engine ManifestEngine) Execute(ctx context.Context, run *rie.RunContext) e
 		run.Artifacts = rie.NewArtifactStore()
 	}
 
-	candidates := engine.manifestCandidates(run.Entries)
+	candidates := engine.manifestCandidates(snapshot)
 	detected := make(map[string]map[string]rie.Evidence)
 	manifestsInspected := 0
 	for _, relativePath := range candidates {
 		if ctxErr := ctx.Err(); ctxErr != nil {
 			return ctxErr
 		}
-		absolutePath := filepath.Join(run.Report.Repository.RootPath, filepath.FromSlash(relativePath))
+		absolutePath := filepath.Join(snapshot.RootPath(), filepath.FromSlash(relativePath))
 		content, err := readManifest(absolutePath, engine.config.MaxManifestSize)
 		if err != nil {
 			code := "manifest_unreadable"
@@ -122,21 +126,22 @@ func (engine ManifestEngine) Execute(ctx context.Context, run *rie.RunContext) e
 	return nil
 }
 
-func (engine ManifestEngine) manifestCandidates(entries []rie.RepositoryEntry) []string {
+func (engine ManifestEngine) manifestCandidates(snapshot rie.RepositorySnapshot) []string {
 	candidates := make([]string, 0)
 	seen := make(map[string]struct{})
-	for _, entry := range entries {
+	_ = snapshot.ForEachEntry(func(entry rie.RepositoryEntry) error {
 		if entry.IsDir {
-			continue
+			return nil
 		}
 		if _, supported := engine.manifestNames[strings.ToLower(path.Base(entry.Path))]; !supported {
-			continue
+			return nil
 		}
 		if _, duplicate := seen[entry.Path]; !duplicate {
 			seen[entry.Path] = struct{}{}
 			candidates = append(candidates, entry.Path)
 		}
-	}
+		return nil
+	})
 	sort.Strings(candidates)
 	return candidates
 }

@@ -1,6 +1,6 @@
 # RIE v0.4 — Framework Engine
 
-Framework Engine consumes the frozen `LanguageInventory` artifact and detects frameworks deterministically from declared dependencies in supported manifest files. It does not execute package managers, parse source code, invoke AST tooling, or use AI.
+Framework Engine consumes frozen `RepositorySnapshot` and `LanguageInventory` artifacts and detects frameworks deterministically from declared dependencies in supported manifest files. It does not execute package managers, parse source code, invoke AST tooling, or use AI.
 
 ## Supported manifests
 

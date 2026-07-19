@@ -1,11 +1,14 @@
 package discovery
 
 import (
+	"bufio"
 	"context"
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/AjayMunagala/software-engineering-platform/backend/rie"
 )
@@ -31,7 +34,7 @@ func NewFileSystemScanner() Engine {
 
 func (FileSystemEngine) Name() string { return "discovery" }
 
-func (FileSystemEngine) Version() string { return "0.1.0" }
+func (FileSystemEngine) Version() string { return "0.1.1" }
 
 func (FileSystemEngine) Description() string {
 	return "Discovers repository identity and normalized local filesystem entries"
@@ -50,7 +53,15 @@ func (engine FileSystemEngine) Execute(ctx context.Context, run *rie.RunContext)
 	run.Entries = entries
 	run.Report.Repository = report.Repository
 	run.Report.Statistics = report.Statistics
-	return nil
+	if run.Artifacts == nil {
+		run.Artifacts = rie.NewArtifactStore()
+	}
+	currentBranch, defaultBranch := localGitBranches(report.Repository.RootPath, report.Repository.Git)
+	inventory := newDiscoveryInventory(RepositoryIdentity{
+		Name: report.Repository.Name, RootPath: report.Repository.RootPath, Git: report.Repository.Git,
+		CurrentBranch: currentBranch, DefaultBranch: defaultBranch,
+	}, report.Statistics)
+	return run.Artifacts.Put(inventory)
 }
 
 // Scan runs Discovery Engine by itself and returns a complete RIE report.
@@ -62,6 +73,37 @@ func (engine FileSystemEngine) Scan(repositoryPath string) (Report, error) {
 	}
 	err := pipeline.Run(context.Background(), run)
 	return run.Report, err
+}
+
+func localGitBranches(rootPath string, isGit bool) (string, string) {
+	if !isGit {
+		return "", ""
+	}
+	gitDirectory := filepath.Join(rootPath, ".git")
+	info, err := os.Stat(gitDirectory)
+	if err != nil || !info.IsDir() {
+		return "", ""
+	}
+	current := symbolicRefName(filepath.Join(gitDirectory, "HEAD"), "refs/heads/")
+	defaultBranch := symbolicRefName(filepath.Join(gitDirectory, "refs", "remotes", "origin", "HEAD"), "refs/remotes/origin/")
+	return current, defaultBranch
+}
+
+func symbolicRefName(filePath, prefix string) string {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return ""
+	}
+	defer file.Close()
+	scanner := bufio.NewScanner(io.LimitReader(file, 4096))
+	if !scanner.Scan() {
+		return ""
+	}
+	line := strings.TrimSpace(scanner.Text())
+	if !strings.HasPrefix(line, "ref: "+prefix) {
+		return ""
+	}
+	return strings.TrimPrefix(line, "ref: "+prefix)
 }
 
 func (engine FileSystemEngine) discover(ctx context.Context, repositoryPath string) (Report, []Entry, error) {

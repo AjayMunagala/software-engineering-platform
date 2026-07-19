@@ -1,6 +1,6 @@
 # RIE v0.3 — Language Engine
 
-Language Engine consumes entries retained by Ignore Engine and detects programming languages from lowercase file extensions only. It does not inspect file contents, parse syntax, invoke Tree-sitter, or use AI.
+Language Engine consumes immutable `RepositorySnapshot` and detects programming languages from lowercase file extensions only. It does not inspect file contents, parse syntax, invoke Tree-sitter, or use AI.
 
 ## Supported languages
 

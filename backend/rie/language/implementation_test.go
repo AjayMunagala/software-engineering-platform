@@ -63,8 +63,8 @@ func TestLanguageEngineUsesCaseInsensitiveCustomMappings(t *testing.T) {
 
 	engine := New(Config{Extensions: map[string]string{"KT": "Kotlin"}})
 	run := rie.NewRunContext(t.TempDir(), rie.DefaultConfig())
-	run.CompletedEngines["ignore"] = "0.2.0"
 	run.Entries = []rie.RepositoryEntry{{Path: "Main.KT"}}
+	publishSnapshot(t, run)
 
 	if err := engine.Execute(context.Background(), run); err != nil {
 		t.Fatalf("Execute() error = %v", err)
@@ -89,8 +89,8 @@ func TestLanguageEngineSupportsEveryV03Extension(t *testing.T) {
 		{Path: "schema.sql"},
 	}
 	run := rie.NewRunContext(t.TempDir(), rie.DefaultConfig())
-	run.CompletedEngines["ignore"] = "0.2.0"
 	run.Entries = entries
+	publishSnapshot(t, run)
 
 	if err := New().Execute(context.Background(), run); err != nil {
 		t.Fatalf("Execute() error = %v", err)
@@ -107,7 +107,7 @@ func TestLanguageEngineRejectsEmptyMappings(t *testing.T) {
 	t.Parallel()
 
 	run := rie.NewRunContext(t.TempDir(), rie.DefaultConfig())
-	run.CompletedEngines["ignore"] = "0.2.0"
+	publishSnapshot(t, run)
 	if err := New(Config{}).Execute(context.Background(), run); err != ErrNoExtensionMappings {
 		t.Errorf("Execute() error = %v, want %v", err, ErrNoExtensionMappings)
 	}
@@ -126,7 +126,7 @@ func TestLanguageEngineMetadata(t *testing.T) {
 	t.Parallel()
 
 	engine := New()
-	if engine.Name() != "language" || engine.Version() != "0.3.1" || engine.Description() == "" {
+	if engine.Name() != "language" || engine.Version() != "0.3.2" || engine.Description() == "" {
 		t.Errorf("unexpected metadata: %s %s %q", engine.Name(), engine.Version(), engine.Description())
 	}
 }
@@ -135,8 +135,8 @@ func TestLanguageInventoryIsImmutableToConsumers(t *testing.T) {
 	t.Parallel()
 
 	run := rie.NewRunContext(t.TempDir(), rie.DefaultConfig())
-	run.CompletedEngines["ignore"] = "0.2.0"
 	run.Entries = []rie.RepositoryEntry{{Path: "main.go"}}
+	publishSnapshot(t, run)
 	if err := New().Execute(context.Background(), run); err != nil {
 		t.Fatalf("Execute() error = %v", err)
 	}
@@ -150,7 +150,7 @@ func TestLanguageInventoryIsImmutableToConsumers(t *testing.T) {
 		t.Error("consumer mutation changed LanguageInventory")
 	}
 	metadata := inventory.Metadata()
-	if metadata.Version != LanguageInventoryArtifactVersion || metadata.EngineVersion != "0.3.1" {
+	if metadata.Version != LanguageInventoryArtifactVersion || metadata.EngineVersion != "0.3.2" {
 		t.Errorf("Metadata = %#v", metadata)
 	}
 }
@@ -159,7 +159,7 @@ func TestLanguageEngineEmptyRepository(t *testing.T) {
 	t.Parallel()
 
 	run := rie.NewRunContext(t.TempDir(), rie.DefaultConfig())
-	run.CompletedEngines["ignore"] = "0.2.0"
+	publishSnapshot(t, run)
 	if err := New().Execute(context.Background(), run); err != nil {
 		t.Fatalf("Execute() error = %v", err)
 	}
@@ -173,10 +173,10 @@ func TestLanguageEngineCountsExtensionlessAndUnknownFiles(t *testing.T) {
 	t.Parallel()
 
 	run := rie.NewRunContext(t.TempDir(), rie.DefaultConfig())
-	run.CompletedEngines["ignore"] = "0.2.0"
 	run.Entries = []rie.RepositoryEntry{
 		{Path: "abc.xyz"}, {Path: "myfile"}, {Path: "data.custom"},
 	}
+	publishSnapshot(t, run)
 	if err := New().Execute(context.Background(), run); err != nil {
 		t.Fatalf("Execute() error = %v", err)
 	}
@@ -193,10 +193,10 @@ func TestLanguageEngineDefaultMappingIsCaseInsensitive(t *testing.T) {
 	t.Parallel()
 
 	run := rie.NewRunContext(t.TempDir(), rie.DefaultConfig())
-	run.CompletedEngines["ignore"] = "0.2.0"
 	run.Entries = []rie.RepositoryEntry{
 		{Path: "main.go"}, {Path: "MAIN.GO"}, {Path: "Main.Go"},
 	}
+	publishSnapshot(t, run)
 	if err := New().Execute(context.Background(), run); err != nil {
 		t.Fatalf("Execute() error = %v", err)
 	}
@@ -211,6 +211,21 @@ func mustRegister(t *testing.T, pipeline *rie.Pipeline, engine rie.Engine) {
 	t.Helper()
 	if err := pipeline.Register(engine); err != nil {
 		t.Fatalf("Register(%s): %v", engine.Name(), err)
+	}
+}
+
+func publishSnapshot(t testing.TB, run *rie.RunContext) {
+	t.Helper()
+	statistics := rie.Statistics{}
+	for _, entry := range run.Entries {
+		if entry.IsDir {
+			statistics.Folders++
+		} else {
+			statistics.Files++
+		}
+	}
+	if err := run.Artifacts.Put(rie.NewRepositorySnapshot(run.RepositoryPath, run.Entries, statistics, nil, "0.2.1")); err != nil {
+		t.Fatal(err)
 	}
 }
 

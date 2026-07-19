@@ -27,7 +27,7 @@ func New(configs ...Config) Engine {
 
 func (ExtensionEngine) Name() string { return "language" }
 
-func (ExtensionEngine) Version() string { return "0.3.1" }
+func (ExtensionEngine) Version() string { return "0.3.2" }
 
 func (ExtensionEngine) Description() string {
 	return "Detects repository languages deterministically from file extensions"
@@ -38,7 +38,8 @@ func (engine ExtensionEngine) Execute(ctx context.Context, run *rie.RunContext) 
 	if run == nil {
 		return rie.ErrRunContextRequired
 	}
-	if _, completed := run.CompletedEngines["ignore"]; !completed {
+	snapshot, available := rie.RepositorySnapshotFrom(run)
+	if !available {
 		return ErrIgnoreRequired
 	}
 	if len(engine.config.Extensions) == 0 {
@@ -50,20 +51,24 @@ func (engine ExtensionEngine) Execute(ctx context.Context, run *rie.RunContext) 
 
 	counts := make(map[string]int)
 	unknownFiles := 0
-	for _, entry := range run.Entries {
+	err := snapshot.ForEachEntry(func(entry rie.RepositoryEntry) error {
 		if ctxErr := ctx.Err(); ctxErr != nil {
 			return ctxErr
 		}
 		if entry.IsDir {
-			continue
+			return nil
 		}
 		extension := strings.ToLower(path.Ext(entry.Path))
 		languageName, detected := engine.config.Extensions[extension]
 		if !detected {
 			unknownFiles++
-			continue
+			return nil
 		}
 		counts[languageName]++
+		return nil
+	})
+	if err != nil {
+		return err
 	}
 
 	detectedFiles := 0

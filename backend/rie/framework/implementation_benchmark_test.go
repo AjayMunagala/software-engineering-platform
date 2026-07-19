@@ -29,6 +29,10 @@ func BenchmarkFrameworkEngineExecute(b *testing.B) {
 	if !exists {
 		b.Fatal("language inventory was not prepared")
 	}
+	snapshot, exists := prepared.Artifacts.Get(rie.RepositorySnapshotArtifactName)
+	if !exists {
+		b.Fatal("repository snapshot was not prepared")
+	}
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -36,6 +40,9 @@ func BenchmarkFrameworkEngineExecute(b *testing.B) {
 		run.Report.Repository.RootPath = repository
 		run.Entries = entries
 		if err := run.Artifacts.Put(languageInventory); err != nil {
+			b.Fatal(err)
+		}
+		if err := run.Artifacts.Put(snapshot); err != nil {
 			b.Fatal(err)
 		}
 		if err := engine.Execute(context.Background(), run); err != nil {

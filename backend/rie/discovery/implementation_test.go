@@ -55,6 +55,26 @@ func TestDiscoveryEngineProducesNormalizedEntries(t *testing.T) {
 	if run.Entries[0].Path != "internal" || run.Entries[1].Path != "internal/service.go" {
 		t.Errorf("Entries = %#v", run.Entries)
 	}
+	inventory, exists := InventoryFrom(run)
+	if !exists || inventory.ArtifactVersion() != "1.0.0" || inventory.Repository().RootPath != repository {
+		t.Errorf("DiscoveryInventory = %#v, exists = %v", inventory, exists)
+	}
+}
+
+func TestDiscoveryInventoryReadsOnlyLocalSymbolicGitBranches(t *testing.T) {
+	t.Parallel()
+	repository := t.TempDir()
+	mustWriteContent(t, filepath.Join(repository, ".git", "HEAD"), "ref: refs/heads/feature/local\n")
+	mustWriteContent(t, filepath.Join(repository, ".git", "refs", "remotes", "origin", "HEAD"), "ref: refs/remotes/origin/main\n")
+	run := rie.NewRunContext(repository, rie.DefaultConfig())
+	if err := New().Execute(context.Background(), run); err != nil {
+		t.Fatal(err)
+	}
+	inventory, _ := InventoryFrom(run)
+	identity := inventory.Repository()
+	if !identity.Git || identity.CurrentBranch != "feature/local" || identity.DefaultBranch != "main" {
+		t.Errorf("Repository = %#v", identity)
+	}
 }
 
 func TestDiscoveryEngineRejectsInvalidRoots(t *testing.T) {
@@ -74,17 +94,21 @@ func TestDiscoveryEngineMetadata(t *testing.T) {
 	t.Parallel()
 
 	engine := New()
-	if engine.Name() != "discovery" || engine.Version() != "0.1.0" || engine.Description() == "" {
+	if engine.Name() != "discovery" || engine.Version() != "0.1.1" || engine.Description() == "" {
 		t.Errorf("unexpected metadata: %s %s %q", engine.Name(), engine.Version(), engine.Description())
 	}
 }
 
 func mustWriteFile(t *testing.T, path string) {
+	mustWriteContent(t, path, "fixture")
+}
+
+func mustWriteContent(t *testing.T, path, content string) {
 	t.Helper()
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		t.Fatalf("MkdirAll(%q): %v", path, err)
 	}
-	if err := os.WriteFile(path, []byte("fixture"), 0o600); err != nil {
+	if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
 		t.Fatalf("WriteFile(%q): %v", path, err)
 	}
 }

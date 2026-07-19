@@ -36,7 +36,7 @@ func TestFrameworkEngineDetectsManifestDependenciesWithEvidence(t *testing.T) {
 	if !exists {
 		t.Fatal("FrameworkInventory artifact was not published")
 	}
-	if inventory.ArtifactVersion() != "1.0.0" || inventory.Metadata().EngineVersion != "0.4.1" {
+	if inventory.ArtifactVersion() != "1.0.0" || inventory.Metadata().EngineVersion != "0.4.2" {
 		t.Errorf("Inventory metadata = %#v", inventory.Metadata())
 	}
 	items := inventory.Items()
@@ -158,7 +158,7 @@ func TestFrameworkEngineMetadata(t *testing.T) {
 	t.Parallel()
 
 	engine := New()
-	if engine.Name() != "framework" || engine.Version() != "0.4.1" || engine.Description() == "" {
+	if engine.Name() != "framework" || engine.Version() != "0.4.2" || engine.Description() == "" {
 		t.Errorf("unexpected metadata: %s %s %q", engine.Name(), engine.Version(), engine.Description())
 	}
 }
@@ -336,11 +336,20 @@ func readyRun(t testing.TB, repository string, entries []rie.RepositoryEntry) *r
 	run := rie.NewRunContext(repository, rie.DefaultConfig())
 	run.Report.Repository.RootPath = repository
 	run.Entries = entries
-	run.CompletedEngines["ignore"] = "0.2.0"
+	statistics := rie.Statistics{}
+	for _, entry := range entries {
+		if entry.IsDir {
+			statistics.Folders++
+		} else {
+			statistics.Files++
+		}
+	}
+	if err := run.Artifacts.Put(rie.NewRepositorySnapshot(repository, entries, statistics, nil, "0.2.1")); err != nil {
+		t.Fatalf("prepare RepositorySnapshot: %v", err)
+	}
 	if err := languageengine.New().Execute(context.Background(), run); err != nil {
 		t.Fatalf("prepare LanguageInventory: %v", err)
 	}
-	run.CompletedEngines["language"] = "0.3.1"
 	return run
 }
 

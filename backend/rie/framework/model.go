@@ -48,7 +48,7 @@ func newFrameworkInventory(items []FrameworkItem, summary FrameworkSummary) Fram
 	return FrameworkInventory{
 		metadata: Metadata{
 			Name: FrameworkInventoryArtifactName, Version: FrameworkInventoryArtifactVersion,
-			EngineName: "framework", EngineVersion: "0.4.1",
+			EngineName: "framework", EngineVersion: "0.4.2",
 		},
 		items: copied, summary: summary,
 	}

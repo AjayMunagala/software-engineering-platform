@@ -22,17 +22,18 @@ type RepositoryEntry struct {
 
 // Report is the versioned, additive JSON contract for RIE scan results.
 type Report struct {
-	SchemaVersion string           `json:"schema_version"`
-	Scan          ScanMetadata     `json:"scan"`
-	Repository    Repository       `json:"repository"`
-	Statistics    Statistics       `json:"statistics"`
-	Ignore        IgnoreSummary    `json:"ignore"`
-	Languages     LanguageSummary  `json:"languages"`
-	Frameworks    FrameworkSummary `json:"frameworks"`
-	Build         BuildSummary     `json:"build"`
-	Metrics       Metrics          `json:"metrics"`
-	Warnings      []Diagnostic     `json:"warnings"`
-	Errors        []Diagnostic     `json:"errors"`
+	SchemaVersion string                    `json:"schema_version"`
+	Scan          ScanMetadata              `json:"scan"`
+	Repository    Repository                `json:"repository"`
+	Statistics    Statistics                `json:"statistics"`
+	Ignore        IgnoreSummary             `json:"ignore"`
+	Languages     LanguageSummary           `json:"languages"`
+	Frameworks    FrameworkSummary          `json:"frameworks"`
+	Build         BuildSummary              `json:"build"`
+	Metadata      RepositoryMetadataSummary `json:"metadata"`
+	Metrics       Metrics                   `json:"metrics"`
+	Warnings      []Diagnostic              `json:"warnings"`
+	Errors        []Diagnostic              `json:"errors"`
 }
 
 // ScanMetadata identifies one pipeline run and records its timing.
@@ -143,6 +144,70 @@ type BuildToolchain struct {
 	Constraint string     `json:"constraint"`
 	Location   string     `json:"location"`
 	Evidence   []Evidence `json:"evidence"`
+}
+
+// RepositoryMetadataSummary is the executive repository cover page.
+type RepositoryMetadataSummary struct {
+	Name                string               `json:"name"`
+	RootPath            string               `json:"root_path"`
+	Git                 GitMetadata          `json:"git"`
+	Statistics          Statistics           `json:"statistics"`
+	Layout              RepositoryLayout     `json:"layout"`
+	Monorepo            bool                 `json:"monorepo"`
+	WorkspaceCount      int                  `json:"workspace_count"`
+	DeclaredModuleCount int                  `json:"declared_module_count"`
+	Languages           []MetadataLanguage   `json:"languages"`
+	Frameworks          []MetadataFramework  `json:"frameworks"`
+	Build               MetadataBuildSummary `json:"build"`
+	SourceArtifacts     []ArtifactReference  `json:"source_artifacts"`
+}
+
+type GitMetadata struct {
+	Present       bool   `json:"present"`
+	CurrentBranch string `json:"current_branch,omitempty"`
+	DefaultBranch string `json:"default_branch,omitempty"`
+}
+
+type RepositoryLayout struct {
+	TopLevelDirectories []string `json:"top_level_directories"`
+	TopLevelFiles       []string `json:"top_level_files"`
+	MaximumDepth        int      `json:"maximum_depth"`
+}
+
+type MetadataLanguage struct {
+	Name       string  `json:"name"`
+	FileCount  int     `json:"file_count"`
+	Percentage float64 `json:"percentage"`
+}
+
+type MetadataFramework struct {
+	Name      string   `json:"name"`
+	Ecosystem string   `json:"ecosystem"`
+	Locations []string `json:"locations"`
+}
+
+type MetadataTechnology struct {
+	ID        string   `json:"id"`
+	Name      string   `json:"name"`
+	Locations []string `json:"locations"`
+}
+
+type MetadataToolchain struct {
+	Tool        string   `json:"tool"`
+	Constraints []string `json:"constraints"`
+	Locations   []string `json:"locations"`
+}
+
+type MetadataBuildSummary struct {
+	PackageManagers []MetadataTechnology `json:"package_managers"`
+	BuildSystems    []MetadataTechnology `json:"build_systems"`
+	Toolchains      []MetadataToolchain  `json:"toolchains"`
+	LockFileCount   int                  `json:"lock_file_count"`
+}
+
+type ArtifactReference struct {
+	Name    string `json:"name"`
+	Version string `json:"version"`
 }
 
 // Metrics records measured scan behavior. Future engines can add metrics
