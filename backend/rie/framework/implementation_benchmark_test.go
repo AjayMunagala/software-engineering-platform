@@ -24,10 +24,20 @@ func BenchmarkFrameworkEngineExecute(b *testing.B) {
 		entries = append(entries, rie.RepositoryEntry{Path: fmt.Sprintf("pkg/file-%06d.go", i)})
 	}
 	engine := New()
+	prepared := readyRun(b, repository, entries)
+	languageInventory, exists := prepared.Artifacts.Get("language-inventory")
+	if !exists {
+		b.Fatal("language inventory was not prepared")
+	}
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		run := readyRun(b, repository, entries)
+		run := rie.NewRunContext(repository, rie.DefaultConfig())
+		run.Report.Repository.RootPath = repository
+		run.Entries = entries
+		if err := run.Artifacts.Put(languageInventory); err != nil {
+			b.Fatal(err)
+		}
 		if err := engine.Execute(context.Background(), run); err != nil {
 			b.Fatal(err)
 		}

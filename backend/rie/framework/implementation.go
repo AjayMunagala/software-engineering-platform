@@ -42,7 +42,7 @@ func New(configs ...Config) Engine {
 
 func (ManifestEngine) Name() string { return "framework" }
 
-func (ManifestEngine) Version() string { return "0.4.0" }
+func (ManifestEngine) Version() string { return "0.4.1" }
 
 func (ManifestEngine) Description() string {
 	return "Detects frameworks deterministically from supported dependency manifests"
@@ -67,7 +67,7 @@ func (engine ManifestEngine) Execute(ctx context.Context, run *rie.RunContext) e
 	}
 
 	candidates := engine.manifestCandidates(run.Entries)
-	detected := make(map[string]map[string]struct{})
+	detected := make(map[string]map[string]rie.Evidence)
 	manifestsInspected := 0
 	for _, relativePath := range candidates {
 		if ctxErr := ctx.Err(); ctxErr != nil {
@@ -97,9 +97,11 @@ func (engine ManifestEngine) Execute(ctx context.Context, run *rie.RunContext) e
 		for _, framework := range frameworks {
 			key := framework.ecosystem + "\x00" + framework.name
 			if detected[key] == nil {
-				detected[key] = make(map[string]struct{})
+				detected[key] = make(map[string]rie.Evidence)
 			}
-			detected[key][relativePath] = struct{}{}
+			evidence := rie.Evidence{File: relativePath, Rule: framework.rule, Value: framework.value}
+			evidenceKey := evidence.File + "\x00" + evidence.Rule + "\x00" + evidence.Value
+			detected[key][evidenceKey] = evidence
 		}
 	}
 
@@ -122,11 +124,16 @@ func (engine ManifestEngine) Execute(ctx context.Context, run *rie.RunContext) e
 
 func (engine ManifestEngine) manifestCandidates(entries []rie.RepositoryEntry) []string {
 	candidates := make([]string, 0)
+	seen := make(map[string]struct{})
 	for _, entry := range entries {
 		if entry.IsDir {
 			continue
 		}
-		if _, supported := engine.manifestNames[strings.ToLower(path.Base(entry.Path))]; supported {
+		if _, supported := engine.manifestNames[strings.ToLower(path.Base(entry.Path))]; !supported {
+			continue
+		}
+		if _, duplicate := seen[entry.Path]; !duplicate {
+			seen[entry.Path] = struct{}{}
 			candidates = append(candidates, entry.Path)
 		}
 	}
@@ -184,15 +191,15 @@ func detectNodeFrameworks(content []byte) ([]detection, error) {
 	}
 	dependencies := mergeDependencyNames(manifest.Dependencies, manifest.DevDependencies, manifest.PeerDependencies)
 	rules := map[string]detection{
-		"react":            {name: "React", ecosystem: "Node.js"},
-		"redux":            {name: "Redux", ecosystem: "Node.js"},
-		"@reduxjs/toolkit": {name: "Redux", ecosystem: "Node.js"},
-		"next":             {name: "Next.js", ecosystem: "Node.js"},
-		"vue":              {name: "Vue", ecosystem: "Node.js"},
-		"@angular/core":    {name: "Angular", ecosystem: "Node.js"},
-		"express":          {name: "Express", ecosystem: "Node.js"},
-		"@nestjs/core":     {name: "NestJS", ecosystem: "Node.js"},
-		"svelte":           {name: "Svelte", ecosystem: "Node.js"},
+		"react":            {name: "React", ecosystem: "Node.js", rule: "node.dependency"},
+		"redux":            {name: "Redux", ecosystem: "Node.js", rule: "node.dependency"},
+		"@reduxjs/toolkit": {name: "Redux", ecosystem: "Node.js", rule: "node.dependency"},
+		"next":             {name: "Next.js", ecosystem: "Node.js", rule: "node.dependency"},
+		"vue":              {name: "Vue", ecosystem: "Node.js", rule: "node.dependency"},
+		"@angular/core":    {name: "Angular", ecosystem: "Node.js", rule: "node.dependency"},
+		"express":          {name: "Express", ecosystem: "Node.js", rule: "node.dependency"},
+		"@nestjs/core":     {name: "NestJS", ecosystem: "Node.js", rule: "node.dependency"},
+		"svelte":           {name: "Svelte", ecosystem: "Node.js", rule: "node.dependency"},
 	}
 	return matchedDependencies(dependencies, rules), nil
 }
@@ -204,8 +211,8 @@ func detectComposerFrameworks(content []byte) ([]detection, error) {
 	}
 	dependencies := mergeDependencyNames(manifest.Require, manifest.RequireDev)
 	rules := map[string]detection{
-		"laravel/framework":        {name: "Laravel", ecosystem: "PHP"},
-		"symfony/framework-bundle": {name: "Symfony", ecosystem: "PHP"},
+		"laravel/framework":        {name: "Laravel", ecosystem: "PHP", rule: "composer.require"},
+		"symfony/framework-bundle": {name: "Symfony", ecosystem: "PHP", rule: "composer.require"},
 	}
 	return matchedDependencies(dependencies, rules), nil
 }
@@ -222,16 +229,12 @@ func mergeDependencyNames(groups ...map[string]json.RawMessage) map[string]struc
 
 func matchedDependencies(dependencies map[string]struct{}, rules map[string]detection) []detection {
 	results := make([]detection, 0)
-	seen := make(map[string]struct{})
 	for dependency, framework := range rules {
 		if _, present := dependencies[dependency]; !present {
 			continue
 		}
-		key := framework.ecosystem + "\x00" + framework.name
-		if _, duplicate := seen[key]; !duplicate {
-			seen[key] = struct{}{}
-			results = append(results, framework)
-		}
+		framework.value = dependency
+		results = append(results, framework)
 	}
 	return results
 }
@@ -239,10 +242,10 @@ func matchedDependencies(dependencies map[string]struct{}, rules map[string]dete
 func detectGoFrameworks(content []byte) []detection {
 	text := uncommentLines(string(content), "//")
 	rules := map[string]detection{
-		"github.com/gin-gonic/gin": {name: "Gin", ecosystem: "Go"},
-		"github.com/labstack/echo": {name: "Echo", ecosystem: "Go"},
-		"github.com/gofiber/fiber": {name: "Fiber", ecosystem: "Go"},
-		"github.com/go-chi/chi":    {name: "Chi", ecosystem: "Go"},
+		"github.com/gin-gonic/gin": {name: "Gin", ecosystem: "Go", rule: "go.require"},
+		"github.com/labstack/echo": {name: "Echo", ecosystem: "Go", rule: "go.require"},
+		"github.com/gofiber/fiber": {name: "Fiber", ecosystem: "Go", rule: "go.require"},
+		"github.com/go-chi/chi":    {name: "Chi", ecosystem: "Go", rule: "go.require"},
 	}
 	return matchedText(text, rules)
 }
@@ -261,32 +264,35 @@ func detectMavenFrameworks(content []byte) ([]detection, error) {
 	if err := xml.Unmarshal(content, &project); err != nil {
 		return nil, err
 	}
-	boot := false
-	spring := false
+	results := make([]detection, 0)
+	seen := make(map[string]struct{})
 	for _, dependency := range project.Dependencies {
 		group := strings.TrimSpace(dependency.GroupID)
 		artifact := strings.TrimSpace(dependency.ArtifactID)
+		coordinate := group + ":" + artifact
+		var framework detection
 		if group == "org.springframework.boot" || strings.HasPrefix(artifact, "spring-boot-") {
-			boot = true
+			framework = detection{name: "Spring Boot", ecosystem: "Java", rule: "maven.dependency", value: coordinate}
 		} else if strings.HasPrefix(group, "org.springframework") {
-			spring = true
+			framework = detection{name: "Spring Framework", ecosystem: "Java", rule: "maven.dependency", value: coordinate}
+		} else {
+			continue
+		}
+		key := framework.name + "\x00" + framework.value
+		if _, duplicate := seen[key]; !duplicate {
+			seen[key] = struct{}{}
+			results = append(results, framework)
 		}
 	}
-	if boot {
-		return []detection{{name: "Spring Boot", ecosystem: "Java"}}, nil
-	}
-	if spring {
-		return []detection{{name: "Spring Framework", ecosystem: "Java"}}, nil
-	}
-	return nil, nil
+	return results, nil
 }
 
 func detectCargoFrameworks(content []byte) []detection {
 	text := uncommentLines(string(content), "#")
 	rules := map[string]detection{
-		"actix-web": {name: "Actix Web", ecosystem: "Rust"},
-		"axum":      {name: "Axum", ecosystem: "Rust"},
-		"rocket":    {name: "Rocket", ecosystem: "Rust"},
+		"actix-web": {name: "Actix Web", ecosystem: "Rust", rule: "cargo.dependency"},
+		"axum":      {name: "Axum", ecosystem: "Rust", rule: "cargo.dependency"},
+		"rocket":    {name: "Rocket", ecosystem: "Rust", rule: "cargo.dependency"},
 	}
 	results := make([]detection, 0)
 	seen := make(map[string]struct{})
@@ -304,6 +310,7 @@ func detectCargoFrameworks(content []byte) []detection {
 			key := framework.ecosystem + "\x00" + framework.name
 			if _, duplicate := seen[key]; !duplicate {
 				seen[key] = struct{}{}
+				framework.value = name
 				results = append(results, framework)
 			}
 		}
@@ -313,9 +320,9 @@ func detectCargoFrameworks(content []byte) []detection {
 
 func detectPythonFrameworks(content []byte) []detection {
 	rules := map[string]detection{
-		"django":  {name: "Django", ecosystem: "Python"},
-		"flask":   {name: "Flask", ecosystem: "Python"},
-		"fastapi": {name: "FastAPI", ecosystem: "Python"},
+		"django":  {name: "Django", ecosystem: "Python", rule: "python.requirement"},
+		"flask":   {name: "Flask", ecosystem: "Python", rule: "python.requirement"},
+		"fastapi": {name: "FastAPI", ecosystem: "Python", rule: "python.requirement"},
 	}
 	results := make([]detection, 0)
 	seen := make(map[string]struct{})
@@ -331,6 +338,7 @@ func detectPythonFrameworks(content []byte) []detection {
 			key := framework.ecosystem + "\x00" + framework.name
 			if _, duplicate := seen[key]; !duplicate {
 				seen[key] = struct{}{}
+				framework.value = name
 				results = append(results, framework)
 			}
 		}
@@ -352,21 +360,30 @@ func matchedText(text string, rules map[string]detection) []detection {
 	results := make([]detection, 0)
 	for token, framework := range rules {
 		if strings.Contains(text, token) {
+			framework.value = token
 			results = append(results, framework)
 		}
 	}
 	return results
 }
 
-func frameworkItems(detected map[string]map[string]struct{}) []FrameworkItem {
+func frameworkItems(detected map[string]map[string]rie.Evidence) []FrameworkItem {
 	items := make([]FrameworkItem, 0, len(detected))
 	for key, evidenceSet := range detected {
 		parts := strings.SplitN(key, "\x00", 2)
-		evidence := make([]string, 0, len(evidenceSet))
-		for manifest := range evidenceSet {
-			evidence = append(evidence, manifest)
+		evidence := make([]rie.Evidence, 0, len(evidenceSet))
+		for _, itemEvidence := range evidenceSet {
+			evidence = append(evidence, itemEvidence)
 		}
-		sort.Strings(evidence)
+		sort.Slice(evidence, func(i, j int) bool {
+			if evidence[i].File != evidence[j].File {
+				return evidence[i].File < evidence[j].File
+			}
+			if evidence[i].Rule != evidence[j].Rule {
+				return evidence[i].Rule < evidence[j].Rule
+			}
+			return evidence[i].Value < evidence[j].Value
+		})
 		items = append(items, FrameworkItem{Name: parts[1], Ecosystem: parts[0], evidence: evidence})
 	}
 	sort.Slice(items, func(i, j int) bool {

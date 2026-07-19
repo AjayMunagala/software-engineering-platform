@@ -36,6 +36,9 @@ func TestFrameworkEngineDetectsManifestDependenciesWithEvidence(t *testing.T) {
 	if !exists {
 		t.Fatal("FrameworkInventory artifact was not published")
 	}
+	if inventory.ArtifactVersion() != "1.0.0" || inventory.Metadata().EngineVersion != "0.4.1" {
+		t.Errorf("Inventory metadata = %#v", inventory.Metadata())
+	}
 	items := inventory.Items()
 	if len(items) != 3 {
 		t.Fatalf("Items = %#v", items)
@@ -135,9 +138,9 @@ func TestFrameworkInventoryIsImmutableToConsumers(t *testing.T) {
 	}
 	items := inventory.Items()
 	evidence := items[0].Evidence()
-	evidence[0] = "changed"
+	evidence[0].File = "changed"
 	items[0].Name = "changed"
-	if inventory.Items()[0].Name != "React" || inventory.Items()[0].Evidence()[0] != "package.json" {
+	if inventory.Items()[0].Name != "React" || inventory.Items()[0].Evidence()[0].File != "package.json" {
 		t.Error("consumer mutation changed FrameworkInventory")
 	}
 }
@@ -155,7 +158,7 @@ func TestFrameworkEngineMetadata(t *testing.T) {
 	t.Parallel()
 
 	engine := New()
-	if engine.Name() != "framework" || engine.Version() != "0.4.0" || engine.Description() == "" {
+	if engine.Name() != "framework" || engine.Version() != "0.4.1" || engine.Description() == "" {
 		t.Errorf("unexpected metadata: %s %s %q", engine.Name(), engine.Version(), engine.Description())
 	}
 }
@@ -192,6 +195,111 @@ func TestFrameworkEngineDeduplicatesFrameworkAndCollectsEvidence(t *testing.T) {
 	}
 	if len(items[0].Evidence()) != 2 {
 		t.Errorf("Evidence = %v", items[0].Evidence())
+	}
+	wantFiles := []string{"package.json", "web/package.json"}
+	for index, evidence := range items[0].Evidence() {
+		if evidence.File != wantFiles[index] || evidence.Rule != "node.dependency" || evidence.Value != "react" {
+			t.Errorf("Evidence[%d] = %#v", index, evidence)
+		}
+	}
+}
+
+func TestFrameworkEngineReportsRelatedFrameworksIndependently(t *testing.T) {
+	t.Parallel()
+
+	repository := t.TempDir()
+	mustWrite(t, filepath.Join(repository, "frontend", "package.json"), `{
+  "dependencies":{"react":"1","redux":"2","next":"3"}
+}`)
+	run := readyRun(t, repository, []rie.RepositoryEntry{{Path: "frontend/package.json"}})
+	if err := New().Execute(context.Background(), run); err != nil {
+		t.Fatalf("Execute() error = %v", err)
+	}
+	inventory, _ := InventoryFrom(run)
+	items := inventory.Items()
+	wantNames := []string{"Next.js", "React", "Redux"}
+	if len(items) != len(wantNames) {
+		t.Fatalf("Items = %#v", items)
+	}
+	for index, want := range wantNames {
+		if items[index].Name != want {
+			t.Errorf("Items[%d].Name = %q, want %q", index, items[index].Name, want)
+		}
+		evidence := items[index].Evidence()
+		if len(evidence) != 1 || evidence[0].File != "frontend/package.json" {
+			t.Errorf("Items[%d].Evidence = %#v", index, evidence)
+		}
+	}
+}
+
+func TestFrameworkEngineAllowsCoexistingFrameworks(t *testing.T) {
+	t.Parallel()
+
+	repository := t.TempDir()
+	mustWrite(t, filepath.Join(repository, "package.json"), `{
+  "dependencies":{"react":"1","vue":"2"}
+}`)
+	run := readyRun(t, repository, []rie.RepositoryEntry{{Path: "package.json"}})
+	if err := New().Execute(context.Background(), run); err != nil {
+		t.Fatalf("Execute() error = %v", err)
+	}
+	inventory, _ := InventoryFrom(run)
+	items := inventory.Items()
+	if len(items) != 2 || items[0].Name != "React" || items[1].Name != "Vue" {
+		t.Errorf("Items = %#v", items)
+	}
+	if len(run.Report.Warnings) != 0 {
+		t.Errorf("Warnings = %#v", run.Report.Warnings)
+	}
+}
+
+func TestFrameworkEnginePreservesMultipleProjectLocations(t *testing.T) {
+	t.Parallel()
+
+	repository := t.TempDir()
+	mustWrite(t, filepath.Join(repository, "apps", "admin", "package.json"), `{"dependencies":{"react":"1"}}`)
+	mustWrite(t, filepath.Join(repository, "apps", "store", "package.json"), `{"dependencies":{"react":"1"}}`)
+	run := readyRun(t, repository, []rie.RepositoryEntry{
+		{Path: "apps/admin/package.json"}, {Path: "apps/store/package.json"},
+	})
+	if err := New().Execute(context.Background(), run); err != nil {
+		t.Fatalf("Execute() error = %v", err)
+	}
+	inventory, _ := InventoryFrom(run)
+	items := inventory.Items()
+	if len(items) != 1 {
+		t.Fatalf("Items = %#v", items)
+	}
+	evidence := items[0].Evidence()
+	if len(evidence) != 2 || evidence[0].File != "apps/admin/package.json" || evidence[1].File != "apps/store/package.json" {
+		t.Errorf("Evidence = %#v", evidence)
+	}
+}
+
+func TestFrameworkEngineDeduplicatesExactEvidence(t *testing.T) {
+	t.Parallel()
+
+	repository := t.TempDir()
+	mustWrite(t, filepath.Join(repository, "package.json"), `{
+  "dependencies":{"react":"1"},
+  "devDependencies":{"react":"1"}
+}`)
+	run := readyRun(t, repository, []rie.RepositoryEntry{
+		{Path: "package.json"}, {Path: "package.json"},
+	})
+	if err := New().Execute(context.Background(), run); err != nil {
+		t.Fatalf("Execute() error = %v", err)
+	}
+	inventory, _ := InventoryFrom(run)
+	items := inventory.Items()
+	if len(items) != 1 {
+		t.Fatalf("Items = %#v", items)
+	}
+	if len(items[0].Evidence()) != 1 {
+		t.Errorf("Evidence = %#v", items[0].Evidence())
+	}
+	if inventory.Summary().ManifestsInspected != 1 {
+		t.Errorf("ManifestsInspected = %d", inventory.Summary().ManifestsInspected)
 	}
 }
 

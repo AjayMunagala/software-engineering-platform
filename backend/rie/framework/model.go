@@ -1,8 +1,10 @@
 package framework
 
+import "github.com/AjayMunagala/software-engineering-platform/backend/rie"
+
 const (
 	FrameworkInventoryArtifactName    = "framework-inventory"
-	FrameworkInventoryArtifactVersion = "0.1.0"
+	FrameworkInventoryArtifactVersion = "1.0.0"
 )
 
 // Metadata identifies the artifact and its producing engine.
@@ -17,12 +19,12 @@ type Metadata struct {
 type FrameworkItem struct {
 	Name      string
 	Ecosystem string
-	evidence  []string
+	evidence  []rie.Evidence
 }
 
-// Evidence returns a defensive copy of supporting manifest paths.
-func (item FrameworkItem) Evidence() []string {
-	return append([]string(nil), item.evidence...)
+// Evidence returns a defensive copy of location-aware detection evidence.
+func (item FrameworkItem) Evidence() []rie.Evidence {
+	return append([]rie.Evidence(nil), item.evidence...)
 }
 
 // FrameworkSummary contains aggregate inventory counts.
@@ -41,12 +43,12 @@ func newFrameworkInventory(items []FrameworkItem, summary FrameworkSummary) Fram
 	copied := make([]FrameworkItem, len(items))
 	for index, item := range items {
 		copied[index] = item
-		copied[index].evidence = append([]string(nil), item.evidence...)
+		copied[index].evidence = append([]rie.Evidence(nil), item.evidence...)
 	}
 	return FrameworkInventory{
 		metadata: Metadata{
 			Name: FrameworkInventoryArtifactName, Version: FrameworkInventoryArtifactVersion,
-			EngineName: "framework", EngineVersion: "0.4.0",
+			EngineName: "framework", EngineVersion: "0.4.1",
 		},
 		items: copied, summary: summary,
 	}
@@ -63,7 +65,7 @@ func (inventory FrameworkInventory) Items() []FrameworkItem {
 	items := make([]FrameworkItem, len(inventory.items))
 	for index, item := range inventory.items {
 		items[index] = item
-		items[index].evidence = append([]string(nil), item.evidence...)
+		items[index].evidence = append([]rie.Evidence(nil), item.evidence...)
 	}
 	return items
 }
@@ -73,4 +75,6 @@ func (inventory FrameworkInventory) Summary() FrameworkSummary { return inventor
 type detection struct {
 	name      string
 	ecosystem string
+	rule      string
+	value     string
 }

@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-const SchemaVersion = "0.4.0"
+const SchemaVersion = "0.4.1"
 
 // Pipeline executes an ordered, configurable sequence of RIE engines.
 type Pipeline struct {

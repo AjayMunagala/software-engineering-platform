@@ -93,9 +93,17 @@ type FrameworkSummary struct {
 
 // Framework records one deterministic detection and its manifest evidence.
 type Framework struct {
-	Name      string   `json:"name"`
-	Ecosystem string   `json:"ecosystem"`
-	Evidence  []string `json:"evidence"`
+	Name      string     `json:"name"`
+	Ecosystem string     `json:"ecosystem"`
+	Evidence  []Evidence `json:"evidence"`
+}
+
+// Evidence records the source and deterministic rule supporting a detection.
+// File is repository-relative so it also preserves the detected project location.
+type Evidence struct {
+	File  string `json:"file"`
+	Rule  string `json:"rule"`
+	Value string `json:"value"`
 }
 
 // Metrics records measured scan behavior. Future engines can add metrics
