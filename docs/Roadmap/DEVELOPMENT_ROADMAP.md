@@ -13,6 +13,13 @@
 - Deterministic repository, language, framework, build, workspace, metadata, and summary intelligence.
 - Regression, coverage, performance, memory, API, dependency, and documentation audits.
 
+## Phase 1.1 — Real-world validation and hardening ✅
+
+- Validated the frozen release on 15 pinned public repositories.
+- Verified file totals, supported-language counts, Git identity, detection evidence, determinism, and performance.
+- Recorded non-blocking coverage gaps without expanding the RIE 1.0 contract.
+- Confirmed no `v1.0.1` bug-fix release was required.
+
 ## Phase 2 — Language Intelligence (next; not started)
 
 - Add Tree-sitter parsing, symbols, imports, and dependency relationships.

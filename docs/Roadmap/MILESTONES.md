@@ -12,6 +12,8 @@ Requirements, report format, internal flow, fixtures, and acceptance tests are a
 
 Discovery, Ignore, RepositorySnapshot, Language, Framework, Build, Metadata, and Summary are immutable, tested, benchmarked, documented, and frozen.
 
+Real-world validation passed on 15 pinned public repositories with no patch-release defect.
+
 ## M3 — Language Intelligence Engine
 
 Design and implement deterministic language parsing, symbols, and imports. This milestone is not started.

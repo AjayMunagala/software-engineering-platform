@@ -12,6 +12,8 @@ This is not a general-purpose chatbot. The first release is deliberately narrow:
 
 Repository Intelligence Engine **1.0.0** is implemented and frozen. It deterministically discovers a local repository, applies ignore rules, detects languages/frameworks/build tooling, synthesizes repository metadata, and publishes an immutable executive summary. It does not use an LLM or execute repository code.
 
+Real-world validation passed on 15 pinned public repositories across the supported ecosystems. No RIE 1.0.1 bug-fix release was required.
+
 ## Run RIE
 
 ```powershell
@@ -33,6 +35,7 @@ The command emits the versioned JSON schema `1.0.0`.
 - [Artifact dependency graph](docs/Architecture/ARTIFACT_DEPENDENCY_GRAPH.md)
 - [RIE public API](docs/API/RIE_PUBLIC_API_V1.md)
 - [RIE stabilization report](docs/Roadmap/RIE_STABILIZATION_REPORT.md)
+- [RIE real-world validation report](docs/Validation/RIE_VALIDATION_REPORT.md)
 
 ## Next milestone
 

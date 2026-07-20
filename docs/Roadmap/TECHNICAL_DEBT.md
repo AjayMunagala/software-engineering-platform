@@ -12,5 +12,9 @@ This register contains deliberate, non-blocking work deferred from RIE 1.0.0. An
 | RIE-DEBT-006 | Rich toolchain semantics | Constraints are preserved exactly as declared. | Version comparison or environment compatibility becomes an approved responsibility. |
 | RIE-DEBT-007 | Git worktree external metadata | RIE reads bounded metadata only from an in-root `.git` directory. | A safe authorization model for external worktree Git directories is designed. |
 | RIE-DEBT-008 | Race-detector CI | Local Windows runtime has CGO disabled. | CI provides a supported CGO/race-enabled Go environment. |
+| RIE-DEBT-009 | Git ignore character classes | Character-class rules are reported and skipped instead of guessed. | A complete, tested character-class implementation is approved. |
+| RIE-DEBT-010 | Rust and PHP extension coverage | `.rs` and `.php` remain unknown while Cargo and Composer facts are still detected. | Additive RIE language coverage is approved. |
+| RIE-DEBT-011 | .NET build/package manifests | C# files are detected, but `.csproj`, `.sln`, and NuGet facts are not. | .NET build/package intelligence enters RIE scope. |
+| RIE-DEBT-012 | Project-role classification | Independent example and fixture manifests contribute to monorepo classification. | Consumers require role-aware application, example, fixture, or test-project distinctions. |
 
 None of these items changes the RIE 1.0.0 correctness boundary. They must not be used as justification for starting LIE features inside RIE.
