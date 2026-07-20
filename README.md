@@ -36,7 +36,10 @@ The command emits the versioned JSON schema `1.0.0`.
 - [RIE public API](docs/API/RIE_PUBLIC_API_V1.md)
 - [RIE stabilization report](docs/Roadmap/RIE_STABILIZATION_REPORT.md)
 - [RIE real-world validation report](docs/Validation/RIE_VALIDATION_REPORT.md)
+- [LIE architecture candidate](docs/Architecture/LANGUAGE_INTELLIGENCE_ENGINE.md)
+- [Go Language Engine candidate](docs/Architecture/GO_LANGUAGE_ENGINE.md)
+- [LIE implementation roadmap](docs/Roadmap/LIE_IMPLEMENTATION_ROADMAP.md)
 
 ## Next milestone
 
-Language Intelligence Engine design begins only after the RIE 1.0.0 release is accepted. No LLM, AST, dependency graph, or code modification capability is part of RIE.
+Language Intelligence Engine Phase 2.0 is ready for design review. No LIE implementation, LLM, dependency graph, or code modification capability has started.

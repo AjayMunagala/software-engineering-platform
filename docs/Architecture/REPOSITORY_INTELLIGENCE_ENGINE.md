@@ -6,7 +6,7 @@ The first platform layer is named the **Repository Intelligence Engine**. The Re
 
 ## Why this name
 
-The Scanner initially inventories repository facts. Over time, the RIE will also parse languages, extract symbols, build dependency and architecture graphs, identify framework and build-system behavior, and provide a queryable knowledge model of the repository.
+The Scanner inventories repository facts and publishes the frozen artifacts required by later platform layers. Source parsing, symbols, dependency graphs, and architecture graphs belong to separate Language, Dependency, and Architecture Intelligence Engines that consume RIE artifacts without expanding RIE into a God engine.
 
 ## Version 1 boundary
 

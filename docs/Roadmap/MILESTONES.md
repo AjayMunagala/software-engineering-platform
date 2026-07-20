@@ -16,7 +16,7 @@ Real-world validation passed on 15 pinned public repositories with no patch-rele
 
 ## M3 — Language Intelligence Engine
 
-Design and implement deterministic language parsing, symbols, and imports. This milestone is not started.
+Phase 2.0 architecture and candidate contracts are ready for design review. Go implementation has not started.
 
 ## M4 — Dependency and Architecture Intelligence
 

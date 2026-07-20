@@ -1,6 +1,6 @@
-# RIE Artifact Dependency Graph
+# Platform Artifact Dependency Graph
 
-This document is the source of truth for typed artifact dependencies. An engine must depend on the lowest-level artifact containing the facts it needs.
+This document is the source of truth for typed artifact dependencies. RIE provides the frozen foundation shown first; later platform engines must depend on the lowest-level artifact containing the facts they need.
 
 ```text
 Discovery Engine
@@ -46,3 +46,16 @@ Discovery and Ignore still populate `RunContext.Entries` for backward compatibil
 ## Planned extensions
 
 A shared `ManifestInventory` may later become a child of `RepositorySnapshot` and a common input to Framework, Build, and Metadata engines. It is intentionally deferred until repeated bounded manifest parsing creates measurable cost or coupling.
+
+## Phase 2.0 LIE candidate extension
+
+LIE is a consumer layer, not an additional RIE engine. It uses the frozen RIE artifacts through `ArtifactStore` and does not consume `RunContext` or presentation JSON.
+
+```text
+RepositorySnapshot 1.0.0 ─┐
+                          ├── Go Language Engine
+LanguageInventory 1.0.0 ──┘       └── GoLanguageInventory 0.1.0 candidate
+                                           └── 1.0.0 freeze target
+```
+
+Future language engines are siblings of Go and publish separate language-specific artifacts. Dependency Intelligence may consume these artifacts only after their 1.0.0 contracts are frozen.

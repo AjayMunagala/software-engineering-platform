@@ -20,10 +20,21 @@
 - Recorded non-blocking coverage gaps without expanding the RIE 1.0 contract.
 - Confirmed no `v1.0.1` bug-fix release was required.
 
-## Phase 2 — Language Intelligence (next; not started)
+## Phase 2.0 — Language Intelligence architecture (design review pending)
 
-- Add Tree-sitter parsing, symbols, imports, and dependency relationships.
-- Create searchable repository metadata.
+- Define LIE boundaries, immutable artifacts, public API, diagnostics, security limits, and performance targets.
+- Use the Go standard library parser for the first language engine.
+- Keep dependency relationships outside LIE.
+
+## Phase 2.1 — Go Language Engine (not started)
+
+- Discover Go packages, imports, structs, interfaces, functions, methods, constants, and package variables.
+- Publish an evidence-backed `GoLanguageInventory`.
+- Do not implement type checking, call graphs, AI, or code modification.
+
+## Phase 2.2+ — Additional language engines (not started)
+
+- Add TypeScript, SQL, Python, Java, and other languages one at a time after Go stabilizes.
 
 ## Phase 3 — Engineering Context
 
