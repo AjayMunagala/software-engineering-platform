@@ -2,7 +2,8 @@
 
 ## Status
 
-Phase 2.0 design candidate. Implementation requires architecture approval.
+Phase 2.1 Go implementation released. Shared LIE contracts and
+`GoLanguageInventory 1.0.0` are frozen for compatible consumers.
 
 ## Purpose
 

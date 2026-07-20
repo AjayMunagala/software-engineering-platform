@@ -54,8 +54,7 @@ LIE is a consumer layer, not an additional RIE engine. It uses the frozen RIE ar
 ```text
 RepositorySnapshot 1.0.0 ─┐
                           ├── Go Language Engine
-LanguageInventory 1.0.0 ──┘       └── GoLanguageInventory 0.1.0 candidate
-                                           └── 1.0.0 freeze target
+LanguageInventory 1.0.0 ──┘       └── GoLanguageInventory 1.0.0 frozen
 ```
 
 Future language engines are siblings of Go and publish separate language-specific artifacts. Dependency Intelligence may consume these artifacts only after their 1.0.0 contracts are frozen.

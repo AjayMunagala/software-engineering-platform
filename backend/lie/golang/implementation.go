@@ -23,7 +23,7 @@ import (
 	"github.com/AjayMunagala/software-engineering-platform/backend/rie/language"
 )
 
-const engineVersion = "0.1.0"
+const engineVersion = "1.0.0"
 
 type engine struct{ config Config }
 

@@ -2,7 +2,7 @@
 
 ## Status
 
-Candidate contract for Phase 2.1. Field names illustrate the approved concepts; implementation review may refine Go spelling without changing their meaning.
+Frozen Go language artifact contract for Phase 2.1 release 1.0.0.
 
 ## Design Principles
 
@@ -59,12 +59,11 @@ type GoLanguageInventory struct {
 }
 ```
 
-Candidate artifact identity:
+Frozen artifact identity:
 
 ```text
 Name:    go-language-inventory
-Version: 0.1.0 during implementation
-Target:  1.0.0 after Phase 2.1 stabilization
+Version: 1.0.0
 ```
 
 Source references must include:
@@ -149,7 +148,7 @@ Methods use receiver fields; all other symbol kinds leave them empty or false.
 ## Statistics
 
 ```go
-type Statistics struct {
+type ParseStatistics struct {
     CandidateFiles  int
     ParsedFiles     int
     FailedFiles     int
@@ -157,7 +156,7 @@ type Statistics struct {
     ParsedBytes     int64
     Packages        int
     Imports         int
-    SymbolsByKind   map[SymbolKind]int
+    SymbolsByKind   map[string]int
     Diagnostics     int
     OmittedDiagnostics int
 }

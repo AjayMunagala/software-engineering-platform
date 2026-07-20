@@ -38,8 +38,11 @@ func Exported(value string) { fmt.Println(value) }
 func (u *User) Save(value string) {}
 `
 	inventory := analyze(t, map[string]string{"sample.go": source}, nil)
-	if inventory.ArtifactVersion() != "0.1.0" || inventory.Language() != "Go" {
+	if inventory.ArtifactVersion() != "1.0.0" || inventory.Language() != "Go" {
 		t.Fatalf("artifact identity = %s/%s", inventory.ArtifactVersion(), inventory.Language())
+	}
+	if inventory.Metadata().EngineVersion != "1.0.0" {
+		t.Fatalf("engine version = %s, want 1.0.0", inventory.Metadata().EngineVersion)
 	}
 	files, packages, symbols := inventory.Files(), inventory.Packages(), inventory.Symbols()
 	if len(files) != 1 || len(files[0].Imports) != 4 || len(packages) != 1 || len(symbols) != 10 {

@@ -2,7 +2,7 @@
 
 ## Status
 
-Phase 2.0 design candidate. This API is not frozen and has no implementation yet.
+LIE runner and `GoLanguageInventory 1.0.0` public API frozen on 2026-07-20.
 
 ## Compatibility Boundary
 
@@ -86,14 +86,14 @@ Timing is audit metadata, not part of deterministic functional artifacts. Public
 package golang
 
 func DefaultConfig() Config
-func New(configs ...Config) lie.Engine
+func New(configs ...Config) (lie.Engine, error)
 
 func InventoryFrom(
     artifacts *rie.ArtifactStore,
 ) (GoLanguageInventory, bool)
 ```
 
-Candidate configuration:
+Frozen configuration:
 
 ```go
 type Config struct {
@@ -118,14 +118,15 @@ func (GoLanguageInventory) Files() []GoFile
 func (GoLanguageInventory) Packages() []GoPackage
 func (GoLanguageInventory) Symbols() []GoSymbol
 func (GoLanguageInventory) Diagnostics() []lie.Diagnostic
-func (GoLanguageInventory) Statistics() Statistics
+func (GoLanguageInventory) Statistics() ParseStatistics
 ```
 
-Allocation-sensitive visitor APIs may be added before the 1.0.0 freeze. They must expose values, not mutable internal references.
+Any future allocation-sensitive visitor API must be additive, follow the
+versioning policy, and expose values rather than mutable internal references.
 
 ## Stable Error Categories
 
-Candidate sentinel errors:
+Stable sentinel errors:
 
 ```text
 ErrContextRequired
@@ -133,10 +134,14 @@ ErrArtifactStoreRequired
 ErrSnapshotRequired
 ErrLanguageInventoryRequired
 ErrArtifactVersionMismatch
-ErrEngineRequired
+ErrNilEngine
 ErrDuplicateEngine
+ErrDuplicateArtifactName
 ErrInvalidConfig
 ErrLanguageInventoryMismatch
+ErrInvalidEngineMetadata
+ErrArtifactRequired
+ErrArtifactContractMismatch
 ```
 
 Errors wrap contextual details while preserving `errors.Is` behavior. File-local parse/read failures belong in the produced artifact diagnostics and are not returned as fatal runner errors.
@@ -160,8 +165,7 @@ Forbidden:
 ## Versioning Policy
 
 - LIE runner and Go engine implementation versions evolve independently.
-- `GoLanguageInventory` begins as `0.1.0` during implementation.
-- Its public contract freezes at `1.0.0` only after the Phase 2.1 approval gate.
+- `GoLanguageInventory 1.0.0` is the frozen Phase 2.1 contract.
 - Additive fields use a minor version after freeze.
 - Changed meanings, IDs, ordering, or position semantics require a major version.
 - LIE artifacts may reference RIE artifacts but do not change their versions.

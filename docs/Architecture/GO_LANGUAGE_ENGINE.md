@@ -2,7 +2,7 @@
 
 ## Status
 
-Phase 2.1 implementation design candidate. No implementation is authorized until this document and the LIE artifact contract are approved.
+Released as Go Language Engine 1.0.0. The Phase 2.1 public artifact contract is frozen.
 
 ## Exact Responsibility
 
@@ -185,4 +185,6 @@ Additional files require architecture review; package responsibilities must not 
 
 ## Freeze Gate
 
-The `GoLanguageInventory` contract starts as a `0.1.0` implementation candidate. It may become `1.0.0` only after unit tests, benchmarks, real-repository validation, public API review, and an immutability audit pass.
+Passed on 2026-07-20 after unit tests, benchmarks, real-repository validation,
+public API review, and an immutability audit. `GoLanguageInventory 1.0.0` is
+frozen; compatible `1.0.x` changes are limited to defect fixes.

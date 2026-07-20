@@ -1,4 +1,4 @@
-# Go Language Engine 0.1.0
+# Go Language Engine 1.0.0
 
 The Go engine consumes `RepositorySnapshot 1.0.0` and `LanguageInventory
 1.0.0`, verifies their `.go` file counts agree, then parses authorized files
@@ -14,8 +14,8 @@ with stable diagnostic codes. Paths are contained beneath the canonical root,
 including parent symlink checks, and reads are bounded without executing tools or
 accessing the network.
 
-The artifact remains a `0.1.0` candidate until Phase 2.1 stabilization and
-real-repository validation are complete.
+The `go-language-inventory 1.0.0` artifact and its public API are frozen.
+Post-release `1.0.x` changes are limited to compatible defect fixes.
 
 ## Benchmarks
 

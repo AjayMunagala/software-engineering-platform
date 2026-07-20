@@ -2,7 +2,7 @@
 
 ## Phase 2.0 — Architecture and Design
 
-Status: design package ready for review; implementation not authorized.
+Status: completed and approved.
 
 Deliverables:
 
@@ -27,7 +27,7 @@ Approval gate:
 - Create `backend/lie` and `backend/lie/golang` using the mandated package structure.
 - Implement runner registry and prerequisite resolution.
 - Implement shared source ranges and diagnostics.
-- Implement immutable `GoLanguageInventory 0.1.0` models and accessors.
+- Implement immutable `GoLanguageInventory` candidate models and accessors.
 - Add contract, immutability, ordering, and empty-inventory tests.
 - No parsing beyond the minimum needed to compile test fixtures.
 
@@ -60,6 +60,9 @@ Each step requires focused unit tests before the next begins.
 - Technical debt review.
 
 Gate: freeze `GoLanguageInventory 1.0.0` only if correctness, performance, immutability, evidence, and API checks pass.
+
+Status: completed. All gates passed and the artifact contract was frozen on
+2026-07-20.
 
 ## Phase 2.2 — TypeScript Language Engine
 

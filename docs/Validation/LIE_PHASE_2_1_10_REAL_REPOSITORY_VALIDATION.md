@@ -2,19 +2,19 @@
 
 ## Status
 
-**Conditional pass. `GoLanguageInventory 1.0.0` is not frozen yet.**
+**Approved. `GoLanguageInventory 1.0.0` release gates passed.**
 
 Correctness, containment, deterministic-output, diagnostic, and memory gates pass.
 One real parser defect was found, fixed in a separate follow-up commit, and
-revalidated. The remaining release decision is to approve a precise performance
-gate for warm-cache versus newly-created/cold-cache repositories on Windows, or
-to repeat the large-repository measurement in a controlled CI environment.
+revalidated. The project owner approved the reference warm-cache performance
+gate on 2026-07-20; cold-cache filesystem time remains a separately recorded
+operational measurement.
 
 ## Release Candidate
 
 - Initial Phase 2.1 RC: `e506d8e` (`Implement Go language intelligence engine`)
 - Validation defect fix: `f598c51` (`Fix parenthesized Go method receivers`)
-- Artifact under validation: `go-language-inventory 0.1.0`
+- Artifact validated: `go-language-inventory 1.0.0`
 - Platform: Windows/amd64
 - CPU: 12th Gen Intel Core i5-12450H
 - Go: 1.26.2
@@ -93,6 +93,7 @@ because file-open time was dominated by filesystem/filter-driver activity:
 - Immediate repeat passes observed: 6.36–50.42 seconds for the same content.
 - The repeatable, explicitly warm-cache 10,000-file benchmark completed its
   timed engine operation in 0.280 seconds.
+- The final 1.0.0 release rerun completed the same gate in 0.479 seconds.
 - OpenTelemetry completed 1,216 files in 15.56 seconds on its initial pass.
 
 The parsing algorithm remains O(n), uses at most eight workers, and stays within
@@ -136,7 +137,8 @@ approved CI runner—the performance exit criterion remains **conditional**.
   file-open costs outside parser CPU work. Immediate repeat results varied
   substantially on the same commit and machine.
 - Engine correctness impact: None.
-- Status: **Awaiting approval of the reference environment/cache definition.**
+- Status: **Approved on 2026-07-20.** Warm-cache engine performance is the
+  reproducible release gate; cold-cache filesystem time is recorded separately.
 
 ## Exit Criteria
 
@@ -148,18 +150,11 @@ approved CI runner—the performance exit criterion remains **conditional**.
 | Critical defects resolved | Pass; one medium defect found and fixed |
 | Only documented limitations remain | Pass |
 | Memory target | Pass based on retained heap |
-| Performance target | Conditional; requires approved measurement definition |
+| Performance target | Pass under the approved warm-cache/reference-CI definition |
 
 ## Release Decision
 
-Do **not** tag `GoLanguageInventory 1.0.0` yet.
+**Approved for `GoLanguageInventory 1.0.0`.**
 
-The implementation is functionally ready, but the final freeze must wait for one
-of these decisions:
-
-1. Approve the warm-cache/reference-CI performance wording above, or
-2. Run the existing gate on an approved CI runner and require the original
-   unqualified 30-second target there.
-
-No Phase 2.2 implementation should begin before that decision and the resulting
-`GoLanguageInventory 1.0.0` freeze.
+The public artifact contract may be frozen and tagged. Phase 2.2 may begin only
+after the release commit and namespaced Git tag are published.

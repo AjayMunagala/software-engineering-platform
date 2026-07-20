@@ -14,6 +14,11 @@ Repository Intelligence Engine **1.0.0** is implemented and frozen. It determini
 
 Real-world validation passed on 15 pinned public repositories across the supported ecosystems. No RIE 1.0.1 bug-fix release was required.
 
+Go Language Intelligence **1.0.0** is also implemented, validated, and frozen.
+It inventories Go packages, imports, structs, interfaces, functions, methods,
+constants, and variables with deterministic IDs, exact source locations, and
+content digests. Its `1.0.x` line is restricted to compatible defect fixes.
+
 ## Run RIE
 
 ```powershell
@@ -39,7 +44,11 @@ The command emits the versioned JSON schema `1.0.0`.
 - [LIE architecture candidate](docs/Architecture/LANGUAGE_INTELLIGENCE_ENGINE.md)
 - [Go Language Engine candidate](docs/Architecture/GO_LANGUAGE_ENGINE.md)
 - [LIE implementation roadmap](docs/Roadmap/LIE_IMPLEMENTATION_ROADMAP.md)
+- [GoLanguageInventory 1.0 public API](docs/API/GO_LANGUAGE_INVENTORY_V1.md)
+- [GoLanguageInventory 1.0 release package](docs/Releases/GoLanguageInventory-1.0.0/README.md)
 
 ## Next milestone
 
-Language Intelligence Engine Phase 2.0 is ready for design review. No LIE implementation, LLM, dependency graph, or code modification capability has started.
+Language Intelligence Engine Phase 2.2 Semantic Resolution is the next approved
+development cycle. No LLM, patch generation, or repository code modification
+capability has started.

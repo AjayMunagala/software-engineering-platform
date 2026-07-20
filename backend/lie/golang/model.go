@@ -10,7 +10,7 @@ import (
 
 const (
 	ArtifactName    = "go-language-inventory"
-	ArtifactVersion = "0.1.0"
+	ArtifactVersion = "1.0.0"
 )
 
 type FileStatus uint8
