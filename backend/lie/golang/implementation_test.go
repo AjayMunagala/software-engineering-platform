@@ -81,7 +81,7 @@ func TestGoEngineHandlesEmptyAndNoGoRepositories(t *testing.T) {
 
 func TestGoEngineSupportsPackagesTestsUppercaseAndReceivers(t *testing.T) {
 	files := map[string]string{
-		"root.GO":           "package root\ntype Item[T any] struct{}\nfunc (i *Item[T]) Save() {}\n",
+		"root.GO":           "package root\ntype Item[T any] struct{}\nfunc (i *Item[T]) Save() {}\nfunc (i *(Item[T])) Parenthesized() {}\n",
 		"pkg/value.go":      "package pkg\nfunc Value() {}\n",
 		"pkg/value_test.go": "package pkg_test\nfunc External() {}\n",
 	}
@@ -89,15 +89,17 @@ func TestGoEngineSupportsPackagesTestsUppercaseAndReceivers(t *testing.T) {
 	if got := len(inventory.Packages()); got != 3 {
 		t.Fatalf("packages = %d, want 3", got)
 	}
-	var method *golang.GoSymbol
+	methods := map[string]golang.GoSymbol{}
 	for _, symbol := range inventory.Symbols() {
 		if symbol.Kind == golang.SymbolKindMethod {
-			copy := symbol
-			method = &copy
+			methods[symbol.Name] = symbol
 		}
 	}
-	if method == nil || method.ReceiverBase != "Item" || !method.PointerReceiver || !method.GenericReceiver {
-		t.Fatalf("method receiver = %+v", method)
+	for _, name := range []string{"Save", "Parenthesized"} {
+		method, ok := methods[name]
+		if !ok || method.ReceiverBase != "Item" || !method.PointerReceiver || !method.GenericReceiver {
+			t.Fatalf("method %s receiver = %+v", name, method)
+		}
 	}
 }
 

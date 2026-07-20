@@ -478,20 +478,24 @@ func extractSymbols(fileSet *token.FileSet, relativePath, packageIdentifier, fil
 }
 
 func receiverDetails(expression ast.Expr) (base string, pointer, generic bool) {
-	if star, ok := expression.(*ast.StarExpr); ok {
-		pointer = true
-		expression = star.X
-	}
-	switch indexed := expression.(type) {
-	case *ast.IndexExpr:
-		generic = true
-		expression = indexed.X
-	case *ast.IndexListExpr:
-		generic = true
-		expression = indexed.X
-	}
-	if identifier, ok := expression.(*ast.Ident); ok {
-		return identifier.Name, pointer, generic
+	for expression != nil {
+		switch current := expression.(type) {
+		case *ast.ParenExpr:
+			expression = current.X
+		case *ast.StarExpr:
+			pointer = true
+			expression = current.X
+		case *ast.IndexExpr:
+			generic = true
+			expression = current.X
+		case *ast.IndexListExpr:
+			generic = true
+			expression = current.X
+		case *ast.Ident:
+			return current.Name, pointer, generic
+		default:
+			return "", pointer, generic
+		}
 	}
 	return "", pointer, generic
 }
