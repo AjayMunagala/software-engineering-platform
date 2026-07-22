@@ -58,3 +58,19 @@ LanguageInventory 1.0.0 ──┘       └── GoLanguageInventory 1.0.0 froz
 ```
 
 Future language engines are siblings of Go and publish separate language-specific artifacts. Dependency Intelligence may consume these artifacts only after their 1.0.0 contracts are frozen.
+
+## Phase 2.2 package-identity candidate
+
+Package identity depends on the lowest-level artifacts that contain its required repository and Go syntax facts. It is a prerequisite sibling artifact, not hidden mutable state in the future semantic engine.
+
+```text
+RepositorySnapshot 1.0.0 ──────┐
+                               ├── Go Package Identity Engine
+GoLanguageInventory 1.0.0 ─────┘       └── GoPackageIdentityInventory 0.1.0
+
+RepositorySnapshot 1.0.0 ───────────────┐
+GoLanguageInventory 1.0.0 ───────────────┼── Go Semantic Resolution Engine (not yet authorized)
+GoPackageIdentityInventory 0.1.0 ────────┘       └── GoSemanticInventory 0.1.0 candidate
+```
+
+`GoPackageIdentityInventory 0.1.0` is a candidate contract and does not change the frozen RIE or Phase 2.1 artifacts. Phase 2.2.2 remains gated even after the package-identity implementation is locally validated.
