@@ -2,8 +2,8 @@
 
 ## Document Status
 
-- Phase: 2.2 design review
-- Status: Architecture and spike accepted; Phase 2.2.1 package-identity implementation authorized; semantic engine implementation remains unauthorized
+- Phase: 2.2.2 semantic artifact skeleton and source verification
+- Status: Phase 2.2.2 accepted; Phase 2.2.3 declaration reconciliation and scopes authorized
 - Candidate engine version: `0.1.0`
 - Candidate artifact: `go-semantic-inventory` `0.1.0`
 - Stable artifact target: `1.0.0`, only after implementation, stabilization, and real-repository validation
@@ -76,11 +76,11 @@ A missing, changed, unreadable, oversized, or out-of-root file produces a file o
 
 Source bytes, token sets, ASTs, and `go/types` state are ephemeral run data. They are never stored in `GoSemanticInventory` or the shared artifact store.
 
-Before using a package-identity proof, the engine also re-hashes every manifest listed by that proof. A changed manifest makes the semantic run treat that immutable proof as stale and prevents dependent resolved edges; the source identity artifact is never mutated.
+Phase 2.2.2 validates the package-identity artifact as a prerequisite but creates no import bindings and therefore consumes no individual proof. When Phase 2.2.5 is authorized, the engine must re-hash every manifest listed by a proof immediately before using that proof. A changed manifest then makes the proof stale and prevents dependent resolved edges; the source identity artifact is never mutated.
 
 ## Rebuild and Invalidation Policy
 
-Phase 2.2 performs a full semantic rebuild on every `Resolve` call:
+Phase 2.2 performs a full semantic rebuild on every `Resolve` call. In Phase 2.2.2 this means every eligible file is re-authorized and re-hashed. As later milestones are authorized, it additionally means:
 
 - every eligible Go file is re-authorized, re-hashed, and re-parsed;
 - every eligible package scope/type state is rebuilt;
@@ -305,7 +305,7 @@ The semantic artifact is additive. It does not change or replace either frozen i
 
 ## Approval Gate
 
-Phase 2.2.0 is accepted and Phase 2.2.1 is authorized. Semantic engine implementation remains gated. Before Phase 2.2.2 may begin, reviewers must approve:
+Phase 2.2.0, Phase 2.2.1, and Phase 2.2.2 are accepted. Phase 2.2.3 alone is authorized; Phase 2.2.4 and later remain unauthorized. The completed Phase 2.2.2 gate covers:
 
 - controlled source re-parsing and digest verification;
 - the authoritative `PackageIdentityProof` contract and supporting artifact;

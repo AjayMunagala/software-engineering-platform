@@ -2,13 +2,13 @@
 
 ## Status
 
-- Current state: Phase 2.2.1 accepted; Phase 2.2.2 authorized
-- Implementation authorization: Phase 2.2.2 only
+- Current state: Phase 2.2.2 accepted; Phase 2.2.3 authorized
+- Implementation authorization: Phase 2.2.3 only
 - Stable prerequisite: `GoLanguageInventory 1.0.0`
 - Candidate output: `GoSemanticInventory 0.1.0`
 - Stable target: `GoSemanticInventory 1.0.0`
 
-Engineering accepted the Phase 2.2.0 evidence and ADR 0008 on 2026-07-22. Phase 2.2.1 implementation and validation were accepted on 2026-07-22. Phase 2.2.2 is authorized. Phase 2.2.3 and later remain unauthorized until their preceding exit gates are completed and accepted explicitly.
+Engineering accepted the Phase 2.2.0 evidence and ADR 0008 on 2026-07-22. Phase 2.2.1 was accepted on 2026-07-22. Phase 2.2.2 implementation and validation were accepted on 2026-07-23. Phase 2.2.3 alone is authorized; Phase 2.2.4 and later remain unauthorized until their preceding exit gates are explicitly accepted.
 
 Phase 2.2.1 implementation and local validation are complete and accepted. Targeted package and full-backend race tests pass with MSYS2 UCRT64 GCC 16.1.0. See [LIE_PHASE_2_2_1_PACKAGE_IDENTITY.md](../Validation/LIE_PHASE_2_2_1_PACKAGE_IDENTITY.md). Authorization advances only to Phase 2.2.2.
 
@@ -85,6 +85,8 @@ Local evidence: package coverage is 87.8%, full regression and vet pass, the 10,
 - Empty repositories produce a valid empty inventory without warnings/errors.
 - Input artifacts remain byte-for-byte/logically unchanged.
 - `go test -race` passes.
+
+Accepted evidence: all behavior tests pass with 88.9% package statement coverage; shuffled tests, package and full-backend regression, vet, targeted race, and full-backend race pass. Repeatable source-verification benchmarks cover 100- and 1,000-file fixtures. See [LIE_PHASE_2_2_2_SEMANTIC_SKELETON.md](../Validation/LIE_PHASE_2_2_2_SEMANTIC_SKELETON.md). Engineering accepted the exit gate on 2026-07-23 and authorized Phase 2.2.3 only.
 
 ## Phase 2.2.3 — Declaration Reconciliation and Scopes
 

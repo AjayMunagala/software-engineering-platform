@@ -2,7 +2,7 @@
 
 ## Status
 
-- Design status: Architecture and spike accepted; semantic artifact implementation remains unauthorized until Phase 2.2.2
+- Design status: Phase 2.2.2 accepted; Phase 2.2.3 authorized
 - Candidate artifact: `go-semantic-inventory` `0.1.0`
 - Stable target: `1.0.0` after validation and API freeze
 - Prerequisites: `repository-snapshot` `1.0.0`, `go-language-inventory` `1.0.0`, and `go-package-identity-inventory` `0.1.0`
@@ -104,6 +104,8 @@ type SemanticFile struct {
 ```
 
 `ContentDigest` is the verified digest analyzed by this engine. It must equal the Phase 2.1 digest. A stale file emits no semantic relations derived from changed source.
+
+In Phase 2.2.2, a digest-matching file is intentionally `partial`, not `resolved`: source authorization and integrity are proven, but declaration reconciliation has not begun. `resolved` becomes possible only after the relevant later semantic milestone is authorized and completed.
 
 ## Semantic Declarations and Reconciliation
 
@@ -281,6 +283,7 @@ type SemanticStatistics struct {
     PartialFiles            int            `json:"partial_files"`
     FailedFiles             int            `json:"failed_files"`
     StaleFiles              int            `json:"stale_files"`
+    SkippedFiles            int            `json:"skipped_files"`
     ResolvedDeclarations    int            `json:"resolved_declarations"`
     UnresolvedDeclarations  int            `json:"unresolved_declarations"`
     PartialDeclarations     int            `json:"partial_declarations"`

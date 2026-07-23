@@ -2,14 +2,14 @@
 
 ## Status
 
-- Phase: Architecture and spike accepted; Phase 2.2.1 prerequisite authorized
+- Phase: Phase 2.2.2 accepted; Phase 2.2.3 authorized
 - API status: Architecture-approved candidate; not frozen
-- Authorization: Semantic engine implementation remains unauthorized until Phase 2.2.2
+- Authorization: Phase 2.2.3 only; Phase 2.2.4 and later remain unauthorized
 - Package: `backend/lie/golang/semantic`
 - Candidate engine version: `0.1.0`
 - Candidate artifact: `go-semantic-inventory` `0.1.0`
 
-This document is an approval target, not an implemented or stable API. The name `LSE_PUBLIC_API.md` is retained as the existing document path; public Go names use `semantic`, not the ambiguous `LSE` acronym.
+This document describes the implemented `0.1.0` candidate API. It is not yet a stable or frozen API. The name `LSE_PUBLIC_API.md` is retained as the existing document path; public Go names use `semantic`, not the ambiguous `LSE` acronym.
 
 ## Package Boundary
 
@@ -40,7 +40,7 @@ Input rules:
 - Both values are treated as immutable.
 - No framework, build, metadata, summary, mutable run context, or report input is accepted.
 
-Source access is not exposed as arbitrary caller callbacks in the candidate API. The implementation reads only authorized paths beneath `Snapshot.RootPath()`, applies boundary checks, verifies each Go-file SHA-256 digest against the syntax artifact, and verifies every manifest digest used by a package-identity proof before resolving an import.
+Source access is not exposed as arbitrary caller callbacks in the candidate API. Phase 2.2.2 reads only authorized paths beneath `Snapshot.RootPath()`, applies boundary checks, and verifies each Go-file SHA-256 digest against the syntax artifact. Package-identity proofs are accepted as a prerequisite but are not consumed to create import bindings in this milestone. Their manifest evidence must be re-hashed immediately before proof consumption when Phase 2.2.5 is authorized; Phase 2.2.2 does not claim that validation prematurely.
 
 ## Engine Contract
 
@@ -90,7 +90,7 @@ Configuration rules:
 - Reaching a bound creates an explicit partial outcome and diagnostic; the engine never silently truncates.
 - The syntax artifact already decides whether tests are present, so semantic configuration does not reintroduce an `IncludeTests` switch.
 
-Default numeric values remain Phase 2.2.0 decisions and must be justified by benchmarks before production authorization.
+Implemented defaults are: at most 8 workers (also bounded by `GOMAXPROCS`), 10 MiB per source file, 2,000 files and 256 MiB per future package operation, 1,000 diagnostics, 50 diagnostics per file, and 1,000,000 future relationships. Package and relationship limits are reserved for the later milestones that perform those operations; Phase 2.2.2 validates them but does not pretend to use them.
 
 ### Configuration Evolution
 
@@ -176,7 +176,7 @@ Every `Resolve` call is a full rebuild. The API accepts no previous semantic inv
 
 ## Cancellation
 
-The implementation checks context before/after file I/O, hashing, parsing, and package checking; at least every 1,024 custom AST nodes; at least every 256 emitted references/interface candidates; and before artifact construction. A synchronous standard-library parse/type-check cannot be interrupted mid-call, so `MaxSourceFileSize`, `MaxPackageFiles`, and `MaxPackageBytes` bound the largest unchecked unit. Phase 2.2.0 must measure and approve a wall-clock cancellation target before `1.0.0`.
+Phase 2.2.2 checks context before scheduling work, in every worker, after source I/O, after hashing, and before artifact construction. Later milestones must additionally check at least every 1,024 custom AST nodes and every 256 emitted references/interface candidates, and before/after synchronous parsing and package checking. A synchronous standard-library parse/type-check cannot be interrupted mid-call, so `MaxSourceFileSize`, `MaxPackageFiles`, and `MaxPackageBytes` bound the largest unchecked unit.
 
 ## Diagnostics
 
