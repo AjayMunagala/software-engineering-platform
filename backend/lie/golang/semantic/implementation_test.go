@@ -75,6 +75,32 @@ func TestPackageBlankIdentifiersReconcileWithoutEnteringScope(t *testing.T) {
 	}
 }
 
+func TestStructAndInterfaceAliasesReconcileFrozenSyntaxSymbols(t *testing.T) {
+	input := prerequisites(t, map[string]string{
+		"aliases.go": "package aliases\ntype RunData = interface{}\ntype Payload = struct { Value int }\n",
+	})
+	inventory := resolve(t, input, nil)
+	wanted := map[string]DeclarationKind{"RunData": DeclarationTypeAlias, "Payload": DeclarationTypeAlias}
+	for _, declaration := range inventory.Declarations() {
+		kind, exists := wanted[declaration.Name]
+		if !exists {
+			continue
+		}
+		if declaration.Kind != kind || declaration.SyntaxSymbolID == "" || declaration.Status != ResolutionResolved {
+			t.Fatalf("alias did not reconcile its frozen syntax symbol: %+v", declaration)
+		}
+		delete(wanted, declaration.Name)
+	}
+	if len(wanted) != 0 {
+		t.Fatalf("missing aliases: %+v", wanted)
+	}
+	for _, diagnostic := range inventory.Diagnostics() {
+		if diagnostic.Code == "semantic_syntax_symbol_unmatched" {
+			t.Fatalf("alias syntax symbol remained unmatched: %+v", diagnostic)
+		}
+	}
+}
+
 func TestDeclarationReconciliationAndLocalDeclarationInventory(t *testing.T) {
 	input := prerequisites(t, map[string]string{
 		"sample.go": `package sample
@@ -539,6 +565,29 @@ func TestRelationshipBudgetPreservesImportsBeforeDerivedReferences(t *testing.T)
 	}
 	if inventory.Statistics().OmittedRelationships == 0 || !hasDiagnostic(inventory.Diagnostics(), "semantic_relationship_limit") {
 		t.Fatalf("statistics=%+v diagnostics=%+v", inventory.Statistics(), inventory.Diagnostics())
+	}
+}
+
+func TestReferenceBudgetKeepsDeterministicPrefixAndCountsOmissions(t *testing.T) {
+	input := prerequisites(t, map[string]string{
+		"main.go": "package budget\nfunc Alpha() {}\nfunc Beta() {}\nfunc Gamma() {}\nfunc Use() { Alpha(); Beta(); Gamma() }\n",
+	})
+	config := DefaultConfig()
+	config.MaxRelationships = 2
+	inventory := resolve(t, input, &config)
+	references := inventory.References()
+	if len(references) != 2 || references[0].Name != "Alpha" || references[1].Name != "Beta" {
+		t.Fatalf("budgeted reference prefix = %+v", references)
+	}
+	if inventory.Statistics().OmittedRelationships != 1 || !hasDiagnostic(inventory.Diagnostics(), "semantic_relationship_limit") {
+		t.Fatalf("budget omissions = %+v diagnostics=%+v", inventory.Statistics(), inventory.Diagnostics())
+	}
+	one := config
+	one.MaxWorkers = 1
+	eight := config
+	eight.MaxWorkers = 8
+	if !reflect.DeepEqual(resolve(t, input, &one).References(), resolve(t, input, &eight).References()) {
+		t.Fatal("worker count changed the budgeted reference prefix")
 	}
 }
 

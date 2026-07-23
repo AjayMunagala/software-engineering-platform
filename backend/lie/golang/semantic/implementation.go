@@ -113,6 +113,12 @@ func (engine *engine) Resolve(ctx context.Context, input Input) (GoSemanticInven
 	}
 
 	syntaxFiles := input.Syntax.Files()
+	sort.Slice(syntaxFiles, func(i, j int) bool {
+		if syntaxFiles[i].Path != syntaxFiles[j].Path {
+			return syntaxFiles[i].Path < syntaxFiles[j].Path
+		}
+		return syntaxFiles[i].ID < syntaxFiles[j].ID
+	})
 	syntaxSymbols := symbolsByFile(input.Syntax.Symbols())
 	candidatePaths := make([]string, 0, len(syntaxFiles))
 	for _, file := range syntaxFiles {
@@ -134,34 +140,47 @@ func (engine *engine) Resolve(ctx context.Context, input Input) (GoSemanticInven
 	defer reader.close()
 
 	outcomes := make([]fileOutcome, len(syntaxFiles))
-	jobs := make(chan int)
 	workerCount := min(engine.config.MaxWorkers, max(1, len(syntaxFiles)))
-	var workers sync.WaitGroup
-	workers.Add(workerCount)
-	for range workerCount {
-		go func() {
-			defer workers.Done()
-			for index := range jobs {
-				if ctx.Err() != nil {
-					return
+	batchSize := max(workerCount*32, 32)
+	retainedReferenceCandidates := 0
+	referenceCandidateOmitted := 0
+	for batchStart := 0; batchStart < len(syntaxFiles); batchStart += batchSize {
+		batchEnd := min(batchStart+batchSize, len(syntaxFiles))
+		jobs := make(chan int)
+		var workers sync.WaitGroup
+		workers.Add(workerCount)
+		for range workerCount {
+			go func() {
+				defer workers.Done()
+				for index := range jobs {
+					if ctx.Err() != nil {
+						return
+					}
+					outcomes[index] = engine.verifyFile(ctx, reader, syntaxFiles[index], syntaxSymbols[syntaxFiles[index].ID])
 				}
-				outcomes[index] = engine.verifyFile(ctx, reader, syntaxFiles[index], syntaxSymbols[syntaxFiles[index].ID])
-			}
-		}()
-	}
-	for index := range syntaxFiles {
-		select {
-		case jobs <- index:
-		case <-ctx.Done():
-			close(jobs)
-			workers.Wait()
-			return GoSemanticInventory{}, ctx.Err()
+			}()
 		}
-	}
-	close(jobs)
-	workers.Wait()
-	if err := ctx.Err(); err != nil {
-		return GoSemanticInventory{}, err
+		for index := batchStart; index < batchEnd; index++ {
+			select {
+			case jobs <- index:
+			case <-ctx.Done():
+				close(jobs)
+				workers.Wait()
+				return GoSemanticInventory{}, ctx.Err()
+			}
+		}
+		close(jobs)
+		workers.Wait()
+		if err := ctx.Err(); err != nil {
+			return GoSemanticInventory{}, err
+		}
+		for index := batchStart; index < batchEnd; index++ {
+			remaining := max(engine.config.MaxRelationships-retainedReferenceCandidates, 0)
+			bounded, omitted := compactAndLimitReferenceCandidates(outcomes[index].references, remaining)
+			outcomes[index].references = bounded
+			retainedReferenceCandidates += len(bounded)
+			referenceCandidateOmitted += omitted
+		}
 	}
 
 	files, declarations, referenceCandidates, receivers, typeRelationCandidates, diagnostics, statistics := collectOutcomes(outcomes)
@@ -170,18 +189,22 @@ func (engine *engine) Resolve(ctx context.Context, input Input) (GoSemanticInven
 		return GoSemanticInventory{}, err
 	}
 	diagnostics = append(diagnostics, importDiagnostics...)
-	references, err := bindReferences(ctx, declarations, referenceCandidates, imports)
+	typeRelations := bindTypeRelations(declarations, typeRelationCandidates, imports)
+	referenceLimit := engine.config.MaxRelationships - len(imports) - len(receivers) - len(typeRelations)
+	if referenceLimit < 0 {
+		referenceLimit = 0
+	}
+	references, referenceOmitted, err := bindReferences(ctx, declarations, referenceCandidates, imports, referenceLimit)
 	if err != nil {
 		return GoSemanticInventory{}, err
 	}
-	typeRelations := bindTypeRelations(declarations, typeRelationCandidates, imports)
 	satisfaction, interfaceDiagnostics, interfaceOmitted, err := evaluateInterfaceSatisfaction(ctx, outcomes, declarations, typeRelations, engine.config)
 	if err != nil {
 		return GoSemanticInventory{}, err
 	}
 	diagnostics = append(diagnostics, interfaceDiagnostics...)
 	imports, receivers, typeRelations, references, satisfaction, omittedRelationships := limitSemanticRelationships(imports, receivers, typeRelations, references, satisfaction, engine.config.MaxRelationships)
-	omittedRelationships += interfaceOmitted
+	omittedRelationships += referenceCandidateOmitted + referenceOmitted + interfaceOmitted
 	updateReferenceStatistics(files, references, &statistics)
 	statistics.ReceiverBindings = len(receivers)
 	statistics.ImportBindingsByStatus = statusesForImports(imports)
@@ -550,6 +573,41 @@ type referenceCandidate struct {
 	selectorBase        bool
 }
 
+func compactAndLimitReferenceCandidates(candidates []referenceCandidate, maximum int) ([]referenceCandidate, int) {
+	sort.SliceStable(candidates, func(i, j int) bool {
+		left, right := candidates[i], candidates[j]
+		if left.location.File != right.location.File {
+			return left.location.File < right.location.File
+		}
+		if left.location.Start.Offset != right.location.Start.Offset {
+			return left.location.Start.Offset < right.location.Start.Offset
+		}
+		if left.kind != right.kind {
+			return left.kind.String() < right.kind.String()
+		}
+		return left.name < right.name
+	})
+	result := make([]referenceCandidate, 0, min(maximum, len(candidates)))
+	omitted := 0
+	for index := 0; index < len(candidates); {
+		end := index + 1
+		for end < len(candidates) && sameReferenceCandidateIdentity(candidates[index], candidates[end]) {
+			end++
+		}
+		if len(result) < maximum {
+			result = append(result, candidates[end-1])
+		} else {
+			omitted++
+		}
+		index = end
+	}
+	return result, omitted
+}
+
+func sameReferenceCandidateIdentity(left, right referenceCandidate) bool {
+	return left.fileID == right.fileID && left.location.Start.Offset == right.location.Start.Offset && left.kind == right.kind && left.name == right.name
+}
+
 type declarationCollector struct {
 	ctx                  context.Context
 	fileSet              *token.FileSet
@@ -683,12 +741,17 @@ func (collector *declarationCollector) collectTypeSpec(specification *ast.TypeSp
 	reconcile := false
 	if specification.Assign.IsValid() {
 		kind = DeclarationTypeAlias
-	} else {
-		switch specification.Type.(type) {
-		case *ast.StructType:
-			kind, syntaxKind, reconcile = DeclarationStruct, golang.SymbolKindStruct, topLevel
-		case *ast.InterfaceType:
-			kind, syntaxKind, reconcile = DeclarationInterface, golang.SymbolKindInterface, topLevel
+	}
+	switch specification.Type.(type) {
+	case *ast.StructType:
+		syntaxKind, reconcile = golang.SymbolKindStruct, topLevel
+		if kind != DeclarationTypeAlias {
+			kind = DeclarationStruct
+		}
+	case *ast.InterfaceType:
+		syntaxKind, reconcile = golang.SymbolKindInterface, topLevel
+		if kind != DeclarationTypeAlias {
+			kind = DeclarationInterface
 		}
 	}
 	location := collector.sourceRange(specification.Pos(), specification.End())
@@ -1515,7 +1578,7 @@ func proofEvidenceFresh(reader *sourceReader, proof packageidentity.PackageIdent
 	return true
 }
 
-func bindReferences(ctx context.Context, declarations []SemanticDeclaration, candidates []referenceCandidate, imports []ImportBinding) ([]SemanticReference, error) {
+func bindReferences(ctx context.Context, declarations []SemanticDeclaration, candidates []referenceCandidate, imports []ImportBinding, maximum int) ([]SemanticReference, int, error) {
 	byID := make(map[string]SemanticDeclaration, len(declarations))
 	packageDeclarations := make(map[string][]SemanticDeclaration)
 	for _, declaration := range declarations {
@@ -1532,11 +1595,26 @@ func bindReferences(ctx context.Context, declarations []SemanticDeclaration, can
 			dotImports[binding.FileID] = append(dotImports[binding.FileID], binding)
 		}
 	}
-	unique := make(map[string]SemanticReference)
+	sort.SliceStable(candidates, func(i, j int) bool {
+		left, right := candidates[i], candidates[j]
+		if left.location.File != right.location.File {
+			return left.location.File < right.location.File
+		}
+		if left.location.Start.Offset != right.location.Start.Offset {
+			return left.location.Start.Offset < right.location.Start.Offset
+		}
+		if left.kind != right.kind {
+			return left.kind.String() < right.kind.String()
+		}
+		return left.name < right.name
+	})
+	result := make([]SemanticReference, 0, min(maximum, len(candidates)))
+	indices := make(map[string]int, min(maximum, len(candidates)))
+	omitted := 0
 	for index, candidate := range candidates {
 		if index%256 == 0 {
 			if err := ctx.Err(); err != nil {
-				return nil, err
+				return nil, 0, err
 			}
 		}
 		if candidate.selectorBase && len(candidate.localCandidates) == 0 {
@@ -1567,11 +1645,19 @@ func bindReferences(ctx context.Context, declarations []SemanticDeclaration, can
 			}
 		}
 		reference.ID = semanticReferenceID(reference)
-		unique[reference.ID] = reference
-	}
-	result := make([]SemanticReference, 0, len(unique))
-	for _, reference := range unique {
-		result = append(result, reference)
+		if previous, exists := indices[reference.ID]; exists {
+			if previous >= 0 {
+				result[previous] = reference
+			}
+			continue
+		}
+		if len(result) < maximum {
+			indices[reference.ID] = len(result)
+			result = append(result, reference)
+		} else {
+			indices[reference.ID] = -1
+			omitted++
+		}
 	}
 	sort.Slice(result, func(i, j int) bool {
 		if result[i].Location.File != result[j].Location.File {
@@ -1582,7 +1668,7 @@ func bindReferences(ctx context.Context, declarations []SemanticDeclaration, can
 		}
 		return result[i].ID < result[j].ID
 	})
-	return result, nil
+	return result, omitted, nil
 }
 
 func importsByFileAndAlias(imports []ImportBinding) map[string]ImportBinding {
