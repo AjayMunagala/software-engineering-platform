@@ -2,9 +2,9 @@
 
 ## Status
 
-- Phase: Phase 2.2.3 accepted; Phase 2.2.4 authorized
+- Phase: Phase 2.2.4 accepted; Phase 2.2.5 authorized
 - API status: Architecture-approved candidate; not frozen
-- Authorization: Phase 2.2.4 only; Phase 2.2.5 and later remain unauthorized
+- Authorization: Phase 2.2.5 only; Phase 2.2.6 and later remain unauthorized
 - Package: `backend/lie/golang/semantic`
 - Candidate engine version: `0.1.0`
 - Candidate artifact: `go-semantic-inventory` `0.1.0`
@@ -86,7 +86,7 @@ Configuration rules:
 - `MaxSourceFileSize` is enforced before reading.
 - `MaxPackageFiles` and `MaxPackageBytes` bound one synchronous package type-check.
 - `MaxDiagnosticsPerFile` is applied before the global `MaxDiagnostics`; omitted diagnostics are counted.
-- `MaxRelationships` bounds emitted semantic relationships and interface candidate evaluations.
+- `MaxRelationships` deterministically bounds emitted receiver bindings and type relations, and later also bounds reference/import/interface relationships when those milestones are authorized. Omitted relationships are counted and diagnosed.
 - Reaching a bound creates an explicit partial outcome and diagnostic; the engine never silently truncates.
 - The syntax artifact already decides whether tests are present, so semantic configuration does not reintroduce an `IncludeTests` switch.
 

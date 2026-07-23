@@ -2,8 +2,8 @@
 
 ## Document Status
 
-- Phase: 2.2.3 declaration reconciliation and scopes
-- Status: Phase 2.2.3 accepted; Phase 2.2.4 receiver and local type binding authorized
+- Phase: 2.2.4 receiver and local type binding
+- Status: Phase 2.2.4 accepted; Phase 2.2.5 references and imports authorized
 - Candidate engine version: `0.1.0`
 - Candidate artifact: `go-semantic-inventory` `0.1.0`
 - Stable artifact target: `1.0.0`, only after implementation, stabilization, and real-repository validation
@@ -207,6 +207,9 @@ File/package problems produce bounded diagnostics and explicit outcomes where sa
 - `semantic_declaration_ambiguous`
 - `semantic_syntax_symbol_unmatched`
 - `semantic_package_scope_conflict`
+- `semantic_receiver_unresolved`
+- `semantic_receiver_ambiguous`
+- `semantic_relationship_limit`
 - `semantic_type_error`
 - `semantic_import_unresolved`
 - `semantic_reference_ambiguous`
@@ -308,7 +311,7 @@ The semantic artifact is additive. It does not change or replace either frozen i
 
 ## Approval Gate
 
-Phase 2.2.0 through Phase 2.2.3 are accepted. Phase 2.2.4 alone is authorized; Phase 2.2.5 and later remain unauthorized. The approved architecture covers:
+Phase 2.2.0 through Phase 2.2.4 are accepted. Phase 2.2.5 alone is authorized; Phase 2.2.6 and later remain unauthorized. The approved architecture covers:
 
 - controlled source re-parsing and digest verification;
 - the authoritative `PackageIdentityProof` contract and supporting artifact;

@@ -2,7 +2,7 @@
 
 ## Status
 
-- Design status: Phase 2.2.3 accepted; Phase 2.2.4 authorized
+- Design status: Phase 2.2.4 accepted; Phase 2.2.5 authorized
 - Candidate artifact: `go-semantic-inventory` `0.1.0`
 - Stable target: `1.0.0` after validation and API freeze
 - Prerequisites: `repository-snapshot` `1.0.0`, `go-language-inventory` `1.0.0`, and `go-package-identity-inventory` `0.1.0`
@@ -105,7 +105,7 @@ type SemanticFile struct {
 
 `ContentDigest` is the verified digest analyzed by this engine. It must equal the Phase 2.1 digest. A stale file emits no semantic relations derived from changed source.
 
-In Phase 2.2.2, a digest-matching file became `partial`, not `resolved`, because only source authorization and integrity were proven. Phase 2.2.3 now reconciles declarations, but files intentionally remain `partial` while later receiver, reference, import, type-relation, and interface results are absent. Individual declarations are independently `resolved`, `partial`, or `ambiguous` according to their own evidence.
+In Phase 2.2.2, a digest-matching file became `partial`, not `resolved`, because only source authorization and integrity were proven. Phase 2.2.3 added declarations and Phase 2.2.4 adds receiver/type relations, but files intentionally remain `partial` while references, imports, and interface results are absent. Individual declarations and relationships carry their own evidence-based states.
 
 ## Semantic Declarations and Reconciliation
 
@@ -198,7 +198,7 @@ type ReceiverBinding struct {
 }
 ```
 
-Bindings point to the local declared receiver type only when proven. The engine does not synthesize a target from a matching name in another package.
+Bindings point to the local declared receiver type only when exactly one valid struct or non-interface defined type in the same package is proven. Pointer and generic syntax are retained independently. Missing, alias, interface, invalid-shape, or conflicting targets remain `unresolved`/`ambiguous`; the engine does not synthesize a target from a matching name in another package.
 
 ## Import Bindings
 
@@ -246,6 +246,8 @@ type TypeRelation struct {
 ```
 
 Type argument text is presentation data. Canonical type identity and source relationships are authoritative.
+
+Phase 2.2.4 emits relations only from declared type contexts. Local declarations and type parameters may resolve to `TargetDeclarationID`; predeclared types use an explicit `builtin:` identity; structural type expressions are exact derived identities; qualified types remain unresolved until import proof consumption is authorized. Relation IDs include owner, kind, source byte offset, and target identity. General identifier/selector references are not emitted here.
 
 ## Interface Satisfaction
 
@@ -297,6 +299,7 @@ type SemanticStatistics struct {
     ReceiverBindings        int            `json:"receiver_bindings"`
     ImportBindingsByStatus  map[string]int `json:"import_bindings_by_status"`
     TypeRelations           int            `json:"type_relations"`
+    OmittedRelationships    int            `json:"omitted_relationships"`
     InterfaceChecksByStatus map[string]int `json:"interface_checks_by_status"`
     Diagnostics             int            `json:"diagnostics"`
     OmittedDiagnostics      int            `json:"omitted_diagnostics"`

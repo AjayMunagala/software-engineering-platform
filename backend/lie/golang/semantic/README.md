@@ -27,6 +27,19 @@ Phase 2.2.3 additionally:
 - builds package, file, function, type, and nested lexical scopes during each
   run without persisting the scope tree.
 
+Phase 2.2.4 additionally:
+
+- binds value, pointer, and generic method receivers only to exact local types
+  in the same package;
+- preserves unresolved and ambiguous receiver states without selecting by
+  name alone;
+- emits deterministic `uses`, `embeds`, `alias-of`, `instantiates`, and
+  `constrains` type relations from declared type contexts;
+- distinguishes proven local targets, predeclared types, structural types,
+  unresolved qualified types, and ambiguous local targets;
+- applies the configured relationship budget with explicit omission counts
+  and diagnostics.
+
 Files remain `partial` because later semantic relationships are not yet
 authorized. Exact declaration matches are independently marked `resolved`.
 
@@ -47,9 +60,8 @@ The engine is local and read-only. It executes no commands, performs no
 network access or downloads, reads no module cache, writes no repository
 files, and persists no source, AST, token, or `go/types` state.
 
-Receiver/type binding, references, imports, type relations, and interface
-satisfaction remain outside the authorized scope. Phase 2.2.4 and later are
-not authorized by this package.
+References, imports, and interface satisfaction remain outside the authorized
+scope. Phase 2.2.5 and later are not authorized by this package.
 
 ## Package Standard
 

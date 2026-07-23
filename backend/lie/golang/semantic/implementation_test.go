@@ -186,6 +186,160 @@ func TestPackageScopeConflictsAreExplicitAndInitIsAllowed(t *testing.T) {
 	}
 }
 
+func TestReceiverBindingIsLocalExactAndExplicit(t *testing.T) {
+	input := prerequisites(t, map[string]string{
+		"types.go": `package sample
+type Worker struct{}
+type Scalar int
+type Generic[T any] struct{}
+type Alias = Worker
+type Contract interface{ Run() }
+`,
+		"methods.go": `package sample
+func (Worker) Value() {}
+func (*Scalar) Pointer() {}
+func (value *Generic[T]) GenericMethod() {}
+func (Missing) MissingMethod() {}
+func (Alias) AliasMethod() {}
+func (Contract) InterfaceMethod() {}
+`,
+	})
+	inventory := resolve(t, input, nil)
+	bindings := inventory.ReceiverBindings()
+	if len(bindings) != 6 {
+		t.Fatalf("receiver bindings = %+v", bindings)
+	}
+	worker := findDeclaration(t, inventory.Declarations(), "Worker", DeclarationStruct)
+	scalar := findDeclaration(t, inventory.Declarations(), "Scalar", DeclarationDefinedType)
+	generic := findDeclaration(t, inventory.Declarations(), "Generic", DeclarationStruct)
+
+	value := findReceiverBinding(t, bindings, "Value")
+	if value.Status != ResolutionResolved || value.ReceiverTypeDeclarationID != worker.ID || value.Pointer || value.Generic {
+		t.Fatalf("value receiver = %+v", value)
+	}
+	pointer := findReceiverBinding(t, bindings, "Pointer")
+	if pointer.Status != ResolutionResolved || pointer.ReceiverTypeDeclarationID != scalar.ID || !pointer.Pointer || pointer.Generic {
+		t.Fatalf("pointer receiver = %+v", pointer)
+	}
+	genericBinding := findReceiverBinding(t, bindings, "GenericMethod")
+	if genericBinding.Status != ResolutionResolved || genericBinding.ReceiverTypeDeclarationID != generic.ID || !genericBinding.Pointer || !genericBinding.Generic {
+		t.Fatalf("generic receiver = %+v", genericBinding)
+	}
+	genericMethod := findDeclaration(t, inventory.Declarations(), "GenericMethod", DeclarationMethod)
+	if !hasOwnedDeclaration(inventory.Declarations(), genericMethod.ID, "T", DeclarationTypeParameter) {
+		t.Fatal("generic receiver type parameter was not declared in method scope")
+	}
+	for _, method := range []string{"MissingMethod", "AliasMethod", "InterfaceMethod"} {
+		binding := findReceiverBinding(t, bindings, method)
+		if binding.Status != ResolutionUnresolved || binding.ReceiverTypeDeclarationID != "" {
+			t.Fatalf("unsupported receiver %s = %+v", method, binding)
+		}
+	}
+	if inventory.Statistics().ReceiverBindings != len(bindings) || !hasDiagnostic(inventory.Diagnostics(), "semantic_receiver_unresolved") {
+		t.Fatalf("statistics=%+v diagnostics=%+v", inventory.Statistics(), inventory.Diagnostics())
+	}
+}
+
+func TestDuplicateReceiverTypeIsAmbiguous(t *testing.T) {
+	input := prerequisites(t, map[string]string{
+		"a.go":      "package duplicate\ntype Duplicate struct{}\n",
+		"b.go":      "package duplicate\ntype Duplicate int\n",
+		"method.go": "package duplicate\nfunc (Duplicate) Method() {}\n",
+	})
+	inventory := resolve(t, input, nil)
+	binding := findReceiverBinding(t, inventory.ReceiverBindings(), "Method")
+	if binding.Status != ResolutionAmbiguous || binding.ReceiverTypeDeclarationID != "" || !hasDiagnostic(inventory.Diagnostics(), "semantic_receiver_ambiguous") {
+		t.Fatalf("binding=%+v diagnostics=%+v", binding, inventory.Diagnostics())
+	}
+}
+
+func TestLocalTypeRelationsAreBoundWithoutImportResolution(t *testing.T) {
+	input := prerequisites(t, map[string]string{
+		"types.go": `package relations
+type Numeric interface { ~int | ~int64 }
+type Node[T any] struct { Next *Node[T] }
+type Box[T Numeric] struct {
+	*Node[T]
+	Value T
+}
+type Alias = Box[int]
+type Count int
+type Handler func(Box[string]) *Node[int]
+type External pkg.Type
+`,
+	})
+	inventory := resolve(t, input, nil)
+	declarations := inventory.Declarations()
+	relations := inventory.TypeRelations()
+	if len(relations) == 0 || inventory.Statistics().TypeRelations != len(relations) {
+		t.Fatalf("relations=%+v statistics=%+v", relations, inventory.Statistics())
+	}
+	box := findDeclaration(t, declarations, "Box", DeclarationStruct)
+	node := findDeclaration(t, declarations, "Node", DeclarationStruct)
+	alias := findDeclaration(t, declarations, "Alias", DeclarationTypeAlias)
+	count := findDeclaration(t, declarations, "Count", DeclarationDefinedType)
+	external := findDeclaration(t, declarations, "External", DeclarationDefinedType)
+
+	aliasRelation := findTypeRelation(t, relations, TypeRelationAliasOf, alias.ID)
+	if aliasRelation.Status != ResolutionResolved || aliasRelation.TargetDeclarationID != box.ID || !reflect.DeepEqual(aliasRelation.TypeArgumentText, []string{"int"}) {
+		t.Fatalf("alias relation = %+v", aliasRelation)
+	}
+	embedRelation := findTypeRelation(t, relations, TypeRelationEmbeds, box.ID)
+	if embedRelation.Status != ResolutionResolved || embedRelation.TargetDeclarationID != node.ID || !reflect.DeepEqual(embedRelation.TypeArgumentText, []string{"T"}) {
+		t.Fatalf("embed relation = %+v", embedRelation)
+	}
+	boxParameter := ownedDeclaration(t, declarations, box.ID, "T", DeclarationTypeParameter)
+	constraint := findTypeRelation(t, relations, TypeRelationConstrains, boxParameter.ID)
+	if constraint.Status != ResolutionResolved || constraint.TargetDeclarationID != findDeclaration(t, declarations, "Numeric", DeclarationInterface).ID {
+		t.Fatalf("constraint relation = %+v", constraint)
+	}
+	countUse := findTypeRelation(t, relations, TypeRelationUses, count.ID)
+	if countUse.Status != ResolutionExternal || countUse.TargetIdentity != "builtin:int" {
+		t.Fatalf("predeclared use = %+v", countUse)
+	}
+	externalUse := findTypeRelation(t, relations, TypeRelationUses, external.ID)
+	if externalUse.Status != ResolutionUnresolved || externalUse.TargetIdentity != "pkg.Type" || externalUse.TargetDeclarationID != "" {
+		t.Fatalf("qualified use was guessed before import resolution: %+v", externalUse)
+	}
+	if !hasTypeRelationKind(relations, TypeRelationInstantiates) {
+		t.Fatal("generic instantiation relations were not emitted")
+	}
+	if len(inventory.References()) != 0 || len(inventory.ImportBindings()) != 0 || len(inventory.InterfaceSatisfaction()) != 0 {
+		t.Fatal("Phase 2.2.4 emitted unauthorized later relationships")
+	}
+}
+
+func TestReceiverAndTypeRelationsAreDeterministicAcrossWorkers(t *testing.T) {
+	input := prerequisites(t, map[string]string{
+		"types.go":  "package deterministic\ntype Box[T any] struct { Value T }\n",
+		"method.go": "package deterministic\nfunc (box *Box[T]) Value(input Box[T]) T { return box.Value }\n",
+	})
+	one := DefaultConfig()
+	one.MaxWorkers = 1
+	eight := DefaultConfig()
+	eight.MaxWorkers = 8
+	left, right := resolve(t, input, &one), resolve(t, input, &eight)
+	if !reflect.DeepEqual(left.ReceiverBindings(), right.ReceiverBindings()) || !reflect.DeepEqual(left.TypeRelations(), right.TypeRelations()) || !reflect.DeepEqual(left.Diagnostics(), right.Diagnostics()) {
+		t.Fatal("worker count changed receiver/type output")
+	}
+}
+
+func TestRelationshipBudgetIsDeterministicAndExplicit(t *testing.T) {
+	input := prerequisites(t, map[string]string{
+		"types.go": "package budget\ntype Box[T any] struct { Value T }\nfunc (box *Box[T]) Method(input Box[T]) {}\n",
+	})
+	config := DefaultConfig()
+	config.MaxRelationships = 2
+	inventory := resolve(t, input, &config)
+	total := len(inventory.ReceiverBindings()) + len(inventory.TypeRelations())
+	if total != 2 || inventory.Statistics().OmittedRelationships == 0 || !hasDiagnostic(inventory.Diagnostics(), "semantic_relationship_limit") {
+		t.Fatalf("relationships=%d statistics=%+v diagnostics=%+v", total, inventory.Statistics(), inventory.Diagnostics())
+	}
+	if inventory.Statistics().ReceiverBindings != len(inventory.ReceiverBindings()) || inventory.Statistics().TypeRelations != len(inventory.TypeRelations()) {
+		t.Fatalf("emitted relationship statistics are inconsistent: %+v", inventory.Statistics())
+	}
+}
+
 func TestUnicodeGroupedDeclarationsAndStableIDs(t *testing.T) {
 	const relativePath = "pkg/μ.go"
 	input := prerequisites(t, map[string]string{
@@ -649,6 +803,48 @@ func hasOwnedDeclaration(declarations []SemanticDeclaration, owner, name string,
 func hasDiagnostic(diagnostics []lie.Diagnostic, code string) bool {
 	for _, diagnostic := range diagnostics {
 		if diagnostic.Code == code {
+			return true
+		}
+	}
+	return false
+}
+
+func findReceiverBinding(t *testing.T, bindings []ReceiverBinding, methodName string) ReceiverBinding {
+	t.Helper()
+	for _, binding := range bindings {
+		if strings.HasSuffix(binding.MethodDeclarationID, ":method:"+methodName) {
+			return binding
+		}
+	}
+	t.Fatalf("receiver binding for %s not found in %+v", methodName, bindings)
+	return ReceiverBinding{}
+}
+
+func ownedDeclaration(t *testing.T, declarations []SemanticDeclaration, owner, name string, kind DeclarationKind) SemanticDeclaration {
+	t.Helper()
+	for _, declaration := range declarations {
+		if declaration.OwnerDeclarationID == owner && declaration.Name == name && declaration.Kind == kind {
+			return declaration
+		}
+	}
+	t.Fatalf("owned declaration %s (%s) under %s not found", name, kind, owner)
+	return SemanticDeclaration{}
+}
+
+func findTypeRelation(t *testing.T, relations []TypeRelation, kind TypeRelationKind, owner string) TypeRelation {
+	t.Helper()
+	for _, relation := range relations {
+		if relation.Kind == kind && relation.OwnerDeclarationID == owner {
+			return relation
+		}
+	}
+	t.Fatalf("type relation %s under %s not found in %+v", kind, owner, relations)
+	return TypeRelation{}
+}
+
+func hasTypeRelationKind(relations []TypeRelation, kind TypeRelationKind) bool {
+	for _, relation := range relations {
+		if relation.Kind == kind {
 			return true
 		}
 	}

@@ -14,6 +14,14 @@ func BenchmarkDeclarationReconciliation1000Files(b *testing.B) {
 	benchmarkDeclarationReconciliation(b, 1_000)
 }
 
+func BenchmarkReceiverAndTypeBinding100Files(b *testing.B) {
+	benchmarkReceiverAndTypeBinding(b, 100)
+}
+
+func BenchmarkReceiverAndTypeBinding1000Files(b *testing.B) {
+	benchmarkReceiverAndTypeBinding(b, 1_000)
+}
+
 func benchmarkDeclarationReconciliation(b *testing.B, fileCount int) {
 	b.Helper()
 	files := map[string]string{"go.mod": "module example.com/benchmark\n\ngo 1.22\n"}
@@ -39,6 +47,36 @@ func benchmarkDeclarationReconciliation(b *testing.B, fileCount int) {
 		}
 		if inventory.Statistics().ResolvedDeclarations != fileCount {
 			b.Fatalf("resolved declarations = %d, want %d", inventory.Statistics().ResolvedDeclarations, fileCount)
+		}
+	}
+}
+
+func benchmarkReceiverAndTypeBinding(b *testing.B, fileCount int) {
+	b.Helper()
+	files := map[string]string{"go.mod": "module example.com/binding\n\ngo 1.22\n"}
+	for index := 0; index < fileCount; index++ {
+		name := fmt.Sprintf("Type%05d", index)
+		files[fmt.Sprintf("pkg/type%05d.go", index)] = fmt.Sprintf("package binding\ntype %s struct { Next *%s }\nfunc (value *%s) Method(input %s) {}\n", name, name, name, name)
+	}
+	input := prerequisites(b, files)
+	engine, err := New()
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	b.ReportAllocs()
+	b.ReportMetric(float64(fileCount), "files/op")
+	b.ResetTimer()
+	for iteration := 0; iteration < b.N; iteration++ {
+		inventory, err := engine.Resolve(context.Background(), input)
+		if err != nil {
+			b.Fatal(err)
+		}
+		if inventory.Statistics().ReceiverBindings != fileCount {
+			b.Fatalf("receiver bindings = %d, want %d", inventory.Statistics().ReceiverBindings, fileCount)
+		}
+		if inventory.Statistics().TypeRelations < fileCount {
+			b.Fatalf("type relations = %d, want at least %d", inventory.Statistics().TypeRelations, fileCount)
 		}
 	}
 }

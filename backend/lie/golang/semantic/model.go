@@ -438,6 +438,7 @@ type SemanticStatistics struct {
 	ReceiverBindings        int            `json:"receiver_bindings"`
 	ImportBindingsByStatus  map[string]int `json:"import_bindings_by_status"`
 	TypeRelations           int            `json:"type_relations"`
+	OmittedRelationships    int            `json:"omitted_relationships"`
 	InterfaceChecksByStatus map[string]int `json:"interface_checks_by_status"`
 	Diagnostics             int            `json:"diagnostics"`
 	OmittedDiagnostics      int            `json:"omitted_diagnostics"`
@@ -458,7 +459,7 @@ type GoSemanticInventory struct {
 	statistics            SemanticStatistics
 }
 
-func newInventory(files []SemanticFile, declarations []SemanticDeclaration, diagnostics []lie.Diagnostic, statistics SemanticStatistics) GoSemanticInventory {
+func newInventory(files []SemanticFile, declarations []SemanticDeclaration, receivers []ReceiverBinding, typeRelations []TypeRelation, diagnostics []lie.Diagnostic, statistics SemanticStatistics) GoSemanticInventory {
 	return GoSemanticInventory{
 		metadata: Metadata{Name: ArtifactName, Version: ArtifactVersion, IDSchemeVersion: IDSchemeVersion, EngineName: "go-semantic", EngineVersion: engineVersion},
 		sources: []rie.ArtifactReference{
@@ -467,7 +468,7 @@ func newInventory(files []SemanticFile, declarations []SemanticDeclaration, diag
 			{Name: packageidentity.ArtifactName, Version: packageidentity.ArtifactVersion},
 		},
 		files: append([]SemanticFile(nil), files...), declarations: append([]SemanticDeclaration(nil), declarations...), references: []SemanticReference{},
-		receivers: []ReceiverBinding{}, imports: []ImportBinding{}, typeRelations: []TypeRelation{},
+		receivers: append([]ReceiverBinding(nil), receivers...), imports: []ImportBinding{}, typeRelations: cloneTypeRelations(typeRelations),
 		interfaceSatisfaction: []InterfaceSatisfaction{}, diagnostics: cloneDiagnostics(diagnostics), statistics: cloneStatistics(statistics),
 	}
 }

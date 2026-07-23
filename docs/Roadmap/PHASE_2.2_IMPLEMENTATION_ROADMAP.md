@@ -2,13 +2,13 @@
 
 ## Status
 
-- Current state: Phase 2.2.3 accepted; Phase 2.2.4 authorized
-- Implementation authorization: Phase 2.2.4 only
+- Current state: Phase 2.2.4 accepted; Phase 2.2.5 authorized
+- Implementation authorization: Phase 2.2.5 only
 - Stable prerequisite: `GoLanguageInventory 1.0.0`
 - Candidate output: `GoSemanticInventory 0.1.0`
 - Stable target: `GoSemanticInventory 1.0.0`
 
-Engineering accepted the Phase 2.2.0 evidence and ADR 0008 on 2026-07-22. Phase 2.2.1 was accepted on 2026-07-22. Phase 2.2.2 and Phase 2.2.3 were accepted on 2026-07-23. Phase 2.2.4 alone is authorized; Phase 2.2.5 and later remain unauthorized until their preceding exit gates are explicitly accepted.
+Engineering accepted the Phase 2.2.0 evidence and ADR 0008 on 2026-07-22. Phase 2.2.1 was accepted on 2026-07-22. Phase 2.2.2 through Phase 2.2.4 were accepted on 2026-07-23. Phase 2.2.5 alone is authorized; Phase 2.2.6 and later remain unauthorized until their preceding exit gates are explicitly accepted.
 
 Phase 2.2.1 implementation and local validation are complete and accepted. Targeted package and full-backend race tests pass with MSYS2 UCRT64 GCC 16.1.0. See [LIE_PHASE_2_2_1_PACKAGE_IDENTITY.md](../Validation/LIE_PHASE_2_2_1_PACKAGE_IDENTITY.md). Authorization advances only to Phase 2.2.2.
 
@@ -119,6 +119,8 @@ Accepted evidence: exact reconciliation and stable-ID tests cover comments, grou
 
 - Tests cover value/pointer receivers, aliases, embedding, generic receivers, duplicate names, and malformed declarations.
 - No receiver target is selected only by an unqualified name outside its proven package scope.
+
+Accepted evidence: tests cover cross-file value/pointer/generic receivers, receiver type parameters, missing/alias/interface/duplicate receiver targets, local and predeclared types, unresolved qualified types, embedding, aliases, uses, constraints, instantiations, deterministic ordering, and explicit relationship limits. Package coverage is 85.8%; shuffled tests, package/full regression, vet, targeted/full race tests, and repeatable benchmarks pass. See [LIE_PHASE_2_2_4_RECEIVER_TYPE_BINDING.md](../Validation/LIE_PHASE_2_2_4_RECEIVER_TYPE_BINDING.md). Engineering accepted the exit gate on 2026-07-23 and authorized Phase 2.2.5 only.
 
 ## Phase 2.2.5 — References and Imports
 

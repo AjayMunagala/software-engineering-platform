@@ -90,7 +90,14 @@ func (engine *engine) Resolve(ctx context.Context, input Input) (GoSemanticInven
 		return GoSemanticInventory{}, err
 	}
 
-	files, declarations, diagnostics, statistics := collectOutcomes(outcomes)
+	files, declarations, receivers, typeRelations, diagnostics, statistics := collectOutcomes(outcomes)
+	receivers, typeRelations, omittedRelationships := limitSemanticRelationships(receivers, typeRelations, engine.config.MaxRelationships)
+	statistics.ReceiverBindings = len(receivers)
+	statistics.TypeRelations = len(typeRelations)
+	statistics.OmittedRelationships = omittedRelationships
+	if omittedRelationships > 0 {
+		diagnostics = append(diagnostics, semanticDiagnostic(lie.SeverityWarning, "semantic_relationship_limit", fmt.Sprintf("%d semantic relationships omitted", omittedRelationships), ""))
+	}
 	sortDiagnostics(diagnostics)
 	diagnostics, omitted := limitDiagnostics(diagnostics, engine.config.MaxDiagnosticsPerFile, engine.config.MaxDiagnostics)
 	statistics.Diagnostics = len(diagnostics)
@@ -98,7 +105,7 @@ func (engine *engine) Resolve(ctx context.Context, input Input) (GoSemanticInven
 	if err := ctx.Err(); err != nil {
 		return GoSemanticInventory{}, err
 	}
-	return newInventory(files, declarations, diagnostics, statistics), nil
+	return newInventory(files, declarations, receivers, typeRelations, diagnostics, statistics), nil
 }
 
 func validateInput(input Input) error {
@@ -231,10 +238,12 @@ func hasExactArtifactReferences(values, expected []rie.ArtifactReference) bool {
 }
 
 type fileOutcome struct {
-	path         string
-	file         SemanticFile
-	declarations []SemanticDeclaration
-	diagnostics  []lie.Diagnostic
+	path          string
+	file          SemanticFile
+	declarations  []SemanticDeclaration
+	receivers     []receiverCandidate
+	typeRelations []typeRelationCandidate
+	diagnostics   []lie.Diagnostic
 }
 
 func (engine *engine) verifyFile(ctx context.Context, reader *sourceReader, source golang.GoFile, syntaxSymbols []golang.GoSymbol) fileOutcome {
@@ -299,7 +308,7 @@ func (engine *engine) verifyFile(ctx context.Context, reader *sourceReader, sour
 	}
 	outcome.file.Status = SemanticFilePartial
 	outcome.file.ContentDigest = digest
-	declarations, diagnostics, err := reconcileDeclarations(ctx, data, source, syntaxSymbols)
+	declarations, receivers, typeRelations, diagnostics, err := reconcileDeclarations(ctx, data, source, syntaxSymbols)
 	if err != nil {
 		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
 			return outcome
@@ -310,6 +319,8 @@ func (engine *engine) verifyFile(ctx context.Context, reader *sourceReader, sour
 		return outcome
 	}
 	outcome.declarations = declarations
+	outcome.receivers = receivers
+	outcome.typeRelations = typeRelations
 	outcome.diagnostics = append(outcome.diagnostics, diagnostics...)
 	return outcome
 }
@@ -353,6 +364,15 @@ type lexicalScope struct {
 	declarations map[string][]string
 }
 
+func (scope *lexicalScope) lookup(name string) []string {
+	for current := scope; current != nil; current = current.parent {
+		if identifiers := current.declarations[name]; len(identifiers) > 0 {
+			return append([]string(nil), identifiers...)
+		}
+	}
+	return nil
+}
+
 func newLexicalScope(kind lexicalScopeKind, parent *lexicalScope) *lexicalScope {
 	return &lexicalScope{kind: kind, parent: parent, declarations: make(map[string][]string)}
 }
@@ -377,32 +397,56 @@ func (scope *lexicalScope) nearestFunction() *lexicalScope {
 	return scope
 }
 
-type declarationCollector struct {
-	ctx          context.Context
-	fileSet      *token.FileSet
-	path         string
-	fileID       string
-	packageID    string
-	syntax       []golang.GoSymbol
-	syntaxByKey  map[syntaxDeclarationKey][]golang.GoSymbol
-	matched      map[string]bool
-	declarations []SemanticDeclaration
-	diagnostics  []lie.Diagnostic
-	packageScope *lexicalScope
-	fileScope    *lexicalScope
+type receiverCandidate struct {
+	methodDeclarationID string
+	packageID           string
+	receiverName        string
+	pointer             bool
+	generic             bool
+	location            lie.SourceRange
 }
 
-func reconcileDeclarations(ctx context.Context, data []byte, source golang.GoFile, syntax []golang.GoSymbol) ([]SemanticDeclaration, []lie.Diagnostic, error) {
+type typeRelationCandidate struct {
+	kind               TypeRelationKind
+	fileID             string
+	packageID          string
+	ownerDeclarationID string
+	location           lie.SourceRange
+	targetName         string
+	targetIdentity     string
+	targetCandidates   []string
+	structural         bool
+	typeArguments      []string
+}
+
+type declarationCollector struct {
+	ctx           context.Context
+	fileSet       *token.FileSet
+	path          string
+	fileID        string
+	packageID     string
+	syntax        []golang.GoSymbol
+	syntaxByKey   map[syntaxDeclarationKey][]golang.GoSymbol
+	matched       map[string]bool
+	declarations  []SemanticDeclaration
+	receivers     []receiverCandidate
+	typeRelations []typeRelationCandidate
+	diagnostics   []lie.Diagnostic
+	packageScope  *lexicalScope
+	fileScope     *lexicalScope
+}
+
+func reconcileDeclarations(ctx context.Context, data []byte, source golang.GoFile, syntax []golang.GoSymbol) ([]SemanticDeclaration, []receiverCandidate, []typeRelationCandidate, []lie.Diagnostic, error) {
 	fileSet := token.NewFileSet()
 	parsed, err := parser.ParseFile(fileSet, source.Path, data, parser.SkipObjectResolution|parser.AllErrors)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 	packageScope := newLexicalScope(scopePackage, nil)
 	collector := &declarationCollector{
 		ctx: ctx, fileSet: fileSet, path: source.Path, fileID: source.ID, packageID: source.PackageID,
 		syntax: syntax, syntaxByKey: make(map[syntaxDeclarationKey][]golang.GoSymbol), matched: make(map[string]bool),
-		declarations: []SemanticDeclaration{}, diagnostics: []lie.Diagnostic{}, packageScope: packageScope,
+		declarations: []SemanticDeclaration{}, receivers: []receiverCandidate{}, typeRelations: []typeRelationCandidate{}, diagnostics: []lie.Diagnostic{}, packageScope: packageScope,
 		fileScope: newLexicalScope(scopeFile, packageScope),
 	}
 	for _, symbol := range syntax {
@@ -411,7 +455,7 @@ func reconcileDeclarations(ctx context.Context, data []byte, source golang.GoFil
 	}
 	for _, declaration := range parsed.Decls {
 		if err := ctx.Err(); err != nil {
-			return nil, nil, err
+			return nil, nil, nil, nil, err
 		}
 		collector.collectTopLevel(declaration)
 	}
@@ -422,7 +466,7 @@ func reconcileDeclarations(ctx context.Context, data []byte, source golang.GoFil
 		}
 		return collector.declarations[i].ID < collector.declarations[j].ID
 	})
-	return collector.declarations, collector.diagnostics, nil
+	return collector.declarations, collector.receivers, collector.typeRelations, collector.diagnostics, nil
 }
 
 func (collector *declarationCollector) collectTopLevel(node ast.Decl) {
@@ -441,8 +485,11 @@ func (collector *declarationCollector) collectTopLevel(node ast.Decl) {
 		}
 		semantic := collector.addDeclaration(declaration.Name.Name, kind, collector.render(declaration.Type), location, "", declarationScope, true, syntaxKind)
 		functionScope := newLexicalScope(scopeFunction, collector.fileScope)
+		if kind == DeclarationMethod {
+			collector.collectReceiver(declaration.Recv, functionScope, semantic.ID)
+		}
 		collector.collectFieldList(declaration.Recv, DeclarationParameter, functionScope, semantic.ID)
-		collector.collectFieldList(declaration.Type.TypeParams, DeclarationTypeParameter, functionScope, semantic.ID)
+		collector.collectTypeParameters(declaration.Type.TypeParams, functionScope, semantic.ID)
 		collector.collectFieldList(declaration.Type.Params, DeclarationParameter, functionScope, semantic.ID)
 		collector.collectFieldList(declaration.Type.Results, DeclarationResult, functionScope, semantic.ID)
 		collector.collectBody(declaration.Body, functionScope, semantic.ID)
@@ -470,7 +517,9 @@ func (collector *declarationCollector) collectGenDecl(declaration *ast.GenDecl, 
 				if name.Name == "_" {
 					continue
 				}
-				collector.addDeclaration(name.Name, kind, typeDisplay, collector.sourceRange(name.Pos(), name.End()), owner, scope, topLevel, syntaxKind)
+				location := collector.sourceRange(name.Pos(), name.End())
+				collector.collectTypeUses(specification.Type, scope, semanticDeclarationID(collector.path, location.Start.Offset, kind, name.Name))
+				collector.addDeclaration(name.Name, kind, typeDisplay, location, owner, scope, topLevel, syntaxKind)
 			}
 		}
 	}
@@ -493,7 +542,13 @@ func (collector *declarationCollector) collectTypeSpec(specification *ast.TypeSp
 	location := collector.sourceRange(specification.Pos(), specification.End())
 	semantic := collector.addDeclaration(specification.Name.Name, kind, collector.render(specification.Type), location, owner, scope, reconcile, syntaxKind)
 	typeScope := newLexicalScope(scopeType, scope)
-	collector.collectFieldList(specification.TypeParams, DeclarationTypeParameter, typeScope, semantic.ID)
+	collector.collectTypeParameters(specification.TypeParams, typeScope, semantic.ID)
+	if kind == DeclarationTypeAlias {
+		collector.addPrimaryTypeRelation(TypeRelationAliasOf, specification.Type, typeScope, semantic.ID)
+		collector.collectTypeUses(specification.Type, typeScope, semantic.ID)
+	} else if kind == DeclarationDefinedType {
+		collector.collectTypeUses(specification.Type, typeScope, semantic.ID)
+	}
 	switch underlying := specification.Type.(type) {
 	case *ast.StructType:
 		collector.collectStructFields(underlying.Fields, typeScope, semantic.ID)
@@ -506,18 +561,22 @@ func (collector *declarationCollector) collectStructFields(fields *ast.FieldList
 	if fields == nil {
 		return
 	}
+	memberScope := newLexicalScope(scopeType, scope)
 	for _, field := range fields.List {
 		typeDisplay := collector.render(field.Type)
 		if len(field.Names) == 0 {
 			name := embeddedFieldName(field.Type)
 			if name != "" {
-				collector.addDeclaration(name, DeclarationField, typeDisplay, collector.sourceRange(field.Type.Pos(), field.Type.End()), owner, scope, false, 0)
+				declaration := collector.addDeclaration(name, DeclarationField, typeDisplay, collector.sourceRange(field.Type.Pos(), field.Type.End()), owner, memberScope, false, 0)
+				collector.collectTypeUses(field.Type, scope, declaration.ID)
+				collector.addPrimaryTypeRelation(TypeRelationEmbeds, field.Type, scope, owner)
 			}
 			continue
 		}
 		for _, name := range field.Names {
 			if name.Name != "_" {
-				collector.addDeclaration(name.Name, DeclarationField, typeDisplay, collector.sourceRange(name.Pos(), name.End()), owner, scope, false, 0)
+				declaration := collector.addDeclaration(name.Name, DeclarationField, typeDisplay, collector.sourceRange(name.Pos(), name.End()), owner, memberScope, false, 0)
+				collector.collectTypeUses(field.Type, scope, declaration.ID)
 			}
 		}
 	}
@@ -527,8 +586,11 @@ func (collector *declarationCollector) collectInterfaceMethods(fields *ast.Field
 	if fields == nil {
 		return
 	}
+	memberScope := newLexicalScope(scopeType, scope)
 	for _, field := range fields.List {
 		if len(field.Names) == 0 {
+			collector.addPrimaryTypeRelation(interfaceElementRelationKind(field.Type), field.Type, scope, owner)
+			collector.collectTypeUses(field.Type, scope, owner)
 			continue
 		}
 		kind := DeclarationField
@@ -538,13 +600,33 @@ func (collector *declarationCollector) collectInterfaceMethods(fields *ast.Field
 		}
 		for _, name := range field.Names {
 			if name.Name != "_" {
-				declaration := collector.addDeclaration(name.Name, kind, collector.render(field.Type), collector.sourceRange(name.Pos(), name.End()), owner, scope, false, 0)
+				declaration := collector.addDeclaration(name.Name, kind, collector.render(field.Type), collector.sourceRange(name.Pos(), name.End()), owner, memberScope, false, 0)
 				if isMethod {
 					methodScope := newLexicalScope(scopeFunction, scope)
 					collector.collectFieldList(functionType.Params, DeclarationParameter, methodScope, declaration.ID)
 					collector.collectFieldList(functionType.Results, DeclarationResult, methodScope, declaration.ID)
+				} else {
+					collector.collectTypeUses(field.Type, scope, declaration.ID)
 				}
 			}
+		}
+	}
+}
+
+func interfaceElementRelationKind(expression ast.Expr) TypeRelationKind {
+	for {
+		switch typed := expression.(type) {
+		case *ast.ParenExpr:
+			expression = typed.X
+		case *ast.Ident:
+			if isPredeclaredType(typed.Name) {
+				return TypeRelationConstrains
+			}
+			return TypeRelationEmbeds
+		case *ast.SelectorExpr, *ast.IndexExpr, *ast.IndexListExpr:
+			return TypeRelationEmbeds
+		default:
+			return TypeRelationConstrains
 		}
 	}
 }
@@ -555,11 +637,212 @@ func (collector *declarationCollector) collectFieldList(fields *ast.FieldList, k
 	}
 	for _, field := range fields.List {
 		typeDisplay := collector.render(field.Type)
+		if len(field.Names) == 0 {
+			collector.collectTypeUses(field.Type, scope, owner)
+		}
 		for _, name := range field.Names {
 			if name.Name != "_" {
-				collector.addDeclaration(name.Name, kind, typeDisplay, collector.sourceRange(name.Pos(), name.End()), owner, scope, false, 0)
+				location := collector.sourceRange(name.Pos(), name.End())
+				collector.collectTypeUses(field.Type, scope, semanticDeclarationID(collector.path, location.Start.Offset, kind, name.Name))
+				collector.addDeclaration(name.Name, kind, typeDisplay, location, owner, scope, false, 0)
 			}
 		}
+	}
+}
+
+func (collector *declarationCollector) collectTypeParameters(fields *ast.FieldList, scope *lexicalScope, owner string) {
+	if fields == nil {
+		return
+	}
+	for _, field := range fields.List {
+		for _, name := range field.Names {
+			if name.Name == "_" {
+				continue
+			}
+			declaration := collector.addDeclaration(name.Name, DeclarationTypeParameter, collector.render(field.Type), collector.sourceRange(name.Pos(), name.End()), owner, scope, false, 0)
+			collector.addPrimaryTypeRelation(TypeRelationConstrains, field.Type, scope, declaration.ID)
+			collector.collectTypeUses(field.Type, scope, declaration.ID)
+		}
+	}
+}
+
+func (collector *declarationCollector) collectReceiver(fields *ast.FieldList, scope *lexicalScope, methodID string) {
+	if fields == nil || len(fields.List) == 0 {
+		collector.receivers = append(collector.receivers, receiverCandidate{methodDeclarationID: methodID, packageID: collector.packageID, location: lie.SourceRange{File: collector.path}})
+		return
+	}
+	expression := fields.List[0].Type
+	name, pointer, generic := receiverTypeDetails(expression)
+	collector.receivers = append(collector.receivers, receiverCandidate{
+		methodDeclarationID: methodID, packageID: collector.packageID, receiverName: name,
+		pointer: pointer, generic: generic, location: collector.sourceRange(expression.Pos(), expression.End()),
+	})
+	for _, identifier := range receiverTypeParameterNames(expression) {
+		if !scope.hasLocal(identifier.Name) {
+			collector.addDeclaration(identifier.Name, DeclarationTypeParameter, "", collector.sourceRange(identifier.Pos(), identifier.End()), methodID, scope, false, 0)
+		}
+	}
+}
+
+func receiverTypeDetails(expression ast.Expr) (name string, pointer, generic bool) {
+	for expression != nil {
+		switch typed := expression.(type) {
+		case *ast.ParenExpr:
+			expression = typed.X
+		case *ast.StarExpr:
+			pointer = true
+			expression = typed.X
+		case *ast.IndexExpr:
+			generic = true
+			expression = typed.X
+		case *ast.IndexListExpr:
+			generic = true
+			expression = typed.X
+		case *ast.Ident:
+			return typed.Name, pointer, generic
+		default:
+			return "", pointer, generic
+		}
+	}
+	return "", pointer, generic
+}
+
+func receiverTypeParameterNames(expression ast.Expr) []*ast.Ident {
+	for {
+		switch typed := expression.(type) {
+		case *ast.ParenExpr:
+			expression = typed.X
+		case *ast.StarExpr:
+			expression = typed.X
+		case *ast.IndexExpr:
+			if identifier, ok := typed.Index.(*ast.Ident); ok {
+				return []*ast.Ident{identifier}
+			}
+			return nil
+		case *ast.IndexListExpr:
+			result := make([]*ast.Ident, 0, len(typed.Indices))
+			for _, index := range typed.Indices {
+				identifier, ok := index.(*ast.Ident)
+				if !ok {
+					return nil
+				}
+				result = append(result, identifier)
+			}
+			return result
+		default:
+			return nil
+		}
+	}
+}
+
+func (collector *declarationCollector) addPrimaryTypeRelation(kind TypeRelationKind, expression ast.Expr, scope *lexicalScope, owner string) {
+	if expression == nil {
+		return
+	}
+	candidate := collector.typeRelationCandidate(kind, expression, scope, owner)
+	collector.typeRelations = append(collector.typeRelations, candidate)
+}
+
+func (collector *declarationCollector) collectTypeUses(expression ast.Expr, scope *lexicalScope, owner string) {
+	if expression == nil {
+		return
+	}
+	walkTypeExpression(expression, func(kind TypeRelationKind, current ast.Expr) {
+		collector.typeRelations = append(collector.typeRelations, collector.typeRelationCandidate(kind, current, scope, owner))
+	})
+}
+
+func (collector *declarationCollector) typeRelationCandidate(kind TypeRelationKind, expression ast.Expr, scope *lexicalScope, owner string) typeRelationCandidate {
+	targetName, targetIdentity, structural, arguments := collector.typeTarget(expression)
+	return typeRelationCandidate{
+		kind: kind, fileID: collector.fileID, packageID: collector.packageID, ownerDeclarationID: owner,
+		location: collector.sourceRange(expression.Pos(), expression.End()), targetName: targetName,
+		targetIdentity: targetIdentity, targetCandidates: scope.lookup(targetName), structural: structural, typeArguments: arguments,
+	}
+}
+
+func (collector *declarationCollector) typeTarget(expression ast.Expr) (name, identity string, structural bool, arguments []string) {
+	for {
+		switch typed := expression.(type) {
+		case *ast.ParenExpr:
+			expression = typed.X
+		case *ast.StarExpr:
+			expression = typed.X
+		case *ast.IndexExpr:
+			arguments = []string{collector.render(typed.Index)}
+			expression = typed.X
+		case *ast.IndexListExpr:
+			arguments = make([]string, 0, len(typed.Indices))
+			for _, argument := range typed.Indices {
+				arguments = append(arguments, collector.render(argument))
+			}
+			expression = typed.X
+		case *ast.Ident:
+			return typed.Name, typed.Name, false, arguments
+		case *ast.SelectorExpr:
+			return "", collector.render(typed), false, arguments
+		default:
+			return "", "type:" + collector.render(expression), true, arguments
+		}
+	}
+}
+
+func walkTypeExpression(expression ast.Expr, visit func(TypeRelationKind, ast.Expr)) {
+	if expression == nil {
+		return
+	}
+	switch typed := expression.(type) {
+	case *ast.Ident, *ast.SelectorExpr:
+		visit(TypeRelationUses, expression)
+	case *ast.ParenExpr:
+		walkTypeExpression(typed.X, visit)
+	case *ast.StarExpr:
+		walkTypeExpression(typed.X, visit)
+	case *ast.ArrayType:
+		walkTypeExpression(typed.Elt, visit)
+	case *ast.MapType:
+		walkTypeExpression(typed.Key, visit)
+		walkTypeExpression(typed.Value, visit)
+	case *ast.ChanType:
+		walkTypeExpression(typed.Value, visit)
+	case *ast.Ellipsis:
+		walkTypeExpression(typed.Elt, visit)
+	case *ast.IndexExpr:
+		visit(TypeRelationInstantiates, expression)
+		walkTypeExpression(typed.X, visit)
+		walkTypeExpression(typed.Index, visit)
+	case *ast.IndexListExpr:
+		visit(TypeRelationInstantiates, expression)
+		walkTypeExpression(typed.X, visit)
+		for _, index := range typed.Indices {
+			walkTypeExpression(index, visit)
+		}
+	case *ast.StructType:
+		for _, field := range typed.Fields.List {
+			walkTypeExpression(field.Type, visit)
+		}
+	case *ast.InterfaceType:
+		for _, field := range typed.Methods.List {
+			walkTypeExpression(field.Type, visit)
+		}
+	case *ast.FuncType:
+		walkFieldTypes(typed.TypeParams, visit)
+		walkFieldTypes(typed.Params, visit)
+		walkFieldTypes(typed.Results, visit)
+	case *ast.UnaryExpr:
+		walkTypeExpression(typed.X, visit)
+	case *ast.BinaryExpr:
+		walkTypeExpression(typed.X, visit)
+		walkTypeExpression(typed.Y, visit)
+	}
+}
+
+func walkFieldTypes(fields *ast.FieldList, visit func(TypeRelationKind, ast.Expr)) {
+	if fields == nil {
+		return
+	}
+	for _, field := range fields.List {
+		walkTypeExpression(field.Type, visit)
 	}
 }
 
@@ -705,7 +988,7 @@ func declarationDiagnostic(severity lie.Severity, code, message string, location
 	return lie.Diagnostic{Engine: "go-semantic", Severity: severity, Code: code, Message: message, Location: &location}
 }
 
-func collectOutcomes(outcomes []fileOutcome) ([]SemanticFile, []SemanticDeclaration, []lie.Diagnostic, SemanticStatistics) {
+func collectOutcomes(outcomes []fileOutcome) ([]SemanticFile, []SemanticDeclaration, []ReceiverBinding, []TypeRelation, []lie.Diagnostic, SemanticStatistics) {
 	sort.Slice(outcomes, func(i, j int) bool {
 		if outcomes[i].path != outcomes[j].path {
 			return outcomes[i].path < outcomes[j].path
@@ -714,12 +997,16 @@ func collectOutcomes(outcomes []fileOutcome) ([]SemanticFile, []SemanticDeclarat
 	})
 	files := make([]SemanticFile, 0, len(outcomes))
 	declarations := make([]SemanticDeclaration, 0)
+	receiverCandidates := make([]receiverCandidate, 0)
+	typeRelationCandidates := make([]typeRelationCandidate, 0)
 	diagnostics := make([]lie.Diagnostic, 0)
 	statistics := emptyStatistics()
 	statistics.CandidateFiles = len(outcomes)
 	for _, outcome := range outcomes {
 		files = append(files, outcome.file)
 		declarations = append(declarations, outcome.declarations...)
+		receiverCandidates = append(receiverCandidates, outcome.receivers...)
+		typeRelationCandidates = append(typeRelationCandidates, outcome.typeRelations...)
 		diagnostics = append(diagnostics, outcome.diagnostics...)
 		switch outcome.file.Status {
 		case SemanticFileResolved:
@@ -736,6 +1023,9 @@ func collectOutcomes(outcomes []fileOutcome) ([]SemanticFile, []SemanticDeclarat
 	}
 	declarations, scopeDiagnostics := reconcilePackageScopes(declarations)
 	diagnostics = append(diagnostics, scopeDiagnostics...)
+	receivers, receiverDiagnostics := bindReceivers(declarations, receiverCandidates)
+	diagnostics = append(diagnostics, receiverDiagnostics...)
+	typeRelations := bindTypeRelations(declarations, typeRelationCandidates)
 	sort.Slice(declarations, func(i, j int) bool {
 		if declarations[i].Location.File != declarations[j].Location.File {
 			return declarations[i].Location.File < declarations[j].Location.File
@@ -759,7 +1049,9 @@ func collectOutcomes(outcomes []fileOutcome) ([]SemanticFile, []SemanticDeclarat
 			statistics.PartialDeclarations++
 		}
 	}
-	return files, declarations, diagnostics, statistics
+	statistics.ReceiverBindings = len(receivers)
+	statistics.TypeRelations = len(typeRelations)
+	return files, declarations, receivers, typeRelations, diagnostics, statistics
 }
 
 func reconcilePackageScopes(declarations []SemanticDeclaration) ([]SemanticDeclaration, []lie.Diagnostic) {
@@ -791,6 +1083,167 @@ func reconcilePackageScopes(declarations []SemanticDeclaration) ([]SemanticDecla
 		diagnostics = append(diagnostics, declarationDiagnostic(lie.SeverityWarning, "semantic_package_scope_conflict", fmt.Sprintf("package %s declares %s %d times", parts[0], parts[1], len(matches)), first.Location))
 	}
 	return declarations, diagnostics
+}
+
+func bindReceivers(declarations []SemanticDeclaration, candidates []receiverCandidate) ([]ReceiverBinding, []lie.Diagnostic) {
+	types := typeDeclarationsByPackageName(declarations)
+	bindings := make([]ReceiverBinding, 0, len(candidates))
+	diagnostics := make([]lie.Diagnostic, 0)
+	for _, candidate := range candidates {
+		binding := ReceiverBinding{
+			ID: receiverBindingID(candidate), MethodDeclarationID: candidate.methodDeclarationID,
+			ReceiverName: candidate.receiverName, Pointer: candidate.pointer, Generic: candidate.generic,
+			Location: candidate.location, Status: ResolutionUnresolved,
+		}
+		matches := types[candidate.packageID+"\x00"+candidate.receiverName]
+		valid := make([]SemanticDeclaration, 0, len(matches))
+		for _, declaration := range matches {
+			if declaration.Kind == DeclarationStruct || declaration.Kind == DeclarationDefinedType {
+				valid = append(valid, declaration)
+			}
+		}
+		switch len(valid) {
+		case 1:
+			if valid[0].Status == ResolutionResolved {
+				binding.Status = ResolutionResolved
+				binding.ReceiverTypeDeclarationID = valid[0].ID
+			} else {
+				binding.Status = ResolutionAmbiguous
+			}
+		case 0:
+			binding.Status = ResolutionUnresolved
+		default:
+			binding.Status = ResolutionAmbiguous
+		}
+		if binding.Status != ResolutionResolved {
+			code := "semantic_receiver_unresolved"
+			if binding.Status == ResolutionAmbiguous {
+				code = "semantic_receiver_ambiguous"
+			}
+			diagnostics = append(diagnostics, declarationDiagnostic(lie.SeverityWarning, code, fmt.Sprintf("receiver %s for method %s is %s", candidate.receiverName, candidate.methodDeclarationID, binding.Status.String()), candidate.location))
+		}
+		bindings = append(bindings, binding)
+	}
+	sort.Slice(bindings, func(i, j int) bool {
+		if bindings[i].MethodDeclarationID != bindings[j].MethodDeclarationID {
+			return bindings[i].MethodDeclarationID < bindings[j].MethodDeclarationID
+		}
+		return bindings[i].ID < bindings[j].ID
+	})
+	return bindings, diagnostics
+}
+
+func bindTypeRelations(declarations []SemanticDeclaration, candidates []typeRelationCandidate) []TypeRelation {
+	byID := make(map[string]SemanticDeclaration, len(declarations))
+	for _, declaration := range declarations {
+		byID[declaration.ID] = declaration
+	}
+	packageTypes := typeDeclarationsByPackageName(declarations)
+	unique := make(map[string]TypeRelation)
+	for _, candidate := range candidates {
+		relation := TypeRelation{
+			Kind: candidate.kind, FileID: candidate.fileID, PackageID: candidate.packageID,
+			OwnerDeclarationID: candidate.ownerDeclarationID, Location: candidate.location,
+			TargetIdentity: candidate.targetIdentity, TypeArgumentText: append([]string(nil), candidate.typeArguments...),
+			Status: ResolutionUnresolved,
+		}
+		matches := typeCandidates(candidate.targetCandidates, byID)
+		if len(candidate.targetCandidates) == 0 && candidate.targetName != "" {
+			matches = packageTypes[candidate.packageID+"\x00"+candidate.targetName]
+		}
+		switch {
+		case candidate.structural:
+			relation.Status = ResolutionResolved
+		case len(matches) == 1 && matches[0].Status == ResolutionResolved:
+			relation.Status = ResolutionResolved
+			relation.TargetDeclarationID = matches[0].ID
+			relation.TargetIdentity = ""
+		case len(matches) > 1 || (len(matches) == 1 && matches[0].Status == ResolutionAmbiguous):
+			relation.Status = ResolutionAmbiguous
+		case candidate.targetName != "" && isPredeclaredType(candidate.targetName):
+			relation.Status = ResolutionExternal
+			relation.TargetIdentity = "builtin:" + candidate.targetName
+		default:
+			relation.Status = ResolutionUnresolved
+		}
+		relation.ID = typeRelationID(relation)
+		unique[relation.ID] = relation
+	}
+	result := make([]TypeRelation, 0, len(unique))
+	for _, relation := range unique {
+		result = append(result, relation)
+	}
+	sort.Slice(result, func(i, j int) bool {
+		if result[i].Location.File != result[j].Location.File {
+			return result[i].Location.File < result[j].Location.File
+		}
+		if result[i].Location.Start.Offset != result[j].Location.Start.Offset {
+			return result[i].Location.Start.Offset < result[j].Location.Start.Offset
+		}
+		return result[i].ID < result[j].ID
+	})
+	return result
+}
+
+func limitSemanticRelationships(receivers []ReceiverBinding, relations []TypeRelation, maximum int) ([]ReceiverBinding, []TypeRelation, int) {
+	total := len(receivers) + len(relations)
+	if total <= maximum {
+		return receivers, relations, 0
+	}
+	omitted := total - maximum
+	if len(receivers) >= maximum {
+		return receivers[:maximum], []TypeRelation{}, omitted
+	}
+	remaining := maximum - len(receivers)
+	return receivers, relations[:remaining], omitted
+}
+
+func typeDeclarationsByPackageName(declarations []SemanticDeclaration) map[string][]SemanticDeclaration {
+	result := make(map[string][]SemanticDeclaration)
+	for _, declaration := range declarations {
+		if declaration.OwnerDeclarationID != "" || !isTypeDeclaration(declaration.Kind) {
+			continue
+		}
+		key := declaration.PackageID + "\x00" + declaration.Name
+		result[key] = append(result[key], declaration)
+	}
+	return result
+}
+
+func typeCandidates(identifiers []string, declarations map[string]SemanticDeclaration) []SemanticDeclaration {
+	result := make([]SemanticDeclaration, 0, len(identifiers))
+	for _, identifier := range identifiers {
+		declaration, exists := declarations[identifier]
+		if exists && isTypeDeclaration(declaration.Kind) {
+			result = append(result, declaration)
+		}
+	}
+	return result
+}
+
+func isTypeDeclaration(kind DeclarationKind) bool {
+	return kind == DeclarationStruct || kind == DeclarationInterface || kind == DeclarationDefinedType || kind == DeclarationTypeAlias || kind == DeclarationTypeParameter
+}
+
+func isPredeclaredType(name string) bool {
+	switch name {
+	case "any", "bool", "byte", "comparable", "complex64", "complex128", "error", "float32", "float64", "int", "int8", "int16", "int32", "int64", "rune", "string", "uint", "uint8", "uint16", "uint32", "uint64", "uintptr":
+		return true
+	default:
+		return false
+	}
+}
+
+func receiverBindingID(candidate receiverCandidate) string {
+	return fmt.Sprintf("go:semantic:v1:receiver:%d:%s#%d:%s#%t#%t", len(candidate.methodDeclarationID), candidate.methodDeclarationID, len(candidate.receiverName), candidate.receiverName, candidate.pointer, candidate.generic)
+}
+
+func typeRelationID(relation TypeRelation) string {
+	target := relation.TargetDeclarationID
+	if target == "" {
+		target = relation.TargetIdentity
+	}
+	return fmt.Sprintf("go:semantic:v1:relation:%d:%s#%s#%d#%d:%s", len(relation.OwnerDeclarationID), relation.OwnerDeclarationID, relation.Kind.String(), relation.Location.Start.Offset, len(target), target)
 }
 
 func semanticDiagnostic(severity lie.Severity, code, message, file string) lie.Diagnostic {
