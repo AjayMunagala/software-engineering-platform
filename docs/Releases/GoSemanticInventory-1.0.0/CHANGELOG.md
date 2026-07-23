@@ -1,6 +1,6 @@
 # GoSemanticInventory Changelog
 
-## 1.0.0 — Release Candidate
+## 1.0.0 — 2026-07-23
 
 - Added digest-verified source authorization and explicit file outcomes.
 - Added declaration reconciliation, lexical/package scopes, stable semantic
@@ -15,4 +15,4 @@
 - Hardened public API, enum, configuration, provenance, and compatibility
   documentation.
 
-The version constant and release tag remain pending Phase 2.2.9 acceptance.
+Released under `go-semantic-inventory/v1.0.0`.

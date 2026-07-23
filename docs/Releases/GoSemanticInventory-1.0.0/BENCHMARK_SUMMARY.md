@@ -13,7 +13,7 @@
 | Gate | Target | Observed | Result |
 |---|---:|---:|---:|
 | Package identity, 10,000 proofs | < 1 s | 55.0–58.3 ms | PASS |
-| Full semantic candidate, 1,000 files | < 1 s | 51–126 ms | PASS |
+| Full semantic candidate, 1,000 files | < 1 s | 51–248 ms | PASS |
 | OpenTelemetry, 1,216 files, semantic | < 30 s | 14.14 s stabilized | PASS |
 | OpenTelemetry peak heap | < 1.5 GiB | 1,059.1 MiB | PASS |
 | Kubernetes, 17,521 files, semantic | < 300 s | 116.9 s and 283.0 s | PASS |

@@ -11,13 +11,13 @@ import (
 )
 
 const (
-	// ArtifactName is the candidate semantic artifact identity.
+	// ArtifactName is the stable semantic artifact identity.
 	ArtifactName = "go-semantic-inventory"
-	// ArtifactVersion is the current candidate contract version.
-	ArtifactVersion = "0.1.0"
-	// IDSchemeVersion identifies the candidate stable-ID algorithm.
+	// ArtifactVersion is the frozen semantic contract version.
+	ArtifactVersion = "1.0.0"
+	// IDSchemeVersion identifies the stable-ID algorithm.
 	IDSchemeVersion = "go-semantic-id/v1"
-	engineVersion   = "0.1.0"
+	engineVersion   = "1.0.0"
 )
 
 // ResolutionStatus describes whether one semantic target is proven.
@@ -444,7 +444,7 @@ type SemanticStatistics struct {
 	OmittedDiagnostics      int            `json:"omitted_diagnostics"`
 }
 
-// GoSemanticInventory is the immutable candidate semantic artifact.
+// GoSemanticInventory is the immutable Go semantic artifact.
 type GoSemanticInventory struct {
 	metadata              Metadata
 	sources               []rie.ArtifactReference

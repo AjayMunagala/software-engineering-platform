@@ -3,10 +3,10 @@
 ## Document Status
 
 - Phase: 2.2.7 candidate integration
-- Status: Phase 2.2.9 accepted; ordered `1.0.0` freeze in progress
-- Candidate engine version: `0.1.0`
-- Candidate artifact: `go-semantic-inventory` `0.1.0`
-- Stable artifact target: `1.0.0`, only after implementation, stabilization, and real-repository validation
+- Status: Stable; `1.0.0` frozen on 2026-07-23
+- Engine version: `1.0.0`
+- Artifact: `go-semantic-inventory` `1.0.0`
+- ID scheme: `go-semantic-id/v1`
 
 ## Responsibility
 
@@ -243,7 +243,7 @@ The engine checks `context.Context`:
 - at least every 256 emitted references or interface candidates;
 - before artifact construction and publication.
 
-Go parser and `go/types` calls are synchronous and cannot be interrupted mid-call. Therefore candidate `0.1.0` defines maximum cooperative cancellation latency as the slowest of one size-bounded file parse, one size-bounded package type-check, a 1,024-node traversal batch, or a 256-relationship batch, plus worker scheduling overhead. Phase 2.2.0 must measure those units and establish an approved wall-clock target before `1.0.0`.
+Go parser and `go/types` calls are synchronous and cannot be interrupted mid-call. The stable contract defines maximum cooperative cancellation latency as the slowest of one size-bounded file parse, one size-bounded package type-check, a 1,024-node traversal batch, or a 256-relationship batch, plus worker scheduling overhead. The approved reference wall-clock gate is one second on pinned OpenTelemetry validation.
 
 ## Security and Side Effects
 
@@ -306,7 +306,7 @@ The final release gate will be established from a checked-in repeatable benchmar
 
 ```text
 RepositorySnapshot 1.0.0 ───────┐
-GoLanguageInventory 1.0.0 ──────┼─> GoSemanticInventory 0.1.0 candidate
+GoLanguageInventory 1.0.0 ──────┼─> GoSemanticInventory 1.0.0
 GoPackageIdentityInventory 1.0.0┘
 ```
 
@@ -314,24 +314,24 @@ The semantic artifact is additive. It does not change or replace either frozen i
 
 ## Approval Gate
 
-Phase 2.2.0 through Phase 2.2.8 are accepted. Phase 2.2.9 stabilization and the `1.0.0` freeze are authorized. The approved architecture covers:
+Phase 2.2.0 through Phase 2.2.9 are accepted and the `1.0.0` contract is frozen. The approved architecture covers:
 
 - controlled source re-parsing and digest verification;
 - the authoritative `PackageIdentityProof` contract and supporting artifact;
 - full-rebuild/invalidation policy;
 - semantic ID evolution and migration policy;
 - bounded local-only import/type strategy;
-- `GoSemanticInventory 0.1.0` as a candidate rather than a prematurely frozen `1.0.0`;
+- `GoSemanticInventory 1.0.0` after staged validation and stabilization;
 - explicit unresolved/partial/stale behavior;
 - package/API model;
 - staged roadmap and validation gate.
 
 ## Phase 2.2.7 Integration Contract
 
-The candidate integrator reads `RepositorySnapshot 1.0.0`,
+The stable integrator reads `RepositorySnapshot 1.0.0`,
 `GoLanguageInventory 1.0.0`, and `GoPackageIdentityInventory 1.0.0` by exact
 type from one per-run `rie.ArtifactStore`. It resolves from those facts only,
-then publishes `GoSemanticInventory 0.1.0` through the store's existing
+then publishes `GoSemanticInventory 1.0.0` through the store's existing
 single-assignment contract.
 
 The integrator holds only immutable configuration and an engine reference. It

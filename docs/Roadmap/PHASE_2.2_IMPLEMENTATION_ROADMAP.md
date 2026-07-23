@@ -2,13 +2,13 @@
 
 ## Status
 
-- Current state: Phase 2.2.9 accepted; ordered `1.0.0` version promotion in progress
-- Implementation authorization: Package Identity and Semantic release-management actions only
+- Current state: Phase 2.2 complete; both `1.0.0` artifacts frozen
+- Implementation authorization: no later milestone authorized
 - Stable prerequisite: `GoLanguageInventory 1.0.0`
-- Candidate output: `GoSemanticInventory 0.1.0`
-- Stable target: `GoSemanticInventory 1.0.0`
+- Stable output: `GoSemanticInventory 1.0.0`
+- Release tags: `go-package-identity-inventory/v1.0.0`, `go-semantic-inventory/v1.0.0`
 
-Engineering accepted the Phase 2.2.0 evidence and ADR 0008 on 2026-07-22. Phase 2.2.1 was accepted on 2026-07-22. Phase 2.2.2 through Phase 2.2.9 were accepted on 2026-07-23. Ordered promotion and tagging of `GoPackageIdentityInventory 1.0.0` followed by `GoSemanticInventory 1.0.0` are authorized; no later milestone is authorized.
+Engineering accepted the Phase 2.2.0 evidence and ADR 0008 on 2026-07-22. Phase 2.2.1 was accepted on 2026-07-22. Phase 2.2.2 through Phase 2.2.9 were accepted on 2026-07-23. `GoPackageIdentityInventory 1.0.0` was frozen before `GoSemanticInventory 1.0.0`; no later milestone is authorized.
 
 Phase 2.2.1 implementation and local validation are complete and accepted. Targeted package and full-backend race tests pass with MSYS2 UCRT64 GCC 16.1.0. See [LIE_PHASE_2_2_1_PACKAGE_IDENTITY.md](../Validation/LIE_PHASE_2_2_1_PACKAGE_IDENTITY.md). Authorization advances only to Phase 2.2.2.
 
@@ -239,8 +239,8 @@ Local stabilization evidence is complete. Kubernetes peak heap fell to
 immutability, dependency direction, diagnostics, configuration, documentation,
 regression, coverage, benchmarks, and race safety were reviewed. See
 [LIE_PHASE_2_2_9_STABILIZATION.md](../Validation/LIE_PHASE_2_2_9_STABILIZATION.md).
-Engineering accepted the evidence on 2026-07-23. The candidate constants and
-tags are advanced only through the subsequent ordered release commits.
+Engineering accepted the evidence on 2026-07-23. The ordered release commits
+promoted Package Identity first and Semantic Inventory second.
 
 ### Review
 

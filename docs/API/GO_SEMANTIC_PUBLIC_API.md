@@ -3,11 +3,12 @@
 ## Status
 
 - Package: `backend/lie/golang/semantic`
-- Candidate artifact: `GoSemanticInventory 0.1.0`
-- Proposed stable artifact: `GoSemanticInventory 1.0.0`
-- Stability: stabilized release candidate; freeze approval pending
+- Stable artifact: `GoSemanticInventory 1.0.0`
+- ID scheme: `go-semantic-id/v1`
+- Stability: frozen on 2026-07-23
+- Release tag: `go-semantic-inventory/v1.0.0`
 
-The version constants remain `0.1.0` until Phase 2.2.9 is explicitly accepted.
+Phase 2.2.9 engineering acceptance froze this contract as `1.0.0`.
 
 ## Responsibility
 
@@ -87,7 +88,7 @@ and uses explicit empty arrays.
 
 ## Compatibility
 
-The proposed `1.0.0` contract freezes exported type names, fields, JSON keys,
+The `1.0.0` contract freezes exported type names, fields, JSON keys,
 enum strings, stable-ID algorithms, ordering, position meaning, error
 boundaries, default configuration behavior, and deep immutability. Additive
 fields are allowed when old consumers can safely ignore them. Removing or

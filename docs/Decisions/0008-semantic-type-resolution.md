@@ -35,7 +35,7 @@ Specifically:
 7. It resolves same-package and cross-file facts directly from verified local source.
 8. It resolves cross-package repository imports only through a non-stale `PackageIdentityProof` from the approved immutable identity artifact. It never guesses from directory suffixes.
 9. Package identity uses exact, digest-backed `go.mod`, `go.work`, local `replace`, verified vendor, nested-module, or versioned standard-library evidence as defined in [GO_PACKAGE_IDENTITY_PROOF.md](../Architecture/GO_PACKAGE_IDENTITY_PROOF.md).
-10. It emits a separate immutable `GoSemanticInventory 0.1.0` candidate and leaves every prerequisite artifact unchanged.
+10. It emits a separate immutable `GoSemanticInventory`; Phase 2.2.9 subsequently froze this artifact as `1.0.0` and leaves every prerequisite artifact unchanged.
 11. Every Phase 2.2 run is a full rebuild; incremental invalidation and persistent caches are deferred to a separate ADR.
 12. Stable IDs contain `go-semantic-id/v1`; re-keying after `1.0.0` requires a new artifact major version and full rebuild migration.
 
@@ -165,4 +165,4 @@ A design spike must prove and document:
 
 Engineering accepted the Phase 2.2.0 findings on 2026-07-22. The spike validated the package-identity proof model, controlled importer behavior, full-rebuild determinism, ID encoding, bounded interface candidates, cancellation checkpoints, diagnostic stability, and security boundaries within the documented limitations.
 
-This acceptance authorizes only Phase 2.2.1 — Go Package Identity Engine. Phase 2.2.2 and later remain gated by their roadmap exit criteria and separate authorization. Neither candidate public API is frozen by this decision.
+This acceptance originally authorized only Phase 2.2.1. The later roadmap gates were independently accepted, and Phase 2.2.9 froze `GoPackageIdentityInventory 1.0.0` and `GoSemanticInventory 1.0.0` on 2026-07-23.

@@ -2,12 +2,12 @@
 
 ## Status
 
-- Design status: Phase 2.2.9 accepted; ordered `1.0.0` freeze in progress
-- Candidate artifact: `go-semantic-inventory` `0.1.0`
-- Stable target: `1.0.0` after validation and API freeze
+- Design status: Stable; `1.0.0` frozen on 2026-07-23
+- Artifact: `go-semantic-inventory` `1.0.0`
+- ID scheme: `go-semantic-id/v1`
 - Prerequisites: `repository-snapshot` `1.0.0`, `go-language-inventory` `1.0.0`, and `go-package-identity-inventory` `1.0.0`
 
-This document defines the conceptual public model. Exact Go spelling is frozen only when the artifact reaches `1.0.0`.
+This document defines the frozen public model.
 
 ## Design Principles
 
@@ -24,7 +24,7 @@ This document defines the conceptual public model. Exact Go spelling is frozen o
 ```go
 const (
     ArtifactName    = "go-semantic-inventory"
-    ArtifactVersion = "0.1.0"
+    ArtifactVersion = "1.0.0"
 )
 
 type GoSemanticInventory struct {
@@ -362,7 +362,6 @@ become mutable merely to support reporting. Empty collections encode as `[]`.
 
 ## Compatibility Policy
 
-- `0.x` is explicitly a candidate contract and may change after measured implementation findings.
 - `1.0.0` freezes field meaning, enum values, ID rules, ordering, position semantics, and immutability behavior.
 - `1.0.x` permits compatible defect fixes only.
 - Additive optional facts require a minor version.

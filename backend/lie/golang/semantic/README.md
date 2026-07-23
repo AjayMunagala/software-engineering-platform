@@ -73,7 +73,7 @@ Phase 2.2.7 additionally:
 
 - retrieves the three exact typed prerequisites from `rie.ArtifactStore`;
 - performs a fresh full semantic rebuild on every integration run;
-- publishes `GoSemanticInventory 0.1.0` exactly once without mutable context
+- publishes `GoSemanticInventory 1.0.0` exactly once without mutable context
   fields or changes to the Phase 2.1 artifact;
 - rejects missing, wrongly typed, canceled, and duplicate-publication runs;
 - exposes `GoSemanticInventoryView` as a detached JSON/reporting model; and
@@ -90,7 +90,7 @@ authorized. Exact declaration matches are independently marked `resolved`.
 
 ## Output
 
-- `GoSemanticInventory 0.1.0`
+- `GoSemanticInventory 1.0.0`
 - ID scheme `go-semantic-id/v1`
 
 ## Boundaries
@@ -144,6 +144,6 @@ dependencies.
 
 Phase 2.2.9 stabilization reduced OpenTelemetry peak heap from 1,384.6 MiB to
 1,059.1 MiB and Kubernetes peak heap from 5.08–5.25 GiB to 3.88–3.92 GiB while
-preserving accepted artifact hashes and omission counts. Public API review and
-release evidence are complete locally; the code remains `0.1.0` until explicit
-engineering acceptance authorizes version promotion and tagging.
+preserving accepted semantic facts and omission counts. Public API review,
+release evidence, version promotion, and the annotated `1.0.0` tag are
+complete.

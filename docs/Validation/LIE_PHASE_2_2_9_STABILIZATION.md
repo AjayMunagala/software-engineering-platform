@@ -5,10 +5,10 @@
 - Date: 2026-07-23
 - Phase 2.2.8 acceptance commit: `d64e9e7`
 - Frozen prerequisite: `GoPackageIdentityInventory 1.0.0`
-- Candidate artifact: `GoSemanticInventory 0.1.0`
+- Frozen artifact: `GoSemanticInventory 1.0.0`
 - Stabilization implementation: accepted on 2026-07-23
 - Release decision: approved
-- Version promotion and tags: authorized; not yet performed in this report
+- Version promotion and tags: complete
 
 ## Scope
 
@@ -60,7 +60,7 @@ The proposed release gate is documented in
 Every proposed target passes:
 
 - package identity 10,000-proof benchmark: 55.0–58.3 ms;
-- full semantic candidate, 1,000 files: 51–126 ms;
+- full semantic candidate, 1,000 files: 51–248 ms;
 - OpenTelemetry semantic rebuild: 14.14 s, 1,059.1 MiB peak;
 - Kubernetes semantic rebuilds: 116.9 s and 283.0 s, 3.88–3.92 GiB peak;
 - pinned OpenTelemetry cancellation: observed in 471.28 ms after a 10 ms
@@ -156,5 +156,5 @@ evidence on 2026-07-23. The following release-management actions are authorized:
 3. committing the freeze changes;
 4. creating and pushing the annotated namespaced release tag.
 
-This report records the authorization. Version promotion and tag evidence are
-recorded by the subsequent ordered freeze commits.
+Package Identity was promoted and tagged first. Semantic Inventory was then
+promoted, passed the final versioned gates, and received its annotated tag.

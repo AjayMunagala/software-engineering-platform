@@ -2,8 +2,9 @@
 
 ## Status
 
-Release candidate. Engineering acceptance, promotion of both candidate
-artifacts to `1.0.0`, and the annotated release tag remain pending.
+Released on 2026-07-23 under the annotated tag
+`go-semantic-inventory/v1.0.0`. Its stable Package Identity prerequisite was
+released first under `go-package-identity-inventory/v1.0.0`.
 
 `GoSemanticInventory` is the stable semantic foundation for Go source in the
 Software Intelligence Platform. It synthesizes deterministic, bounded facts
