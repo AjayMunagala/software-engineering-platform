@@ -483,9 +483,9 @@ func newInventory(files []SemanticFile, declarations []SemanticDeclaration, refe
 			{Name: golang.ArtifactName, Version: golang.ArtifactVersion},
 			{Name: packageidentity.ArtifactName, Version: packageidentity.ArtifactVersion},
 		},
-		files: append([]SemanticFile(nil), files...), declarations: append([]SemanticDeclaration(nil), declarations...), references: cloneReferences(references),
-		receivers: append([]ReceiverBinding(nil), receivers...), imports: append([]ImportBinding(nil), imports...), typeRelations: cloneTypeRelations(typeRelations),
-		interfaceSatisfaction: cloneInterfaceSatisfaction(satisfaction), diagnostics: cloneDiagnostics(diagnostics), statistics: cloneStatistics(statistics),
+		files: files, declarations: declarations, references: references,
+		receivers: receivers, imports: imports, typeRelations: typeRelations,
+		interfaceSatisfaction: satisfaction, diagnostics: diagnostics, statistics: statistics,
 	}
 }
 

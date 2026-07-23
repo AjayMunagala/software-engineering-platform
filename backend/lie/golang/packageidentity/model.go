@@ -43,7 +43,31 @@ func (kind ProofKind) String() string {
 	}
 }
 
-func (kind ProofKind) MarshalJSON() ([]byte, error) { return json.Marshal(kind.String()) }
+func (kind ProofKind) MarshalJSON() ([]byte, error) {
+	return marshalKnownEnum("proof kind", kind.String())
+}
+
+func (kind *ProofKind) UnmarshalJSON(data []byte) error {
+	value, err := unmarshalEnum(data)
+	if err != nil {
+		return err
+	}
+	switch value {
+	case "same-module":
+		*kind = ProofSameModule
+	case "workspace-module":
+		*kind = ProofWorkspaceModule
+	case "local-replace":
+		*kind = ProofLocalReplace
+	case "vendor":
+		*kind = ProofVendor
+	case "standard-library":
+		*kind = ProofStandardLibrary
+	default:
+		return fmt.Errorf("unknown proof kind: %s", value)
+	}
+	return nil
+}
 
 type ProofStatus uint8
 
@@ -72,7 +96,31 @@ func (status ProofStatus) String() string {
 	}
 }
 
-func (status ProofStatus) MarshalJSON() ([]byte, error) { return json.Marshal(status.String()) }
+func (status ProofStatus) MarshalJSON() ([]byte, error) {
+	return marshalKnownEnum("proof status", status.String())
+}
+
+func (status *ProofStatus) UnmarshalJSON(data []byte) error {
+	value, err := unmarshalEnum(data)
+	if err != nil {
+		return err
+	}
+	switch value {
+	case "resolved":
+		*status = ProofResolved
+	case "unresolved":
+		*status = ProofUnresolved
+	case "ambiguous":
+		*status = ProofAmbiguous
+	case "external":
+		*status = ProofExternal
+	case "stale":
+		*status = ProofStale
+	default:
+		return fmt.Errorf("unknown proof status: %s", value)
+	}
+	return nil
+}
 
 type ResolutionContextKind uint8
 
@@ -101,7 +149,31 @@ func (kind ResolutionContextKind) String() string {
 	}
 }
 
-func (kind ResolutionContextKind) MarshalJSON() ([]byte, error) { return json.Marshal(kind.String()) }
+func (kind ResolutionContextKind) MarshalJSON() ([]byte, error) {
+	return marshalKnownEnum("resolution context kind", kind.String())
+}
+
+func (kind *ResolutionContextKind) UnmarshalJSON(data []byte) error {
+	value, err := unmarshalEnum(data)
+	if err != nil {
+		return err
+	}
+	switch value {
+	case "single-module":
+		*kind = ContextSingleModule
+	case "workspace":
+		*kind = ContextWorkspace
+	case "module-vendor":
+		*kind = ContextModuleVendor
+	case "workspace-vendor":
+		*kind = ContextWorkspaceVendor
+	case "unmanaged":
+		*kind = ContextUnmanaged
+	default:
+		return fmt.Errorf("unknown resolution context kind: %s", value)
+	}
+	return nil
+}
 
 type Metadata struct {
 	Name            string `json:"name"`
@@ -169,6 +241,18 @@ type GoPackageIdentityInventory struct {
 	statistics  PackageIdentityStatistics
 }
 
+// GoPackageIdentityInventoryView is a detached presentation view. It is never
+// an engine input and cannot mutate the immutable identity artifact.
+type GoPackageIdentityInventoryView struct {
+	Artifact        Metadata                  `json:"artifact"`
+	SourceArtifacts []rie.ArtifactReference   `json:"source_artifacts"`
+	Contexts        []ResolutionContext       `json:"contexts"`
+	Modules         []ModuleIdentity          `json:"modules"`
+	Proofs          []PackageIdentityProof    `json:"proofs"`
+	Diagnostics     []lie.Diagnostic          `json:"diagnostics"`
+	Statistics      PackageIdentityStatistics `json:"statistics"`
+}
+
 func newInventory(contexts []ResolutionContext, modules []ModuleIdentity, proofs []PackageIdentityProof, diagnostics []lie.Diagnostic, statistics PackageIdentityStatistics) GoPackageIdentityInventory {
 	return GoPackageIdentityInventory{
 		metadata: Metadata{Name: ArtifactName, Version: ArtifactVersion, IDSchemeVersion: ProofIDSchemeVersion, EngineName: "go-package-identity", EngineVersion: engineVersion},
@@ -200,6 +284,28 @@ func (inventory GoPackageIdentityInventory) Diagnostics() []lie.Diagnostic {
 }
 func (inventory GoPackageIdentityInventory) Statistics() PackageIdentityStatistics {
 	return cloneStatistics(inventory.statistics)
+}
+
+// View returns a defensive presentation copy of the complete artifact.
+func (inventory GoPackageIdentityInventory) View() GoPackageIdentityInventoryView {
+	return GoPackageIdentityInventoryView{
+		Artifact: inventory.Metadata(), SourceArtifacts: presentSlice(inventory.SourceArtifacts()),
+		Contexts: presentSlice(inventory.Contexts()), Modules: presentSlice(inventory.Modules()),
+		Proofs: presentSlice(inventory.Proofs()), Diagnostics: presentSlice(inventory.Diagnostics()),
+		Statistics: inventory.Statistics(),
+	}
+}
+
+// MarshalJSON serializes only the detached presentation view.
+func (inventory GoPackageIdentityInventory) MarshalJSON() ([]byte, error) {
+	return json.Marshal(inventory.View())
+}
+
+func presentSlice[T any](values []T) []T {
+	if values == nil {
+		return []T{}
+	}
+	return values
 }
 
 func cloneContexts(source []ResolutionContext) []ResolutionContext {
@@ -268,4 +374,19 @@ func cloneStatistics(source PackageIdentityStatistics) PackageIdentityStatistics
 
 func (metadata Metadata) String() string {
 	return fmt.Sprintf("%s@%s (%s)", metadata.Name, metadata.Version, metadata.IDSchemeVersion)
+}
+
+func marshalKnownEnum(name, value string) ([]byte, error) {
+	if value == "unknown" {
+		return nil, fmt.Errorf("invalid %s", name)
+	}
+	return json.Marshal(value)
+}
+
+func unmarshalEnum(data []byte) (string, error) {
+	var value string
+	if err := json.Unmarshal(data, &value); err != nil {
+		return "", err
+	}
+	return value, nil
 }

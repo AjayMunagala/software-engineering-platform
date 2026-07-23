@@ -13,10 +13,10 @@ const (
 
 // Config bounds manifest parsing and diagnostics. Zero means the default.
 type Config struct {
-	MaxWorkers            int
-	MaxManifestSize       int64
-	MaxDiagnostics        int
-	MaxDiagnosticsPerFile int
+	MaxWorkers            int   `json:"max_workers"`
+	MaxManifestSize       int64 `json:"max_manifest_size"`
+	MaxDiagnostics        int   `json:"max_diagnostics"`
+	MaxDiagnosticsPerFile int   `json:"max_diagnostics_per_file"`
 }
 
 // DefaultConfig returns explicit safe defaults.

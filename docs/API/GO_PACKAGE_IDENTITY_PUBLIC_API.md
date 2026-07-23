@@ -5,8 +5,8 @@
 - Milestone: Phase 2.2.1
 - Package: `backend/lie/golang/packageidentity`
 - Candidate artifact: `GoPackageIdentityInventory 0.1.0`
-- Stability: candidate; not frozen as `1.0.0`
-- Authorization: Phase 2.2.1 only
+- Stability: stabilized `1.0.0` release candidate; freeze approval pending
+- Authorization: Phase 2.2.9 contract review
 
 ## Responsibility
 
@@ -43,10 +43,10 @@ func New(configs ...Config) (Engine, error)
 
 ```go
 type Config struct {
-    MaxWorkers            int
-    MaxManifestSize       int64
-    MaxDiagnostics        int
-    MaxDiagnosticsPerFile int
+    MaxWorkers            int   `json:"max_workers"`
+    MaxManifestSize       int64 `json:"max_manifest_size"`
+    MaxDiagnostics        int   `json:"max_diagnostics"`
+    MaxDiagnosticsPerFile int   `json:"max_diagnostics_per_file"`
 }
 ```
 
@@ -66,9 +66,16 @@ func (GoPackageIdentityInventory) Modules() []ModuleIdentity
 func (GoPackageIdentityInventory) Proofs() []PackageIdentityProof
 func (GoPackageIdentityInventory) Diagnostics() []lie.Diagnostic
 func (GoPackageIdentityInventory) Statistics() PackageIdentityStatistics
+func (GoPackageIdentityInventory) View() GoPackageIdentityInventoryView
+func (GoPackageIdentityInventory) MarshalJSON() ([]byte, error)
 ```
 
 Construction is private. Every collection accessor returns a deep copy, including evidence ranges, context evidence, candidate IDs, and statistics maps.
+
+`View` returns a complete detached presentation copy. Direct JSON encoding of
+the inventory serializes that view and uses explicit empty arrays instead of
+`null`. Proof, status, and context enums use stable string values; invalid or
+unknown values are rejected during JSON marshal/unmarshal.
 
 `InventoryFrom` retrieves a previously published artifact from `rie.ArtifactStore`. Phase 2.2.1 does not alter the frozen Phase 2.1 runner; orchestration may publish the returned artifact with `ArtifactStore.Put`.
 
@@ -112,5 +119,13 @@ The engine:
 
 ## Deferred API
 
-Semantic relationships, source re-parsing, digest revalidation by consumers, exact standard-library indexing, module-version selection, incremental execution, and external dependency loading are outside Phase 2.2.1.
+Semantic relationships, source re-parsing, digest revalidation by consumers, exact standard-library indexing, module-version selection, incremental execution, and external dependency loading remain outside this artifact.
 
+## Proposed 1.0 Freeze
+
+The Go type names, field names, JSON keys, enum strings, accessor behavior,
+proof ordering, proof precedence, and `go-package-proof-id/v1` algorithm in
+this document are the proposed `1.0.0` contract. Additive fields may be added
+compatibly. Removing or reinterpreting fields, enum values, proof precedence,
+or stable IDs requires a new artifact major version. The code remains at
+`0.1.0` until Phase 2.2.9 engineering acceptance.

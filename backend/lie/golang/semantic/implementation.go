@@ -108,25 +108,26 @@ func (engine *engine) Resolve(ctx context.Context, input Input) (GoSemanticInven
 	if err := ctx.Err(); err != nil {
 		return GoSemanticInventory{}, err
 	}
-	if err := validateInput(input); err != nil {
+	validated, err := validateAndSnapshotInput(input)
+	if err != nil {
 		return GoSemanticInventory{}, err
 	}
 
-	syntaxFiles := input.Syntax.Files()
+	syntaxFiles := validated.syntaxFiles
 	sort.Slice(syntaxFiles, func(i, j int) bool {
 		if syntaxFiles[i].Path != syntaxFiles[j].Path {
 			return syntaxFiles[i].Path < syntaxFiles[j].Path
 		}
 		return syntaxFiles[i].ID < syntaxFiles[j].ID
 	})
-	syntaxSymbols := symbolsByFile(input.Syntax.Symbols())
+	syntaxSymbols := symbolsByFile(validated.syntaxSymbols)
 	candidatePaths := make([]string, 0, len(syntaxFiles))
 	for _, file := range syntaxFiles {
 		if file.Status == golang.FileStatusParsed {
 			candidatePaths = append(candidatePaths, file.Path)
 		}
 	}
-	for _, proof := range input.PackageIdentities.Proofs() {
+	for _, proof := range validated.identityProofs {
 		for _, evidence := range proof.Evidence {
 			if evidence.File != "" {
 				candidatePaths = append(candidatePaths, evidence.File)
@@ -184,7 +185,8 @@ func (engine *engine) Resolve(ctx context.Context, input Input) (GoSemanticInven
 	}
 
 	files, declarations, referenceCandidates, receivers, typeRelationCandidates, diagnostics, statistics := collectOutcomes(outcomes)
-	imports, importDiagnostics, err := bindImports(ctx, reader, syntaxFiles, files, input.Syntax.Packages(), input.PackageIdentities.Proofs(), engine.config.MaxSourceFileSize)
+	releaseCollectedOutcomeData(outcomes)
+	imports, importDiagnostics, err := bindImports(ctx, reader, syntaxFiles, files, validated.syntaxPackages, validated.identityProofs, engine.config.MaxSourceFileSize)
 	if err != nil {
 		return GoSemanticInventory{}, err
 	}
@@ -198,10 +200,14 @@ func (engine *engine) Resolve(ctx context.Context, input Input) (GoSemanticInven
 	if err != nil {
 		return GoSemanticInventory{}, err
 	}
+	referenceCandidates = nil
+	typeRelationCandidates = nil
 	satisfaction, interfaceDiagnostics, interfaceOmitted, err := evaluateInterfaceSatisfaction(ctx, outcomes, declarations, typeRelations, engine.config)
 	if err != nil {
 		return GoSemanticInventory{}, err
 	}
+	releaseOutcomeSources(outcomes)
+	outcomes = nil
 	diagnostics = append(diagnostics, interfaceDiagnostics...)
 	imports, receivers, typeRelations, references, satisfaction, omittedRelationships := limitSemanticRelationships(imports, receivers, typeRelations, references, satisfaction, engine.config.MaxRelationships)
 	omittedRelationships += referenceCandidateOmitted + referenceOmitted + interfaceOmitted
@@ -224,64 +230,73 @@ func (engine *engine) Resolve(ctx context.Context, input Input) (GoSemanticInven
 	return newInventory(files, declarations, references, receivers, imports, typeRelations, satisfaction, diagnostics, statistics), nil
 }
 
-func validateInput(input Input) error {
+type validatedInputSnapshot struct {
+	syntaxFiles    []golang.GoFile
+	syntaxPackages []golang.GoPackage
+	syntaxSymbols  []golang.GoSymbol
+	identityProofs []packageidentity.PackageIdentityProof
+}
+
+func validateAndSnapshotInput(input Input) (validatedInputSnapshot, error) {
+	validated := validatedInputSnapshot{}
 	snapshotMetadata := input.Snapshot.Metadata()
 	if input.Snapshot.RootPath() == "" || snapshotMetadata.Name == "" {
-		return ErrMissingRepositorySnapshot
+		return validated, ErrMissingRepositorySnapshot
 	}
 	if input.Snapshot.ArtifactName() != rie.RepositorySnapshotArtifactName ||
 		input.Snapshot.ArtifactVersion() != rie.RepositorySnapshotArtifactVersion ||
 		snapshotMetadata.Name != rie.RepositorySnapshotArtifactName ||
 		snapshotMetadata.Version != rie.RepositorySnapshotArtifactVersion {
-		return ErrIncompatibleRepositorySnapshot
+		return validated, ErrIncompatibleRepositorySnapshot
 	}
 
 	syntaxMetadata := input.Syntax.Metadata()
 	if syntaxMetadata.Name == "" {
-		return ErrMissingGoLanguageInventory
+		return validated, ErrMissingGoLanguageInventory
 	}
 	if input.Syntax.ArtifactName() != golang.ArtifactName || input.Syntax.ArtifactVersion() != golang.ArtifactVersion ||
 		syntaxMetadata.Name != golang.ArtifactName || syntaxMetadata.Version != golang.ArtifactVersion {
-		return ErrIncompatibleGoInventory
+		return validated, ErrIncompatibleGoInventory
 	}
 
 	identityMetadata := input.PackageIdentities.Metadata()
 	if identityMetadata.Name == "" {
-		return ErrMissingPackageIdentityInventory
+		return validated, ErrMissingPackageIdentityInventory
 	}
 	if input.PackageIdentities.ArtifactName() != packageidentity.ArtifactName ||
 		input.PackageIdentities.ArtifactVersion() != packageidentity.ArtifactVersion ||
 		identityMetadata.Name != packageidentity.ArtifactName || identityMetadata.Version != packageidentity.ArtifactVersion {
-		return ErrIncompatiblePackageIdentity
+		return validated, ErrIncompatiblePackageIdentity
 	}
 
 	snapshotReference := rie.ArtifactReference{Name: rie.RepositorySnapshotArtifactName, Version: rie.RepositorySnapshotArtifactVersion}
 	syntaxReference := rie.ArtifactReference{Name: golang.ArtifactName, Version: golang.ArtifactVersion}
 	if !hasArtifactReference(input.Syntax.SourceArtifacts(), snapshotReference) ||
 		!hasExactArtifactReferences(input.PackageIdentities.SourceArtifacts(), []rie.ArtifactReference{snapshotReference, syntaxReference}) {
-		return ErrArtifactProvenanceMismatch
+		return validated, ErrArtifactProvenanceMismatch
 	}
 
 	entries := make(map[string]bool)
 	for _, entry := range input.Snapshot.Entries() {
 		if _, duplicate := entries[entry.Path]; duplicate {
-			return fmt.Errorf("%w: duplicate snapshot entry %s", ErrArtifactProvenanceMismatch, entry.Path)
+			return validated, fmt.Errorf("%w: duplicate snapshot entry %s", ErrArtifactProvenanceMismatch, entry.Path)
 		}
 		entries[entry.Path] = entry.IsDir
 	}
 	fileIDs := make(map[string]struct{})
 	filePaths := make(map[string]struct{})
 	filesByID := make(map[string]golang.GoFile)
-	for _, file := range input.Syntax.Files() {
+	validated.syntaxFiles = input.Syntax.Files()
+	for _, file := range validated.syntaxFiles {
 		isDirectory, exists := entries[file.Path]
 		if file.ID == "" || file.Path == "" || !exists || isDirectory {
-			return fmt.Errorf("%w: Go file %s is absent from RepositorySnapshot", ErrArtifactProvenanceMismatch, file.Path)
+			return validated, fmt.Errorf("%w: Go file %s is absent from RepositorySnapshot", ErrArtifactProvenanceMismatch, file.Path)
 		}
 		if _, duplicate := fileIDs[file.ID]; duplicate {
-			return fmt.Errorf("%w: duplicate Go file ID %s", ErrArtifactProvenanceMismatch, file.ID)
+			return validated, fmt.Errorf("%w: duplicate Go file ID %s", ErrArtifactProvenanceMismatch, file.ID)
 		}
 		if _, duplicate := filePaths[file.Path]; duplicate {
-			return fmt.Errorf("%w: duplicate Go file path %s", ErrArtifactProvenanceMismatch, file.Path)
+			return validated, fmt.Errorf("%w: duplicate Go file path %s", ErrArtifactProvenanceMismatch, file.Path)
 		}
 		fileIDs[file.ID] = struct{}{}
 		filePaths[file.Path] = struct{}{}
@@ -289,38 +304,41 @@ func validateInput(input Input) error {
 	}
 
 	packageIDs := make(map[string]struct{})
-	for _, pkg := range input.Syntax.Packages() {
+	validated.syntaxPackages = input.Syntax.Packages()
+	for _, pkg := range validated.syntaxPackages {
 		if pkg.ID == "" {
-			return fmt.Errorf("%w: Go package has an empty ID", ErrArtifactProvenanceMismatch)
+			return validated, fmt.Errorf("%w: Go package has an empty ID", ErrArtifactProvenanceMismatch)
 		}
 		packageIDs[pkg.ID] = struct{}{}
 	}
 	symbolIDs := make(map[string]struct{})
-	for _, symbol := range input.Syntax.Symbols() {
+	validated.syntaxSymbols = input.Syntax.Symbols()
+	for _, symbol := range validated.syntaxSymbols {
 		file, exists := filesByID[symbol.FileID]
 		if symbol.ID == "" || symbol.Name == "" || !exists || symbol.PackageID != file.PackageID || symbol.Location.File != file.Path || symbol.Location.Start.Offset < 0 || symbol.Location.End.Offset < symbol.Location.Start.Offset || symbol.Kind.String() == "unknown" {
-			return fmt.Errorf("%w: invalid Go syntax symbol %s", ErrArtifactProvenanceMismatch, symbol.ID)
+			return validated, fmt.Errorf("%w: invalid Go syntax symbol %s", ErrArtifactProvenanceMismatch, symbol.ID)
 		}
 		if _, exists := packageIDs[symbol.PackageID]; !exists {
-			return fmt.Errorf("%w: symbol %s belongs to unknown package %s", ErrArtifactProvenanceMismatch, symbol.ID, symbol.PackageID)
+			return validated, fmt.Errorf("%w: symbol %s belongs to unknown package %s", ErrArtifactProvenanceMismatch, symbol.ID, symbol.PackageID)
 		}
 		if _, duplicate := symbolIDs[symbol.ID]; duplicate {
-			return fmt.Errorf("%w: duplicate Go symbol ID %s", ErrArtifactProvenanceMismatch, symbol.ID)
+			return validated, fmt.Errorf("%w: duplicate Go symbol ID %s", ErrArtifactProvenanceMismatch, symbol.ID)
 		}
 		symbolIDs[symbol.ID] = struct{}{}
 	}
-	for _, proof := range input.PackageIdentities.Proofs() {
+	validated.identityProofs = input.PackageIdentities.Proofs()
+	for _, proof := range validated.identityProofs {
 		if _, exists := packageIDs[proof.ImportingPackageID]; !exists {
-			return fmt.Errorf("%w: proof %s imports from unknown package %s", ErrArtifactProvenanceMismatch, proof.ID, proof.ImportingPackageID)
+			return validated, fmt.Errorf("%w: proof %s imports from unknown package %s", ErrArtifactProvenanceMismatch, proof.ID, proof.ImportingPackageID)
 		}
 		if proof.TargetPackageID != "" {
 			if _, exists := packageIDs[proof.TargetPackageID]; !exists {
-				return fmt.Errorf("%w: proof %s targets unknown package %s", ErrArtifactProvenanceMismatch, proof.ID, proof.TargetPackageID)
+				return validated, fmt.Errorf("%w: proof %s targets unknown package %s", ErrArtifactProvenanceMismatch, proof.ID, proof.TargetPackageID)
 			}
 		}
 		for _, candidate := range proof.CandidatePackageIDs {
 			if _, exists := packageIDs[candidate]; !exists {
-				return fmt.Errorf("%w: proof %s names unknown candidate %s", ErrArtifactProvenanceMismatch, proof.ID, candidate)
+				return validated, fmt.Errorf("%w: proof %s names unknown candidate %s", ErrArtifactProvenanceMismatch, proof.ID, candidate)
 			}
 		}
 		for _, evidence := range proof.Evidence {
@@ -328,15 +346,15 @@ func validateInput(input Input) error {
 				continue
 			}
 			if evidence.ContentDigest == "" {
-				return fmt.Errorf("%w: proof %s has incomplete manifest evidence", ErrArtifactProvenanceMismatch, proof.ID)
+				return validated, fmt.Errorf("%w: proof %s has incomplete manifest evidence", ErrArtifactProvenanceMismatch, proof.ID)
 			}
 			isDirectory, exists := entries[evidence.File]
 			if !exists || isDirectory {
-				return fmt.Errorf("%w: proof %s evidence %s is absent from RepositorySnapshot", ErrArtifactProvenanceMismatch, proof.ID, evidence.File)
+				return validated, fmt.Errorf("%w: proof %s evidence %s is absent from RepositorySnapshot", ErrArtifactProvenanceMismatch, proof.ID, evidence.File)
 			}
 		}
 	}
-	return nil
+	return validated, nil
 }
 
 func hasArtifactReference(values []rie.ArtifactReference, expected rie.ArtifactReference) bool {
@@ -374,6 +392,22 @@ type fileOutcome struct {
 	typeRelations []typeRelationCandidate
 	diagnostics   []lie.Diagnostic
 	source        []byte
+}
+
+func releaseCollectedOutcomeData(outcomes []fileOutcome) {
+	for index := range outcomes {
+		outcomes[index].declarations = nil
+		outcomes[index].references = nil
+		outcomes[index].receivers = nil
+		outcomes[index].typeRelations = nil
+		outcomes[index].diagnostics = nil
+	}
+}
+
+func releaseOutcomeSources(outcomes []fileOutcome) {
+	for index := range outcomes {
+		outcomes[index].source = nil
+	}
 }
 
 func (engine *engine) verifyFile(ctx context.Context, reader *sourceReader, source golang.GoFile, syntaxSymbols []golang.GoSymbol) fileOutcome {

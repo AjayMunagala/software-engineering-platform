@@ -2,7 +2,7 @@
 
 ## Status
 
-- Design status: Phase 2.2.8 accepted; Phase 2.2.9 stabilization authorized
+- Design status: Phase 2.2.9 accepted; ordered `1.0.0` freeze in progress
 - Candidate artifact: `go-semantic-inventory` `0.1.0`
 - Stable target: `1.0.0` after validation and API freeze
 - Prerequisites: `repository-snapshot` `1.0.0`, `go-language-inventory` `1.0.0`, and `go-package-identity-inventory` `0.1.0`

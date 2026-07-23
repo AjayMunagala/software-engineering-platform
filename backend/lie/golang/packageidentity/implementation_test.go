@@ -79,6 +79,44 @@ func TestEngineAndArtifactPublicationContract(t *testing.T) {
 	if err != nil || string(encoded) != `{"kind":"single-module","status":"resolved"}` {
 		t.Fatalf("enum JSON = %s, %v", encoded, err)
 	}
+	encoded, err = json.Marshal(inventory)
+	if err != nil || !strings.Contains(string(encoded), `"artifact"`) || !strings.Contains(string(encoded), `"proofs"`) {
+		t.Fatalf("artifact JSON = %s, %v", encoded, err)
+	}
+}
+
+func TestEnumJSONContractsRejectUnknownValues(t *testing.T) {
+	tests := []struct {
+		name  string
+		value any
+		text  string
+		out   any
+	}{
+		{"proof kind", packageidentity.ProofVendor, `"vendor"`, new(packageidentity.ProofKind)},
+		{"proof status", packageidentity.ProofAmbiguous, `"ambiguous"`, new(packageidentity.ProofStatus)},
+		{"context kind", packageidentity.ContextWorkspace, `"workspace"`, new(packageidentity.ResolutionContextKind)},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			encoded, err := json.Marshal(test.value)
+			if err != nil || string(encoded) != test.text {
+				t.Fatalf("marshal = %s, %v", encoded, err)
+			}
+			if err := json.Unmarshal(encoded, test.out); err != nil {
+				t.Fatalf("unmarshal: %v", err)
+			}
+		})
+	}
+	for _, invalid := range []any{packageidentity.ProofKind(0), packageidentity.ProofStatus(0), packageidentity.ResolutionContextKind(0)} {
+		if _, err := json.Marshal(invalid); err == nil {
+			t.Fatalf("invalid %T marshaled successfully", invalid)
+		}
+	}
+	for _, output := range []any{new(packageidentity.ProofKind), new(packageidentity.ProofStatus), new(packageidentity.ResolutionContextKind)} {
+		if err := json.Unmarshal([]byte(`"future-value"`), output); err == nil {
+			t.Fatalf("unknown %T unmarshaled successfully", output)
+		}
+	}
 }
 
 func TestWorkspacePreservesIndependentResolutionContexts(t *testing.T) {
@@ -268,8 +306,14 @@ func TestInventoryIsDeeplyImmutable(t *testing.T) {
 	proofs[0].CandidatePackageIDs = append(proofs[0].CandidatePackageIDs, "changed")
 	statistics := inventory.Statistics()
 	statistics.ProofsByStatus["resolved"] = 999
+	view := inventory.View()
+	view.Contexts[0].ManifestFiles[0] = "view-changed"
+	view.Modules[0].Evidence[0].File = "view-changed"
 	if inventory.Contexts()[0].ManifestFiles[0] == "changed" || inventory.Contexts()[0].Evidence[0].File == "changed" || inventory.Modules()[0].Evidence[0].File == "changed" || inventory.Modules()[0].Evidence[0].Location.File == "changed" || inventory.Proofs()[0].Kinds[0] == packageidentity.ProofVendor || inventory.Statistics().ProofsByStatus["resolved"] == 999 {
 		t.Fatal("artifact exposes mutable nested state")
+	}
+	if inventory.Contexts()[0].ManifestFiles[0] == "view-changed" || inventory.Modules()[0].Evidence[0].File == "view-changed" {
+		t.Fatal("artifact view exposes mutable nested state")
 	}
 }
 

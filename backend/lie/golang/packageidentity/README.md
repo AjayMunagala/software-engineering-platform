@@ -15,6 +15,10 @@ only snapshot-authorized local manifests and the frozen Go syntax inventory.
 - `GoPackageIdentityInventory 0.1.0`
 - ID scheme `go-package-proof-id/v1`
 
+The stabilized candidate also exposes a detached immutable presentation view
+and direct JSON serialization with strict stable enum strings. Promotion to
+`1.0.0` remains pending Phase 2.2.9 engineering acceptance.
+
 ## Boundaries
 
 The engine is local and read-only. It uses `golang.org/x/mod/modfile` as an
@@ -42,10 +46,11 @@ models, errors, README, tests, and benchmarks.
 
 ## Validation
 
-Targeted tests, ten shuffled runs, full backend regression, vet, and 87.8%
+Stabilization tests, ten shuffled runs, full backend regression, vet, and 86.9%
 statement coverage pass on Go 1.26.2/Windows amd64. A 10,000-proof rebuild
-measures 15.56–19.24 ms in the local benchmark fixture. Targeted package and
-full-backend race tests pass with MSYS2 UCRT64 GCC 16.1.0.
+measures 55.0–58.3 ms in the release-gate fixture on the reference workstation.
+Targeted package and full-backend race tests pass with MSYS2 UCRT64 GCC 16.1.0.
 
-Passing local validation completes the implementation evidence for Phase
-2.2.1 only. Phase 2.2.2 is not authorized by this package.
+The proposed `1.0.0` contract is documented under `docs/API` and `docs/Releases`.
+The candidate version remains unchanged until the Phase 2.2.9 freeze is
+explicitly accepted.

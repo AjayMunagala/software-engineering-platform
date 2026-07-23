@@ -141,3 +141,9 @@ JSON evidence. Optional variables select the label, pinned commit, output path,
 controlled stale path, cancellation delay, and large-repository isolation
 behavior. The harness executes no target-repository commands and downloads no
 dependencies.
+
+Phase 2.2.9 stabilization reduced OpenTelemetry peak heap from 1,384.6 MiB to
+1,059.1 MiB and Kubernetes peak heap from 5.08–5.25 GiB to 3.88–3.92 GiB while
+preserving accepted artifact hashes and omission counts. Public API review and
+release evidence are complete locally; the code remains `0.1.0` until explicit
+engineering acceptance authorizes version promotion and tagging.

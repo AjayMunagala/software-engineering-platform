@@ -3,7 +3,7 @@
 ## Document Status
 
 - Phase: 2.2.7 candidate integration
-- Status: Phase 2.2.8 accepted; Phase 2.2.9 stabilization authorized
+- Status: Phase 2.2.9 accepted; ordered `1.0.0` freeze in progress
 - Candidate engine version: `0.1.0`
 - Candidate artifact: `go-semantic-inventory` `0.1.0`
 - Stable artifact target: `1.0.0`, only after implementation, stabilization, and real-repository validation
