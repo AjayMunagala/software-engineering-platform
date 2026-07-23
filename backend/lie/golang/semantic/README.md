@@ -100,8 +100,8 @@ network access or downloads, reads no module cache, writes no repository
 files, and persists no source, AST, token, or `go/types` state.
 
 Real-repository validation remains outside this package's implementation scope
-and is performed by the authorized Phase 2.2.8 validation milestone. Phase
-2.2.9 remains unauthorized. A default import of an external
+and was performed and accepted through Phase 2.2.8. Phase 2.2.9 stabilization
+and the `1.0.0` freeze are authorized. A default import of an external
 package keeps an empty local name when no exact package-name proof exists;
 selectors through that unknown name remain unresolved rather than using the
 import-path suffix as a guess. Interface checking likewise does not import
@@ -132,3 +132,12 @@ encoded, err := json.MarshalIndent(inventory.View(), "", "  ")
 `Run` never consumes an earlier `GoSemanticInventory`. Because artifact names
 are single-assignment, a second run requires a new per-run store and therefore
 cannot silently reuse or overwrite previous semantic state.
+
+## Real-Repository Validation Harness
+
+`TestRealRepositoryValidation` is skipped during ordinary tests. Set
+`SEMANTIC_VALIDATION_ROOT` and run the named test to collect the Phase 2.2.8
+JSON evidence. Optional variables select the label, pinned commit, output path,
+controlled stale path, cancellation delay, and large-repository isolation
+behavior. The harness executes no target-repository commands and downloads no
+dependencies.

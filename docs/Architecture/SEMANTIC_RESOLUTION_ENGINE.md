@@ -3,7 +3,7 @@
 ## Document Status
 
 - Phase: 2.2.7 candidate integration
-- Status: Phase 2.2.7 accepted; Phase 2.2.8 real-repository validation authorized
+- Status: Phase 2.2.8 accepted; Phase 2.2.9 stabilization authorized
 - Candidate engine version: `0.1.0`
 - Candidate artifact: `go-semantic-inventory` `0.1.0`
 - Stable artifact target: `1.0.0`, only after implementation, stabilization, and real-repository validation
@@ -314,7 +314,7 @@ The semantic artifact is additive. It does not change or replace either frozen i
 
 ## Approval Gate
 
-Phase 2.2.0 through Phase 2.2.7 are accepted. Phase 2.2.8 real-repository validation alone is authorized; Phase 2.2.9 remains unauthorized. The approved architecture covers:
+Phase 2.2.0 through Phase 2.2.8 are accepted. Phase 2.2.9 stabilization and the `1.0.0` freeze are authorized. The approved architecture covers:
 
 - controlled source re-parsing and digest verification;
 - the authoritative `PackageIdentityProof` contract and supporting artifact;

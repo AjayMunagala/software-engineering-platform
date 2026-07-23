@@ -2,13 +2,13 @@
 
 ## Status
 
-- Current state: Phase 2.2.7 accepted; Phase 2.2.8 authorized
-- Implementation authorization: Phase 2.2.8 real-repository validation only
+- Current state: Phase 2.2.8 accepted; Phase 2.2.9 stabilization authorized
+- Implementation authorization: Phase 2.2.9 stabilization and `1.0.0` freeze only
 - Stable prerequisite: `GoLanguageInventory 1.0.0`
 - Candidate output: `GoSemanticInventory 0.1.0`
 - Stable target: `GoSemanticInventory 1.0.0`
 
-Engineering accepted the Phase 2.2.0 evidence and ADR 0008 on 2026-07-22. Phase 2.2.1 was accepted on 2026-07-22. Phase 2.2.2 through Phase 2.2.7 were accepted on 2026-07-23. Phase 2.2.8 real-repository validation alone is authorized; Phase 2.2.9 remains unauthorized until the Phase 2.2.8 exit gate is explicitly accepted.
+Engineering accepted the Phase 2.2.0 evidence and ADR 0008 on 2026-07-22. Phase 2.2.1 was accepted on 2026-07-22. Phase 2.2.2 through Phase 2.2.8 were accepted on 2026-07-23. Phase 2.2.9 stabilization and the `1.0.0` freeze are authorized; no later milestone is authorized.
 
 Phase 2.2.1 implementation and local validation are complete and accepted. Targeted package and full-backend race tests pass with MSYS2 UCRT64 GCC 16.1.0. See [LIE_PHASE_2_2_1_PACKAGE_IDENTITY.md](../Validation/LIE_PHASE_2_2_1_PACKAGE_IDENTITY.md). Authorization advances only to Phase 2.2.2.
 
@@ -219,6 +219,18 @@ For every repository, record:
 - manually verified samples and classified defects.
 
 Defects use small follow-up commits; do not rewrite published release-candidate history.
+
+Local evidence: five representative open-source repositories, actual
+Kubernetes, one malformed fixture, and one stale-source fixture were validated
+at pinned revisions. Determinism, repository boundaries, explicit failure
+states, package proofs, relationship limits, diagnostics, cancellation, timing,
+and memory were recorded. Validation found and fixed blank-identifier
+reconciliation, struct/interface alias reconciliation, and late reference
+budgeting defects in follow-up commits. Package coverage is 85.8%; shuffled
+tests, full regression, vet, and targeted/full race tests pass. See
+[LIE_PHASE_2_2_8_REAL_REPOSITORY_VALIDATION.md](../Validation/LIE_PHASE_2_2_8_REAL_REPOSITORY_VALIDATION.md).
+Engineering accepted this evidence on 2026-07-23 and authorized Phase 2.2.9
+stabilization and the `1.0.0` freeze.
 
 ## Phase 2.2.9 — Stabilization and `1.0.0` Freeze
 
