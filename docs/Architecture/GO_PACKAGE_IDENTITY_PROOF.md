@@ -3,9 +3,9 @@
 ## Status
 
 - Phase: 2.2 architecture prerequisite
-- Status: Accepted; Phase 2.2.1 implementation authorized on 2026-07-22
-- Candidate artifact: `go-package-identity-inventory` `0.1.0`
-- Stable target: `1.0.0` only after independent validation and API freeze
+- Status: Stable; `1.0.0` frozen on 2026-07-23
+- Artifact: `go-package-identity-inventory` `1.0.0`
+- ID scheme: `go-package-proof-id/v1`
 
 ## Purpose
 
@@ -19,12 +19,12 @@ Package/module/workspace identity is a separate prerequisite concern, not hidden
 
 ```text
 RepositorySnapshot 1.0.0 ─┐
-                          ├─> GoPackageIdentityInventory 0.1.0
+                          ├─> GoPackageIdentityInventory 1.0.0
 GoLanguageInventory 1.0.0 ┘
 
 RepositorySnapshot 1.0.0 ───────┐
 GoLanguageInventory 1.0.0 ──────┼─> GoSemanticInventory 0.1.0
-GoPackageIdentityInventory 0.1.0┘
+GoPackageIdentityInventory 1.0.0┘
 ```
 
 The identity engine reads only manifests present in `RepositorySnapshot`, records the exact digest of every manifest used, and maps only packages already present in `GoLanguageInventory`.
@@ -281,7 +281,7 @@ Phase 2.2.1 validates rule precedence against fixtures containing:
 - stale manifest digests;
 - ambiguous workspace membership.
 
-Engineering accepted ADR 0008 and authorized this package on 2026-07-22. Passing this gate completes only Phase 2.2.1; it does not freeze the candidate artifact or authorize Phase 2.2.2.
+Engineering accepted ADR 0008 and authorized this package on 2026-07-22. Phase 2.2.9 accepted the validated public contract and authorized the `1.0.0` freeze on 2026-07-23.
 
 ## Specification Sources
 

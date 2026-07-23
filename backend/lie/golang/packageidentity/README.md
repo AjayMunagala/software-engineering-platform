@@ -12,12 +12,11 @@ only snapshot-authorized local manifests and the frozen Go syntax inventory.
 
 ## Output
 
-- `GoPackageIdentityInventory 0.1.0`
+- `GoPackageIdentityInventory 1.0.0`
 - ID scheme `go-package-proof-id/v1`
 
-The stabilized candidate also exposes a detached immutable presentation view
-and direct JSON serialization with strict stable enum strings. Promotion to
-`1.0.0` remains pending Phase 2.2.9 engineering acceptance.
+The stable artifact exposes a detached immutable presentation view and direct
+JSON serialization with strict stable enum strings.
 
 ## Boundaries
 
@@ -51,6 +50,4 @@ statement coverage pass on Go 1.26.2/Windows amd64. A 10,000-proof rebuild
 measures 55.0–58.3 ms in the release-gate fixture on the reference workstation.
 Targeted package and full-backend race tests pass with MSYS2 UCRT64 GCC 16.1.0.
 
-The proposed `1.0.0` contract is documented under `docs/API` and `docs/Releases`.
-The candidate version remains unchanged until the Phase 2.2.9 freeze is
-explicitly accepted.
+The frozen `1.0.0` contract is documented under `docs/API` and `docs/Releases`.

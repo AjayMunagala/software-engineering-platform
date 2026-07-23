@@ -52,7 +52,7 @@ Execution evidence: [LIE_PHASE_2_2_0_DESIGN_SPIKE.md](../Validation/LIE_PHASE_2_
 ### Work
 
 - Create `backend/lie/golang/packageidentity` using the eight-file package standard.
-- Produce immutable `GoPackageIdentityInventory 0.1.0` from the snapshot and syntax inventory.
+- Produce immutable `GoPackageIdentityInventory 1.0.0` from the snapshot and syntax inventory.
 - Parse and digest approved `go.mod`, `go.work`, local `replace`, nested-module, and `vendor/modules.txt` evidence.
 - Implement exact proof precedence, ambiguity, staleness, and empty-repository behavior.
 - Exclude the ambient module cache, network, external tools, and directory-suffix guesses.

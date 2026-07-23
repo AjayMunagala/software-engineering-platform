@@ -11,9 +11,9 @@ import (
 
 const (
 	ArtifactName         = "go-package-identity-inventory"
-	ArtifactVersion      = "0.1.0"
+	ArtifactVersion      = "1.0.0"
 	ProofIDSchemeVersion = "go-package-proof-id/v1"
-	engineVersion        = "0.1.0"
+	engineVersion        = "1.0.0"
 )
 
 type ProofKind uint8
@@ -230,7 +230,7 @@ type PackageIdentityStatistics struct {
 	OmittedDiagnostics int            `json:"omitted_diagnostics"`
 }
 
-// GoPackageIdentityInventory is the immutable Phase 2.2.1 candidate artifact.
+// GoPackageIdentityInventory is the immutable Go package-identity artifact.
 type GoPackageIdentityInventory struct {
 	metadata    Metadata
 	sources     []rie.ArtifactReference

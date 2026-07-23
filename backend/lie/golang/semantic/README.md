@@ -86,7 +86,7 @@ authorized. Exact declaration matches are independently marked `resolved`.
 
 - `RepositorySnapshot 1.0.0`
 - `GoLanguageInventory 1.0.0`
-- `GoPackageIdentityInventory 0.1.0`
+- `GoPackageIdentityInventory 1.0.0`
 
 ## Output
 

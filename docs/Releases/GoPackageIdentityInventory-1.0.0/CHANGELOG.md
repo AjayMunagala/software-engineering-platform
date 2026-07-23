@@ -1,6 +1,6 @@
 # GoPackageIdentityInventory Changelog
 
-## 1.0.0 — Release Candidate
+## 1.0.0 — 2026-07-23
 
 - Defined immutable module, workspace, vendor, replacement, and unmanaged
   resolution contexts.
@@ -11,4 +11,4 @@
 - Validated deterministic output, repository boundaries, cancellation,
   coverage, benchmarks, and race safety.
 
-The version constant and tag remain pending Phase 2.2.9 acceptance.
+Released under `go-package-identity-inventory/v1.0.0`.

@@ -53,7 +53,7 @@ The engine consumes exactly three immutable artifacts:
 
 1. `RepositorySnapshot 1.0.0` — authorizes the repository root and ignore-filtered paths.
 2. `GoLanguageInventory 1.0.0` — supplies candidate Go files, content digests, packages, imports, and stable declaration IDs.
-3. `GoPackageIdentityInventory 0.1.0` — supplies exact, digest-backed module/workspace/replace/vendor package mappings.
+3. `GoPackageIdentityInventory 1.0.0` — supplies exact, digest-backed module/workspace/replace/vendor package mappings.
 
 It does not consume mutable `RunContext` fields, framework/build/metadata/summary artifacts, or presentation reports.
 
@@ -109,7 +109,7 @@ Unknown is a valid result. Evidence is stronger than inference.
 ```text
 RepositorySnapshot 1.0.0 ───────┐
 GoLanguageInventory 1.0.0 ──────┼─> validate inputs
-GoPackageIdentityInventory 0.1.0┘
+GoPackageIdentityInventory 1.0.0┘
                                   ↓
                          authorize and verify files
                                   ↓
@@ -307,7 +307,7 @@ The final release gate will be established from a checked-in repeatable benchmar
 ```text
 RepositorySnapshot 1.0.0 ───────┐
 GoLanguageInventory 1.0.0 ──────┼─> GoSemanticInventory 0.1.0 candidate
-GoPackageIdentityInventory 0.1.0┘
+GoPackageIdentityInventory 1.0.0┘
 ```
 
 The semantic artifact is additive. It does not change or replace either frozen input.
@@ -329,7 +329,7 @@ Phase 2.2.0 through Phase 2.2.8 are accepted. Phase 2.2.9 stabilization and the 
 ## Phase 2.2.7 Integration Contract
 
 The candidate integrator reads `RepositorySnapshot 1.0.0`,
-`GoLanguageInventory 1.0.0`, and `GoPackageIdentityInventory 0.1.0` by exact
+`GoLanguageInventory 1.0.0`, and `GoPackageIdentityInventory 1.0.0` by exact
 type from one per-run `rie.ArtifactStore`. It resolves from those facts only,
 then publishes `GoSemanticInventory 0.1.0` through the store's existing
 single-assignment contract.

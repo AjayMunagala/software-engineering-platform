@@ -26,7 +26,7 @@ func TestSingleModuleProducesEvidenceBackedProofs(t *testing.T) {
 		"lib/lib.go": "package lib\nfunc Value() {}\n",
 	}, nil)
 
-	if inventory.ArtifactVersion() != "0.1.0" || inventory.Metadata().IDSchemeVersion != "go-package-proof-id/v1" {
+	if inventory.ArtifactVersion() != "1.0.0" || inventory.Metadata().IDSchemeVersion != "go-package-proof-id/v1" {
 		t.Fatalf("artifact metadata = %+v", inventory.Metadata())
 	}
 	modules := inventory.Modules()
@@ -55,7 +55,7 @@ func TestEngineAndArtifactPublicationContract(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if engine.Name() != "go-package-identity" || engine.Version() != "0.1.0" || engine.ArtifactName() != packageidentity.ArtifactName || strings.TrimSpace(engine.Description()) == "" {
+	if engine.Name() != "go-package-identity" || engine.Version() != "1.0.0" || engine.ArtifactName() != packageidentity.ArtifactName || strings.TrimSpace(engine.Description()) == "" {
 		t.Fatalf("engine metadata: %s %s %s %q", engine.Name(), engine.Version(), engine.ArtifactName(), engine.Description())
 	}
 	inventory := analyze(t, map[string]string{"go.mod": "module example.com/app\n", "main.go": "package main\n"}, nil)

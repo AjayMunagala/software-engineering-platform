@@ -4,9 +4,9 @@
 
 - Milestone: Phase 2.2.1
 - Package: `backend/lie/golang/packageidentity`
-- Candidate artifact: `GoPackageIdentityInventory 0.1.0`
-- Stability: stabilized `1.0.0` release candidate; freeze approval pending
-- Authorization: Phase 2.2.9 contract review
+- Stable artifact: `GoPackageIdentityInventory 1.0.0`
+- Stability: frozen on 2026-07-23
+- Release tag: `go-package-identity-inventory/v1.0.0`
 
 ## Responsibility
 
@@ -121,11 +121,10 @@ The engine:
 
 Semantic relationships, source re-parsing, digest revalidation by consumers, exact standard-library indexing, module-version selection, incremental execution, and external dependency loading remain outside this artifact.
 
-## Proposed 1.0 Freeze
+## 1.0 Compatibility
 
 The Go type names, field names, JSON keys, enum strings, accessor behavior,
 proof ordering, proof precedence, and `go-package-proof-id/v1` algorithm in
-this document are the proposed `1.0.0` contract. Additive fields may be added
+this document are the frozen `1.0.0` contract. Additive fields may be added
 compatibly. Removing or reinterpreting fields, enum values, proof precedence,
-or stable IDs requires a new artifact major version. The code remains at
-`0.1.0` until Phase 2.2.9 engineering acceptance.
+or stable IDs requires a new artifact major version.

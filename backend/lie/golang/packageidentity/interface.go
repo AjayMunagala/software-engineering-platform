@@ -38,7 +38,7 @@ func New(configs ...Config) (Engine, error) {
 	return &engine{config: config}, nil
 }
 
-// InventoryFrom retrieves the candidate artifact from a per-run store.
+// InventoryFrom retrieves the stable artifact from a per-run store.
 func InventoryFrom(store *rie.ArtifactStore) (GoPackageIdentityInventory, bool) {
 	return rie.ArtifactAs[GoPackageIdentityInventory](store, ArtifactName)
 }

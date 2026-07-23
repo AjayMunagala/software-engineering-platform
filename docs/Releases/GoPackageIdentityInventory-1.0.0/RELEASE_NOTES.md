@@ -2,8 +2,8 @@
 
 ## Status
 
-Release candidate. Engineering acceptance, version promotion, and tagging are
-pending.
+Released on 2026-07-23 under the annotated tag
+`go-package-identity-inventory/v1.0.0`.
 
 `GoPackageIdentityInventory` proves repository-local Go import identity from
 snapshot-authorized `go.mod`, `go.work`, local replacement, nested-module, and

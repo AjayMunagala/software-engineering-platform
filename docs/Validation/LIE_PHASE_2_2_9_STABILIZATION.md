@@ -4,8 +4,8 @@
 
 - Date: 2026-07-23
 - Phase 2.2.8 acceptance commit: `d64e9e7`
-- Candidate artifacts: `GoPackageIdentityInventory 0.1.0`,
-  `GoSemanticInventory 0.1.0`
+- Frozen prerequisite: `GoPackageIdentityInventory 1.0.0`
+- Candidate artifact: `GoSemanticInventory 0.1.0`
 - Stabilization implementation: accepted on 2026-07-23
 - Release decision: approved
 - Version promotion and tags: authorized; not yet performed in this report

@@ -26,7 +26,7 @@ The Go Semantic Resolution Engine will use digest-verified ephemeral source re-p
 
 Specifically:
 
-1. It consumes `RepositorySnapshot 1.0.0`, `GoLanguageInventory 1.0.0`, and candidate `GoPackageIdentityInventory 0.1.0`.
+1. It consumes `RepositorySnapshot 1.0.0`, `GoLanguageInventory 1.0.0`, and stable `GoPackageIdentityInventory 1.0.0`.
 2. It reads only Go paths authorized by both artifacts.
 3. It recalculates SHA-256 and analyzes a file only when the digest matches `GoFile.ContentDigest`.
 4. It rebuilds AST/token/type state in memory with `go/parser`, `go/ast`, `go/token`, and bounded `go/types` use.
