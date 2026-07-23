@@ -2,7 +2,7 @@
 
 ## Status
 
-- Design status: Phase 2.2.4 accepted; Phase 2.2.5 authorized
+- Design status: Phase 2.2.5 accepted; Phase 2.2.6 authorized
 - Candidate artifact: `go-semantic-inventory` `0.1.0`
 - Stable target: `1.0.0` after validation and API freeze
 - Prerequisites: `repository-snapshot` `1.0.0`, `go-language-inventory` `1.0.0`, and `go-package-identity-inventory` `0.1.0`
@@ -105,7 +105,7 @@ type SemanticFile struct {
 
 `ContentDigest` is the verified digest analyzed by this engine. It must equal the Phase 2.1 digest. A stale file emits no semantic relations derived from changed source.
 
-In Phase 2.2.2, a digest-matching file became `partial`, not `resolved`, because only source authorization and integrity were proven. Phase 2.2.3 added declarations and Phase 2.2.4 adds receiver/type relations, but files intentionally remain `partial` while references, imports, and interface results are absent. Individual declarations and relationships carry their own evidence-based states.
+In Phase 2.2.2, a digest-matching file became `partial`, not `resolved`, because only source authorization and integrity were proven. Phase 2.2.3 added declarations, Phase 2.2.4 added receiver/type relations, and Phase 2.2.5 adds references/imports. Files intentionally remain `partial` while interface results and compiler-equivalent package checking are absent. Individual declarations and relationships carry their own evidence-based states.
 
 ## Semantic Declarations and Reconciliation
 
@@ -218,6 +218,8 @@ type ImportBinding struct {
 
 An import becomes `resolved` only when `PackageIdentityProofID` names a non-stale resolved proof from the consumed identity inventory. A proven standard-library or dependency identity may retain an external proof ID while leaving `TargetPackageID` empty. Unavailable dependencies are `external`; malformed or unprovable local mappings are `unresolved` or `ambiguous`. Blank imports retain the proof link when available but create no selector scope binding. Proof rules are defined in [GO_PACKAGE_IDENTITY_PROOF.md](GO_PACKAGE_IDENTITY_PROOF.md).
 
+When multiple explicit resolution contexts apply, all fresh usable proofs must agree on the same repository package before the combined import is `resolved`; conflicting targets are `ambiguous`, while stale or incomplete context results prevent resolution. The lexicographically first proof ID is retained only as deterministic evidence after unanimous agreement and is never used to choose between targets. Default local imports use the exact target `GoPackage.Name`. Default external imports do not derive a local name from the import-path suffix; if no exact package name exists, `LocalName` remains empty and selectors through an assumed name remain unresolved. Named, dot, and blank aliases remain exact source facts.
+
 ## Type Relations and Generics
 
 ```go
@@ -247,7 +249,7 @@ type TypeRelation struct {
 
 Type argument text is presentation data. Canonical type identity and source relationships are authoritative.
 
-Phase 2.2.4 emits relations only from declared type contexts. Local declarations and type parameters may resolve to `TargetDeclarationID`; predeclared types use an explicit `builtin:` identity; structural type expressions are exact derived identities; qualified types remain unresolved until import proof consumption is authorized. Relation IDs include owner, kind, source byte offset, and target identity. General identifier/selector references are not emitted here.
+Type relations originate only from declared type contexts. Local declarations and type parameters may resolve to `TargetDeclarationID`; predeclared types use an explicit `builtin:` identity; structural type expressions are exact derived identities. Phase 2.2.5 resolves qualified type targets only through a fresh import binding and exact target-package declaration; unavailable dependencies remain external and missing proof remains unresolved. Relation IDs include owner, kind, source byte offset, and target identity.
 
 ## Interface Satisfaction
 

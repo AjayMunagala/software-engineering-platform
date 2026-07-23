@@ -2,9 +2,9 @@
 
 ## Status
 
-- Phase: Phase 2.2.4 accepted; Phase 2.2.5 authorized
+- Phase: Phase 2.2.5 accepted; Phase 2.2.6 authorized
 - API status: Architecture-approved candidate; not frozen
-- Authorization: Phase 2.2.5 only; Phase 2.2.6 and later remain unauthorized
+- Authorization: Phase 2.2.6 only; Phase 2.2.7 and later remain unauthorized
 - Package: `backend/lie/golang/semantic`
 - Candidate engine version: `0.1.0`
 - Candidate artifact: `go-semantic-inventory` `0.1.0`
@@ -40,7 +40,7 @@ Input rules:
 - Both values are treated as immutable.
 - No framework, build, metadata, summary, mutable run context, or report input is accepted.
 
-Source access is not exposed as arbitrary caller callbacks in the candidate API. Phase 2.2.2 reads only authorized paths beneath `Snapshot.RootPath()`, applies boundary checks, and verifies each Go-file SHA-256 digest against the syntax artifact. Package-identity proofs are accepted as a prerequisite but are not consumed to create import bindings in this milestone. Their manifest evidence must be re-hashed immediately before proof consumption when Phase 2.2.5 is authorized; Phase 2.2.2 does not claim that validation prematurely.
+Source access is not exposed as arbitrary caller callbacks in the candidate API. The engine reads only authorized paths beneath `Snapshot.RootPath()`, applies boundary checks, and verifies each Go-file SHA-256 digest against the syntax artifact. Phase 2.2.5 also re-hashes each repository manifest named by a package-identity proof immediately before consuming it. Stale proof evidence prevents dependent resolved edges without mutating the identity artifact.
 
 ## Engine Contract
 
@@ -86,11 +86,11 @@ Configuration rules:
 - `MaxSourceFileSize` is enforced before reading.
 - `MaxPackageFiles` and `MaxPackageBytes` bound one synchronous package type-check.
 - `MaxDiagnosticsPerFile` is applied before the global `MaxDiagnostics`; omitted diagnostics are counted.
-- `MaxRelationships` deterministically bounds emitted receiver bindings and type relations, and later also bounds reference/import/interface relationships when those milestones are authorized. Omitted relationships are counted and diagnosed.
+- `MaxRelationships` deterministically bounds imports, receiver bindings, type relations, and references in that priority order. Interface relationships join the budget only when their milestone is authorized. Omitted relationships are counted and diagnosed.
 - Reaching a bound creates an explicit partial outcome and diagnostic; the engine never silently truncates.
 - The syntax artifact already decides whether tests are present, so semantic configuration does not reintroduce an `IncludeTests` switch.
 
-Implemented defaults are: at most 8 workers (also bounded by `GOMAXPROCS`), 10 MiB per source file, 2,000 files and 256 MiB per future package operation, 1,000 diagnostics, 50 diagnostics per file, and 1,000,000 future relationships. Package and relationship limits are reserved for the later milestones that perform those operations; Phase 2.2.2 validates them but does not pretend to use them.
+Implemented defaults are: at most 8 workers (also bounded by `GOMAXPROCS`), 10 MiB per source file, 2,000 files and 256 MiB per future package operation, 1,000 diagnostics, 50 diagnostics per file, and 1,000,000 semantic relationships. Package operation limits remain reserved for the later milestone that performs bounded package type checking.
 
 ### Configuration Evolution
 
@@ -176,7 +176,7 @@ Every `Resolve` call is a full rebuild. The API accepts no previous semantic inv
 
 ## Cancellation
 
-Phase 2.2.2 checks context before scheduling work, in every worker, after source I/O, after hashing, and before artifact construction. Later milestones must additionally check at least every 1,024 custom AST nodes and every 256 emitted references/interface candidates, and before/after synchronous parsing and package checking. A synchronous standard-library parse/type-check cannot be interrupted mid-call, so `MaxSourceFileSize`, `MaxPackageFiles`, and `MaxPackageBytes` bound the largest unchecked unit.
+The implementation checks context before scheduling work, in every worker, after source I/O and hashing, during AST traversal, every 256 import/reference candidates, and before artifact construction. Later package-checking milestones must also check before and after each synchronous package operation. A synchronous standard-library parse/type-check cannot be interrupted mid-call, so `MaxSourceFileSize`, `MaxPackageFiles`, and `MaxPackageBytes` bound the largest unchecked unit.
 
 ## Diagnostics
 

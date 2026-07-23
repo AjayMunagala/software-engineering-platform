@@ -40,6 +40,21 @@ Phase 2.2.4 additionally:
 - applies the configured relationship budget with explicit omission counts
   and diagnostics.
 
+Phase 2.2.5 additionally:
+
+- emits stable identifier, selector, type, and instantiation references;
+- resolves lexical, package-local, same-package cross-file, and proven local
+  imported-package targets;
+- models default, named, dot, and blank imports without executing tools;
+- re-hashes every repository manifest used by a package-identity proof before
+  consuming the proof;
+- combines applicable resolution contexts conservatively: they must agree on
+  one fresh target before a repository import is resolved;
+- preserves external, unresolved, ambiguous, and partial states rather than
+  inferring package identities from path suffixes;
+- budgets imports first, then receiver bindings, type relations, and references
+  so foundational import evidence is not silently displaced by derived uses.
+
 Files remain `partial` because later semantic relationships are not yet
 authorized. Exact declaration matches are independently marked `resolved`.
 
@@ -60,8 +75,11 @@ The engine is local and read-only. It executes no commands, performs no
 network access or downloads, reads no module cache, writes no repository
 files, and persists no source, AST, token, or `go/types` state.
 
-References, imports, and interface satisfaction remain outside the authorized
-scope. Phase 2.2.5 and later are not authorized by this package.
+Interface satisfaction remains outside the authorized scope. Phase 2.2.6 and
+later are not authorized by this package. A default import of an external
+package keeps an empty local name when no exact package-name proof exists;
+selectors through that unknown name remain unresolved rather than using the
+import-path suffix as a guess.
 
 ## Package Standard
 

@@ -2,8 +2,8 @@
 
 ## Document Status
 
-- Phase: 2.2.4 receiver and local type binding
-- Status: Phase 2.2.4 accepted; Phase 2.2.5 references and imports authorized
+- Phase: 2.2.6 conditional interface satisfaction
+- Status: Phase 2.2.5 accepted; Phase 2.2.6 authorized
 - Candidate engine version: `0.1.0`
 - Candidate artifact: `go-semantic-inventory` `0.1.0`
 - Stable artifact target: `1.0.0`, only after implementation, stabilization, and real-repository validation
@@ -76,7 +76,7 @@ A missing, changed, unreadable, oversized, or out-of-root file produces a file o
 
 Source bytes, token sets, ASTs, and `go/types` state are ephemeral run data. They are never stored in `GoSemanticInventory` or the shared artifact store.
 
-Phase 2.2.2 validates the package-identity artifact as a prerequisite but creates no import bindings and therefore consumes no individual proof. When Phase 2.2.5 is authorized, the engine must re-hash every manifest listed by a proof immediately before using that proof. A changed manifest then makes the proof stale and prevents dependent resolved edges; the source identity artifact is never mutated.
+Phase 2.2.5 re-hashes every repository manifest listed by a proof immediately before using that proof. A changed manifest makes the consumer treat the proof as stale and prevents dependent resolved edges; the source identity artifact is never mutated. Applicable contexts are combined without environment inference: every usable context must resolve to the same repository package before the import is `resolved`; conflicting targets are `ambiguous`, and stale or incomplete context results remain unresolved.
 
 ## Rebuild and Invalidation Policy
 
@@ -209,6 +209,7 @@ File/package problems produce bounded diagnostics and explicit outcomes where sa
 - `semantic_package_scope_conflict`
 - `semantic_receiver_unresolved`
 - `semantic_receiver_ambiguous`
+- `semantic_package_proof_stale`
 - `semantic_relationship_limit`
 - `semantic_type_error`
 - `semantic_import_unresolved`
@@ -311,7 +312,7 @@ The semantic artifact is additive. It does not change or replace either frozen i
 
 ## Approval Gate
 
-Phase 2.2.0 through Phase 2.2.4 are accepted. Phase 2.2.5 alone is authorized; Phase 2.2.6 and later remain unauthorized. The approved architecture covers:
+Phase 2.2.0 through Phase 2.2.5 are accepted. Phase 2.2.6 alone is authorized; Phase 2.2.7 and later remain unauthorized. The approved architecture covers:
 
 - controlled source re-parsing and digest verification;
 - the authoritative `PackageIdentityProof` contract and supporting artifact;

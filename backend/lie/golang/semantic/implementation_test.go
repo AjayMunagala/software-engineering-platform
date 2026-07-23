@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"sort"
 	"strings"
 	"testing"
 
@@ -304,8 +305,8 @@ type External pkg.Type
 	if !hasTypeRelationKind(relations, TypeRelationInstantiates) {
 		t.Fatal("generic instantiation relations were not emitted")
 	}
-	if len(inventory.References()) != 0 || len(inventory.ImportBindings()) != 0 || len(inventory.InterfaceSatisfaction()) != 0 {
-		t.Fatal("Phase 2.2.4 emitted unauthorized later relationships")
+	if len(inventory.References()) == 0 || len(inventory.ImportBindings()) != 0 || len(inventory.InterfaceSatisfaction()) != 0 {
+		t.Fatal("Phase 2.2.5 references should be present without inventing imports or interface results")
 	}
 }
 
@@ -321,6 +322,195 @@ func TestReceiverAndTypeRelationsAreDeterministicAcrossWorkers(t *testing.T) {
 	left, right := resolve(t, input, &one), resolve(t, input, &eight)
 	if !reflect.DeepEqual(left.ReceiverBindings(), right.ReceiverBindings()) || !reflect.DeepEqual(left.TypeRelations(), right.TypeRelations()) || !reflect.DeepEqual(left.Diagnostics(), right.Diagnostics()) {
 		t.Fatal("worker count changed receiver/type output")
+	}
+}
+
+func TestReferencesAndDefaultImportResolveAcrossLocalPackages(t *testing.T) {
+	input := prerequisites(t, map[string]string{
+		"go.mod":        "module example.com/app\n\ngo 1.26\n",
+		"lib/lib.go":    "package lib\nfunc Value() int { return 1 }\n",
+		"app/helper.go": "package app\nfunc helper() int { return 2 }\n",
+		"app/main.go":   "package app\nimport \"example.com/app/lib\"\nfunc Run() int { return lib.Value() + helper() }\n",
+	})
+	inventory := resolve(t, input, nil)
+	binding := findImportBinding(t, inventory.ImportBindings(), "example.com/app/lib")
+	if binding.Status != ResolutionResolved || binding.LocalName != "lib" || binding.TargetPackageID == "" || binding.PackageIdentityProofID == "" {
+		t.Fatalf("import binding = %+v", binding)
+	}
+	value := findDeclaration(t, inventory.Declarations(), "Value", DeclarationFunction)
+	helper := findDeclaration(t, inventory.Declarations(), "helper", DeclarationFunction)
+	if reference := findReference(t, inventory.References(), "Value", ReferenceSelector); reference.Status != ResolutionResolved || reference.TargetDeclarationID != value.ID {
+		t.Fatalf("selector reference = %+v", reference)
+	}
+	if reference := findReference(t, inventory.References(), "helper", ReferenceIdentifier); reference.Status != ResolutionResolved || reference.TargetDeclarationID != helper.ID {
+		t.Fatalf("cross-file reference = %+v", reference)
+	}
+	if inventory.Statistics().ReferencesByStatus[ResolutionResolved.String()] < 2 || inventory.Statistics().ImportBindingsByStatus[ResolutionResolved.String()] != 1 {
+		t.Fatalf("statistics = %+v", inventory.Statistics())
+	}
+}
+
+func TestNamedExternalBlankAndDotImportsAreIntentional(t *testing.T) {
+	input := prerequisites(t, map[string]string{
+		"go.mod":      "module example.com/app\n\ngo 1.26\n",
+		"shared/x.go": "package shared\nfunc Shared() int { return 1 }\n",
+		"main.go": `package app
+import (
+    ext "example.net/external"
+    _ "example.net/driver"
+    . "example.com/app/shared"
+)
+func Run() int { ext.Call(); return Shared() }
+`,
+	})
+	inventory := resolve(t, input, nil)
+	external := findImportBinding(t, inventory.ImportBindings(), "example.net/external")
+	blank := findImportBinding(t, inventory.ImportBindings(), "example.net/driver")
+	dot := findImportBinding(t, inventory.ImportBindings(), "example.com/app/shared")
+	if external.Status != ResolutionExternal || external.LocalName != "ext" || external.PackageIdentityProofID == "" {
+		t.Fatalf("external import = %+v", external)
+	}
+	if blank.Status != ResolutionExternal || blank.LocalName != "_" || blank.AliasKind != "blank" {
+		t.Fatalf("blank import = %+v", blank)
+	}
+	if dot.Status != ResolutionResolved || dot.LocalName != "." || dot.AliasKind != "dot" {
+		t.Fatalf("dot import = %+v", dot)
+	}
+	call := findReference(t, inventory.References(), "Call", ReferenceSelector)
+	if call.Status != ResolutionExternal || call.ExternalIdentity != "example.net/external.Call" {
+		t.Fatalf("external selector = %+v", call)
+	}
+	shared := findDeclaration(t, inventory.Declarations(), "Shared", DeclarationFunction)
+	used := findReference(t, inventory.References(), "Shared", ReferenceIdentifier)
+	if used.Status != ResolutionResolved || used.TargetDeclarationID != shared.ID {
+		t.Fatalf("dot-import reference = %+v", used)
+	}
+}
+
+func TestLexicalShadowingWinsAndAmbiguousPackageReferencesStayExplicit(t *testing.T) {
+	input := prerequisites(t, map[string]string{
+		"a.go": "package scope\nvar Value = 1\nvar Duplicate = 1\n",
+		"b.go": "package scope\nvar Duplicate = 2\nfunc Run() int { Value := 3; _ = Value; return Duplicate }\n",
+	})
+	inventory := resolve(t, input, nil)
+	run := findDeclaration(t, inventory.Declarations(), "Run", DeclarationFunction)
+	local := ownedDeclaration(t, inventory.Declarations(), run.ID, "Value", DeclarationVariable)
+	var shadowed SemanticReference
+	for _, reference := range inventory.References() {
+		if reference.Name == "Value" && reference.OwnerDeclarationID == run.ID && reference.Status == ResolutionResolved {
+			shadowed = reference
+		}
+	}
+	if shadowed.TargetDeclarationID != local.ID {
+		t.Fatalf("shadowed reference = %+v, local = %+v", shadowed, local)
+	}
+	ambiguous := findReference(t, inventory.References(), "Duplicate", ReferenceIdentifier)
+	if ambiguous.Status != ResolutionAmbiguous || len(ambiguous.CandidateDeclarationIDs) != 2 || !sort.StringsAreSorted(ambiguous.CandidateDeclarationIDs) {
+		t.Fatalf("ambiguous reference = %+v", ambiguous)
+	}
+}
+
+func TestLocalValueShadowsImportAliasAndUnexportedImportsDoNotResolve(t *testing.T) {
+	input := prerequisites(t, map[string]string{
+		"go.mod":     "module example.com/app\n\ngo 1.26\n",
+		"lib/lib.go": "package lib\nfunc Hidden() {}\nfunc hidden() {}\n",
+		"main.go": `package app
+import "example.com/app/lib"
+func Imported() { lib.hidden() }
+func Shadowed() { lib := struct{ Hidden func() }{}; lib.Hidden() }
+`,
+	})
+	inventory := resolve(t, input, nil)
+	for _, reference := range inventory.References() {
+		if reference.Name == "hidden" && reference.Kind == ReferenceSelector && reference.Status != ResolutionUnresolved {
+			t.Fatalf("unexported imported selector resolved: %+v", reference)
+		}
+	}
+	shadowed := findDeclaration(t, inventory.Declarations(), "Shadowed", DeclarationFunction)
+	local := ownedDeclaration(t, inventory.Declarations(), shadowed.ID, "lib", DeclarationVariable)
+	base := findOwnedReference(t, inventory.References(), shadowed.ID, "lib", ReferenceIdentifier)
+	if base.Status != ResolutionResolved || base.TargetDeclarationID != local.ID {
+		t.Fatalf("shadowed import base = %+v", base)
+	}
+	selector := findOwnedReference(t, inventory.References(), shadowed.ID, "Hidden", ReferenceSelector)
+	if selector.Status != ResolutionUnresolved || selector.ExternalIdentity != "" {
+		t.Fatalf("local field selector was treated as import: %+v", selector)
+	}
+}
+
+func TestStalePackageProofPreventsImportResolution(t *testing.T) {
+	root, input := prerequisitesAt(t, t.TempDir(), map[string]string{
+		"go.mod":     "module example.com/app\n\ngo 1.26\n",
+		"lib/lib.go": "package lib\nfunc Value() {}\n",
+		"main.go":    "package app\nimport \"example.com/app/lib\"\nfunc Run() { lib.Value() }\n",
+	})
+	if err := os.WriteFile(filepath.Join(root, "go.mod"), []byte("module example.com/changed\n\ngo 1.26\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	inventory := resolve(t, input, nil)
+	binding := findImportBinding(t, inventory.ImportBindings(), "example.com/app/lib")
+	if binding.Status != ResolutionUnresolved || binding.TargetPackageID != "" || binding.PackageIdentityProofID != "" || !hasDiagnostic(inventory.Diagnostics(), "semantic_package_proof_stale") {
+		t.Fatalf("binding=%+v diagnostics=%+v", binding, inventory.Diagnostics())
+	}
+}
+
+func TestApplicablePackageProofsRequireUnanimousFreshAgreement(t *testing.T) {
+	reader, err := newSourceReader(t.TempDir(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer reader.close()
+	proof := func(id, target string, status packageidentity.ProofStatus) packageidentity.PackageIdentityProof {
+		return packageidentity.PackageIdentityProof{ID: id, TargetPackageID: target, Status: status}
+	}
+	status, target, proofID, stale := combinePackageProofs(reader, []packageidentity.PackageIdentityProof{
+		proof("a", "pkg", packageidentity.ProofResolved), proof("b", "pkg", packageidentity.ProofResolved),
+	}, map[string]bool{}, defaultMaxSourceFileSize)
+	if status != ResolutionResolved || target != "pkg" || proofID != "a" || stale {
+		t.Fatalf("unanimous result = %s %q %q stale=%t", status, target, proofID, stale)
+	}
+	status, _, _, _ = combinePackageProofs(reader, []packageidentity.PackageIdentityProof{
+		proof("a", "one", packageidentity.ProofResolved), proof("b", "two", packageidentity.ProofResolved),
+	}, map[string]bool{}, defaultMaxSourceFileSize)
+	if status != ResolutionAmbiguous {
+		t.Fatalf("conflicting result = %s", status)
+	}
+	status, _, _, _ = combinePackageProofs(reader, []packageidentity.PackageIdentityProof{
+		proof("a", "pkg", packageidentity.ProofResolved), proof("b", "", packageidentity.ProofExternal),
+	}, map[string]bool{}, defaultMaxSourceFileSize)
+	if status != ResolutionUnresolved {
+		t.Fatalf("incomplete context result = %s", status)
+	}
+}
+
+func TestReferencesAndImportsAreDeterministicAcrossWorkers(t *testing.T) {
+	input := prerequisites(t, map[string]string{
+		"go.mod":     "module example.com/app\n\ngo 1.26\n",
+		"lib/lib.go": "package lib\nfunc Value() int { return 1 }\n",
+		"main.go":    "package app\nimport \"example.com/app/lib\"\nfunc Run() int { return lib.Value() }\n",
+	})
+	one, eight := DefaultConfig(), DefaultConfig()
+	one.MaxWorkers, eight.MaxWorkers = 1, 8
+	left, right := resolve(t, input, &one), resolve(t, input, &eight)
+	if !reflect.DeepEqual(left.References(), right.References()) || !reflect.DeepEqual(left.ImportBindings(), right.ImportBindings()) || !reflect.DeepEqual(left.Diagnostics(), right.Diagnostics()) {
+		t.Fatal("worker count changed reference/import output")
+	}
+}
+
+func TestRelationshipBudgetPreservesImportsBeforeDerivedReferences(t *testing.T) {
+	input := prerequisites(t, map[string]string{
+		"go.mod":     "module example.com/app\n\ngo 1.26\n",
+		"lib/lib.go": "package lib\nfunc Value() int { return 1 }\n",
+		"main.go":    "package app\nimport \"example.com/app/lib\"\nfunc Run() int { return lib.Value() + lib.Value() }\n",
+	})
+	config := DefaultConfig()
+	config.MaxRelationships = 1
+	inventory := resolve(t, input, &config)
+	if len(inventory.ImportBindings()) != 1 || len(inventory.ReceiverBindings()) != 0 || len(inventory.TypeRelations()) != 0 || len(inventory.References()) != 0 {
+		t.Fatalf("budgeted collections: imports=%d receivers=%d types=%d references=%d", len(inventory.ImportBindings()), len(inventory.ReceiverBindings()), len(inventory.TypeRelations()), len(inventory.References()))
+	}
+	if inventory.Statistics().OmittedRelationships == 0 || !hasDiagnostic(inventory.Diagnostics(), "semantic_relationship_limit") {
+		t.Fatalf("statistics=%+v diagnostics=%+v", inventory.Statistics(), inventory.Diagnostics())
 	}
 }
 
@@ -818,6 +1008,39 @@ func findReceiverBinding(t *testing.T, bindings []ReceiverBinding, methodName st
 	}
 	t.Fatalf("receiver binding for %s not found in %+v", methodName, bindings)
 	return ReceiverBinding{}
+}
+
+func findImportBinding(t *testing.T, bindings []ImportBinding, importPath string) ImportBinding {
+	t.Helper()
+	for _, binding := range bindings {
+		if binding.ImportPath == importPath {
+			return binding
+		}
+	}
+	t.Fatalf("import binding %s not found in %+v", importPath, bindings)
+	return ImportBinding{}
+}
+
+func findReference(t *testing.T, references []SemanticReference, name string, kind ReferenceKind) SemanticReference {
+	t.Helper()
+	for _, reference := range references {
+		if reference.Name == name && reference.Kind == kind {
+			return reference
+		}
+	}
+	t.Fatalf("reference %s (%s) not found in %+v", name, kind, references)
+	return SemanticReference{}
+}
+
+func findOwnedReference(t *testing.T, references []SemanticReference, owner, name string, kind ReferenceKind) SemanticReference {
+	t.Helper()
+	for _, reference := range references {
+		if reference.OwnerDeclarationID == owner && reference.Name == name && reference.Kind == kind {
+			return reference
+		}
+	}
+	t.Fatalf("owned reference %s (%s) under %s not found in %+v", name, kind, owner, references)
+	return SemanticReference{}
 }
 
 func ownedDeclaration(t *testing.T, declarations []SemanticDeclaration, owner, name string, kind DeclarationKind) SemanticDeclaration {

@@ -69,8 +69,8 @@ RepositorySnapshot 1.0.0 ──────┐
 GoLanguageInventory 1.0.0 ─────┘       └── GoPackageIdentityInventory 0.1.0
 
 RepositorySnapshot 1.0.0 ───────────────┐
-GoLanguageInventory 1.0.0 ───────────────┼── Go Semantic Resolution Engine (through Phase 2.2.4 candidate)
+GoLanguageInventory 1.0.0 ───────────────┼── Go Semantic Resolution Engine (through Phase 2.2.5 candidate)
 GoPackageIdentityInventory 0.1.0 ────────┘       └── GoSemanticInventory 0.1.0 candidate
 ```
 
-`GoPackageIdentityInventory 0.1.0` is a candidate contract and does not change the frozen RIE or Phase 2.1 artifacts. The semantic candidate now verifies source and publishes declarations, exact local receiver bindings, and bounded declared-type relations without mutating prerequisites or persisting AST/scope state. Reference/import resolution and interface satisfaction remain gated behind Phase 2.2.5 and later approvals.
+`GoPackageIdentityInventory 0.1.0` is a candidate contract and does not change the frozen RIE or Phase 2.1 artifacts. The semantic candidate now verifies source and publishes declarations, exact local receiver bindings, bounded declared-type relations, references, and proof-backed import bindings without mutating prerequisites or persisting AST/scope state. Interface satisfaction remains gated behind Phase 2.2.6 approval.

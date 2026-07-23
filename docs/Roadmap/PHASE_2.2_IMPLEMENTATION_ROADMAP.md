@@ -2,13 +2,13 @@
 
 ## Status
 
-- Current state: Phase 2.2.4 accepted; Phase 2.2.5 authorized
-- Implementation authorization: Phase 2.2.5 only
+- Current state: Phase 2.2.5 accepted; Phase 2.2.6 authorized
+- Implementation authorization: Phase 2.2.6 only
 - Stable prerequisite: `GoLanguageInventory 1.0.0`
 - Candidate output: `GoSemanticInventory 0.1.0`
 - Stable target: `GoSemanticInventory 1.0.0`
 
-Engineering accepted the Phase 2.2.0 evidence and ADR 0008 on 2026-07-22. Phase 2.2.1 was accepted on 2026-07-22. Phase 2.2.2 through Phase 2.2.4 were accepted on 2026-07-23. Phase 2.2.5 alone is authorized; Phase 2.2.6 and later remain unauthorized until their preceding exit gates are explicitly accepted.
+Engineering accepted the Phase 2.2.0 evidence and ADR 0008 on 2026-07-22. Phase 2.2.1 was accepted on 2026-07-22. Phase 2.2.2 through Phase 2.2.5 were accepted on 2026-07-23. Phase 2.2.6 alone is authorized; Phase 2.2.7 and later remain unauthorized until their preceding exit gates are explicitly accepted.
 
 Phase 2.2.1 implementation and local validation are complete and accepted. Targeted package and full-backend race tests pass with MSYS2 UCRT64 GCC 16.1.0. See [LIE_PHASE_2_2_1_PACKAGE_IDENTITY.md](../Validation/LIE_PHASE_2_2_1_PACKAGE_IDENTITY.md). Authorization advances only to Phase 2.2.2.
 
@@ -138,6 +138,8 @@ Accepted evidence: tests cover cross-file value/pointer/generic receivers, recei
 - Tests cover shadowing, dot imports, blank imports, package aliases, unresolved/external packages, ambiguous candidates, and cross-file references.
 - Relationship bounds create explicit partial outcomes rather than silent truncation.
 - No external tool or network activity is observed.
+
+Accepted evidence: lexical and import-alias shadowing, same-package cross-file references, default/named/dot/blank imports, local/external/unresolved/ambiguous states, stale manifest proof rejection, unanimous/conflicting context handling, deterministic worker output, and explicit relationship limiting pass. Package coverage is 85.6%; shuffled tests, package/full regression, vet, targeted/full race tests, and repeatable 100/1,000-import benchmarks pass. See [LIE_PHASE_2_2_5_REFERENCES_IMPORTS.md](../Validation/LIE_PHASE_2_2_5_REFERENCES_IMPORTS.md). Engineering accepted the exit gate on 2026-07-23 and authorized Phase 2.2.6 only.
 
 ## Phase 2.2.6 — Conditional Interface Satisfaction
 

@@ -53,6 +53,13 @@ func (engine *engine) Resolve(ctx context.Context, input Input) (GoSemanticInven
 			candidatePaths = append(candidatePaths, file.Path)
 		}
 	}
+	for _, proof := range input.PackageIdentities.Proofs() {
+		for _, evidence := range proof.Evidence {
+			if evidence.File != "" {
+				candidatePaths = append(candidatePaths, evidence.File)
+			}
+		}
+	}
 	reader, err := newSourceReader(input.Snapshot.RootPath(), candidatePaths)
 	if err != nil {
 		return GoSemanticInventory{}, err
@@ -90,9 +97,21 @@ func (engine *engine) Resolve(ctx context.Context, input Input) (GoSemanticInven
 		return GoSemanticInventory{}, err
 	}
 
-	files, declarations, receivers, typeRelations, diagnostics, statistics := collectOutcomes(outcomes)
-	receivers, typeRelations, omittedRelationships := limitSemanticRelationships(receivers, typeRelations, engine.config.MaxRelationships)
+	files, declarations, referenceCandidates, receivers, typeRelationCandidates, diagnostics, statistics := collectOutcomes(outcomes)
+	imports, importDiagnostics, err := bindImports(ctx, reader, syntaxFiles, files, input.Syntax.Packages(), input.PackageIdentities.Proofs(), engine.config.MaxSourceFileSize)
+	if err != nil {
+		return GoSemanticInventory{}, err
+	}
+	diagnostics = append(diagnostics, importDiagnostics...)
+	references, err := bindReferences(ctx, declarations, referenceCandidates, imports)
+	if err != nil {
+		return GoSemanticInventory{}, err
+	}
+	typeRelations := bindTypeRelations(declarations, typeRelationCandidates, imports)
+	imports, receivers, typeRelations, references, omittedRelationships := limitSemanticRelationships(imports, receivers, typeRelations, references, engine.config.MaxRelationships)
+	updateReferenceStatistics(files, references, &statistics)
 	statistics.ReceiverBindings = len(receivers)
+	statistics.ImportBindingsByStatus = statusesForImports(imports)
 	statistics.TypeRelations = len(typeRelations)
 	statistics.OmittedRelationships = omittedRelationships
 	if omittedRelationships > 0 {
@@ -105,7 +124,7 @@ func (engine *engine) Resolve(ctx context.Context, input Input) (GoSemanticInven
 	if err := ctx.Err(); err != nil {
 		return GoSemanticInventory{}, err
 	}
-	return newInventory(files, declarations, receivers, typeRelations, diagnostics, statistics), nil
+	return newInventory(files, declarations, references, receivers, imports, typeRelations, diagnostics, statistics), nil
 }
 
 func validateInput(input Input) error {
@@ -207,6 +226,18 @@ func validateInput(input Input) error {
 				return fmt.Errorf("%w: proof %s names unknown candidate %s", ErrArtifactProvenanceMismatch, proof.ID, candidate)
 			}
 		}
+		for _, evidence := range proof.Evidence {
+			if evidence.File == "" {
+				continue
+			}
+			if evidence.ContentDigest == "" {
+				return fmt.Errorf("%w: proof %s has incomplete manifest evidence", ErrArtifactProvenanceMismatch, proof.ID)
+			}
+			isDirectory, exists := entries[evidence.File]
+			if !exists || isDirectory {
+				return fmt.Errorf("%w: proof %s evidence %s is absent from RepositorySnapshot", ErrArtifactProvenanceMismatch, proof.ID, evidence.File)
+			}
+		}
 	}
 	return nil
 }
@@ -241,6 +272,7 @@ type fileOutcome struct {
 	path          string
 	file          SemanticFile
 	declarations  []SemanticDeclaration
+	references    []referenceCandidate
 	receivers     []receiverCandidate
 	typeRelations []typeRelationCandidate
 	diagnostics   []lie.Diagnostic
@@ -308,7 +340,7 @@ func (engine *engine) verifyFile(ctx context.Context, reader *sourceReader, sour
 	}
 	outcome.file.Status = SemanticFilePartial
 	outcome.file.ContentDigest = digest
-	declarations, receivers, typeRelations, diagnostics, err := reconcileDeclarations(ctx, data, source, syntaxSymbols)
+	declarations, references, receivers, typeRelations, diagnostics, err := reconcileDeclarations(ctx, data, source, syntaxSymbols)
 	if err != nil {
 		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
 			return outcome
@@ -319,6 +351,7 @@ func (engine *engine) verifyFile(ctx context.Context, reader *sourceReader, sour
 		return outcome
 	}
 	outcome.declarations = declarations
+	outcome.references = references
 	outcome.receivers = receivers
 	outcome.typeRelations = typeRelations
 	outcome.diagnostics = append(outcome.diagnostics, diagnostics...)
@@ -373,6 +406,15 @@ func (scope *lexicalScope) lookup(name string) []string {
 	return nil
 }
 
+func (scope *lexicalScope) lookupBeforePackage(name string) []string {
+	for current := scope; current != nil && current.kind != scopePackage; current = current.parent {
+		if identifiers := current.declarations[name]; len(identifiers) > 0 {
+			return append([]string(nil), identifiers...)
+		}
+	}
+	return nil
+}
+
 func newLexicalScope(kind lexicalScopeKind, parent *lexicalScope) *lexicalScope {
 	return &lexicalScope{kind: kind, parent: parent, declarations: make(map[string][]string)}
 }
@@ -419,35 +461,54 @@ type typeRelationCandidate struct {
 	typeArguments      []string
 }
 
-type declarationCollector struct {
-	ctx           context.Context
-	fileSet       *token.FileSet
-	path          string
-	fileID        string
-	packageID     string
-	syntax        []golang.GoSymbol
-	syntaxByKey   map[syntaxDeclarationKey][]golang.GoSymbol
-	matched       map[string]bool
-	declarations  []SemanticDeclaration
-	receivers     []receiverCandidate
-	typeRelations []typeRelationCandidate
-	diagnostics   []lie.Diagnostic
-	packageScope  *lexicalScope
-	fileScope     *lexicalScope
+type referenceCandidate struct {
+	name                string
+	kind                ReferenceKind
+	fileID              string
+	packageID           string
+	ownerDeclarationID  string
+	location            lie.SourceRange
+	localCandidates     []string
+	qualifier           string
+	qualifierCandidates []string
+	selectorBase        bool
 }
 
-func reconcileDeclarations(ctx context.Context, data []byte, source golang.GoFile, syntax []golang.GoSymbol) ([]SemanticDeclaration, []receiverCandidate, []typeRelationCandidate, []lie.Diagnostic, error) {
+type declarationCollector struct {
+	ctx                  context.Context
+	fileSet              *token.FileSet
+	path                 string
+	fileID               string
+	packageID            string
+	syntax               []golang.GoSymbol
+	syntaxByKey          map[syntaxDeclarationKey][]golang.GoSymbol
+	matched              map[string]bool
+	declarations         []SemanticDeclaration
+	references           []referenceCandidate
+	receivers            []receiverCandidate
+	typeRelations        []typeRelationCandidate
+	diagnostics          []lie.Diagnostic
+	packageScope         *lexicalScope
+	fileScope            *lexicalScope
+	declarationOffsets   map[int]bool
+	typeReferenceOffsets map[int]bool
+	selectorOffsets      map[int]bool
+	selectorBaseOffsets  map[int]bool
+}
+
+func reconcileDeclarations(ctx context.Context, data []byte, source golang.GoFile, syntax []golang.GoSymbol) ([]SemanticDeclaration, []referenceCandidate, []receiverCandidate, []typeRelationCandidate, []lie.Diagnostic, error) {
 	fileSet := token.NewFileSet()
 	parsed, err := parser.ParseFile(fileSet, source.Path, data, parser.SkipObjectResolution|parser.AllErrors)
 	if err != nil {
-		return nil, nil, nil, nil, err
+		return nil, nil, nil, nil, nil, err
 	}
 	packageScope := newLexicalScope(scopePackage, nil)
 	collector := &declarationCollector{
 		ctx: ctx, fileSet: fileSet, path: source.Path, fileID: source.ID, packageID: source.PackageID,
 		syntax: syntax, syntaxByKey: make(map[syntaxDeclarationKey][]golang.GoSymbol), matched: make(map[string]bool),
-		declarations: []SemanticDeclaration{}, receivers: []receiverCandidate{}, typeRelations: []typeRelationCandidate{}, diagnostics: []lie.Diagnostic{}, packageScope: packageScope,
-		fileScope: newLexicalScope(scopeFile, packageScope),
+		declarations: []SemanticDeclaration{}, references: []referenceCandidate{}, receivers: []receiverCandidate{}, typeRelations: []typeRelationCandidate{}, diagnostics: []lie.Diagnostic{}, packageScope: packageScope,
+		fileScope:          newLexicalScope(scopeFile, packageScope),
+		declarationOffsets: make(map[int]bool), typeReferenceOffsets: make(map[int]bool), selectorOffsets: make(map[int]bool), selectorBaseOffsets: make(map[int]bool),
 	}
 	for _, symbol := range syntax {
 		key := syntaxDeclarationKey{kind: symbol.Kind, name: symbol.Name, start: symbol.Location.Start.Offset, end: symbol.Location.End.Offset}
@@ -455,7 +516,7 @@ func reconcileDeclarations(ctx context.Context, data []byte, source golang.GoFil
 	}
 	for _, declaration := range parsed.Decls {
 		if err := ctx.Err(); err != nil {
-			return nil, nil, nil, nil, err
+			return nil, nil, nil, nil, nil, err
 		}
 		collector.collectTopLevel(declaration)
 	}
@@ -466,7 +527,16 @@ func reconcileDeclarations(ctx context.Context, data []byte, source golang.GoFil
 		}
 		return collector.declarations[i].ID < collector.declarations[j].ID
 	})
-	return collector.declarations, collector.receivers, collector.typeRelations, collector.diagnostics, nil
+	sort.Slice(collector.references, func(i, j int) bool {
+		if collector.references[i].location.Start.Offset != collector.references[j].location.Start.Offset {
+			return collector.references[i].location.Start.Offset < collector.references[j].location.Start.Offset
+		}
+		if collector.references[i].kind != collector.references[j].kind {
+			return collector.references[i].kind < collector.references[j].kind
+		}
+		return collector.references[i].name < collector.references[j].name
+	})
+	return collector.declarations, collector.references, collector.receivers, collector.typeRelations, collector.diagnostics, nil
 }
 
 func (collector *declarationCollector) collectTopLevel(node ast.Decl) {
@@ -513,13 +583,22 @@ func (collector *declarationCollector) collectGenDecl(declaration *ast.GenDecl, 
 				continue
 			}
 			typeDisplay := collector.render(specification.Type)
+			owners := make([]string, 0, len(specification.Names))
 			for _, name := range specification.Names {
 				if name.Name == "_" {
 					continue
 				}
 				location := collector.sourceRange(name.Pos(), name.End())
 				collector.collectTypeUses(specification.Type, scope, semanticDeclarationID(collector.path, location.Start.Offset, kind, name.Name))
-				collector.addDeclaration(name.Name, kind, typeDisplay, location, owner, scope, topLevel, syntaxKind)
+				semantic := collector.addDeclaration(name.Name, kind, typeDisplay, location, owner, scope, topLevel, syntaxKind)
+				owners = append(owners, semantic.ID)
+			}
+			for index, value := range specification.Values {
+				valueOwner := owner
+				if len(owners) > 0 {
+					valueOwner = owners[min(index, len(owners)-1)]
+				}
+				collector.collectExpressionReferences(value, scope, valueOwner)
 			}
 		}
 	}
@@ -749,7 +828,44 @@ func (collector *declarationCollector) collectTypeUses(expression ast.Expr, scop
 	}
 	walkTypeExpression(expression, func(kind TypeRelationKind, current ast.Expr) {
 		collector.typeRelations = append(collector.typeRelations, collector.typeRelationCandidate(kind, current, scope, owner))
+		collector.addTypeReference(kind, current, scope, owner)
 	})
+}
+
+func (collector *declarationCollector) addTypeReference(relationKind TypeRelationKind, expression ast.Expr, scope *lexicalScope, owner string) {
+	kind := ReferenceType
+	if relationKind == TypeRelationInstantiates {
+		kind = ReferenceInstantiation
+	}
+	for {
+		switch typed := expression.(type) {
+		case *ast.ParenExpr:
+			expression = typed.X
+		case *ast.StarExpr:
+			expression = typed.X
+		case *ast.IndexExpr:
+			expression = typed.X
+		case *ast.IndexListExpr:
+			expression = typed.X
+		case *ast.Ident:
+			collector.typeReferenceOffsets[collector.fileSet.Position(typed.Pos()).Offset] = true
+			collector.addReference(typed.Name, kind, typed.Pos(), typed.End(), scope, owner, "")
+			return
+		case *ast.SelectorExpr:
+			qualifier := ""
+			if identifier, ok := typed.X.(*ast.Ident); ok {
+				qualifier = identifier.Name
+				collector.selectorBaseOffsets[collector.fileSet.Position(identifier.Pos()).Offset] = true
+			}
+			offset := collector.fileSet.Position(typed.Sel.Pos()).Offset
+			collector.typeReferenceOffsets[offset] = true
+			collector.selectorOffsets[offset] = true
+			collector.addReference(typed.Sel.Name, kind, typed.Sel.Pos(), typed.Sel.End(), scope, owner, qualifier)
+			return
+		default:
+			return
+		}
+	}
 }
 
 func (collector *declarationCollector) typeRelationCandidate(kind TypeRelationKind, expression ast.Expr, scope *lexicalScope, owner string) typeRelationCandidate {
@@ -896,9 +1012,60 @@ func (collector *declarationCollector) collectBody(body *ast.BlockStmt, initialS
 		case *ast.LabeledStmt:
 			labelScope := current.nearestFunction()
 			collector.addDeclaration(typed.Label.Name, DeclarationLabel, "", collector.sourceRange(typed.Label.Pos(), typed.Label.End()), owner, labelScope, false, 0)
+		case *ast.SelectorExpr:
+			qualifier := ""
+			if identifier, ok := typed.X.(*ast.Ident); ok {
+				qualifier = identifier.Name
+			}
+			offset := collector.fileSet.Position(typed.Sel.Pos()).Offset
+			collector.selectorOffsets[offset] = true
+			if !collector.typeReferenceOffsets[offset] {
+				collector.addReference(typed.Sel.Name, ReferenceSelector, typed.Sel.Pos(), typed.Sel.End(), current, owner, qualifier)
+			}
+		case *ast.Ident:
+			offset := collector.fileSet.Position(typed.Pos()).Offset
+			if typed.Name != "_" && !collector.declarationOffsets[offset] && !collector.selectorOffsets[offset] && !collector.typeReferenceOffsets[offset] {
+				collector.addReference(typed.Name, ReferenceIdentifier, typed.Pos(), typed.End(), current, owner, "")
+			}
 		}
 		markers = append(markers, pushed)
 		return collector.ctx.Err() == nil
+	})
+}
+
+func (collector *declarationCollector) collectExpressionReferences(expression ast.Expr, scope *lexicalScope, owner string) {
+	if expression == nil {
+		return
+	}
+	selectorOffsets := make(map[int]bool)
+	ast.Inspect(expression, func(node ast.Node) bool {
+		switch typed := node.(type) {
+		case *ast.SelectorExpr:
+			qualifier := ""
+			if identifier, ok := typed.X.(*ast.Ident); ok {
+				qualifier = identifier.Name
+				collector.selectorBaseOffsets[collector.fileSet.Position(identifier.Pos()).Offset] = true
+			}
+			offset := collector.fileSet.Position(typed.Sel.Pos()).Offset
+			selectorOffsets[offset] = true
+			collector.addReference(typed.Sel.Name, ReferenceSelector, typed.Sel.Pos(), typed.Sel.End(), scope, owner, qualifier)
+		case *ast.Ident:
+			offset := collector.fileSet.Position(typed.Pos()).Offset
+			if typed.Name != "_" && !selectorOffsets[offset] {
+				collector.addReference(typed.Name, ReferenceIdentifier, typed.Pos(), typed.End(), scope, owner, "")
+			}
+		}
+		return collector.ctx.Err() == nil
+	})
+}
+
+func (collector *declarationCollector) addReference(name string, kind ReferenceKind, start, end token.Pos, scope *lexicalScope, owner, qualifier string) {
+	collector.references = append(collector.references, referenceCandidate{
+		name: name, kind: kind, fileID: collector.fileID, packageID: collector.packageID,
+		ownerDeclarationID: owner, location: collector.sourceRange(start, end),
+		localCandidates: scope.lookupBeforePackage(name), qualifier: qualifier,
+		qualifierCandidates: scope.lookupBeforePackage(qualifier),
+		selectorBase:        collector.selectorBaseOffsets[collector.fileSet.Position(start).Offset],
 	})
 }
 
@@ -934,6 +1101,7 @@ func (collector *declarationCollector) addDeclaration(name string, kind Declarat
 		}
 	}
 	collector.declarations = append(collector.declarations, declaration)
+	collector.declarationOffsets[location.Start.Offset] = true
 	scope.declare(name, declaration.ID)
 	return declaration
 }
@@ -988,7 +1156,7 @@ func declarationDiagnostic(severity lie.Severity, code, message string, location
 	return lie.Diagnostic{Engine: "go-semantic", Severity: severity, Code: code, Message: message, Location: &location}
 }
 
-func collectOutcomes(outcomes []fileOutcome) ([]SemanticFile, []SemanticDeclaration, []ReceiverBinding, []TypeRelation, []lie.Diagnostic, SemanticStatistics) {
+func collectOutcomes(outcomes []fileOutcome) ([]SemanticFile, []SemanticDeclaration, []referenceCandidate, []ReceiverBinding, []typeRelationCandidate, []lie.Diagnostic, SemanticStatistics) {
 	sort.Slice(outcomes, func(i, j int) bool {
 		if outcomes[i].path != outcomes[j].path {
 			return outcomes[i].path < outcomes[j].path
@@ -997,6 +1165,7 @@ func collectOutcomes(outcomes []fileOutcome) ([]SemanticFile, []SemanticDeclarat
 	})
 	files := make([]SemanticFile, 0, len(outcomes))
 	declarations := make([]SemanticDeclaration, 0)
+	referenceCandidates := make([]referenceCandidate, 0)
 	receiverCandidates := make([]receiverCandidate, 0)
 	typeRelationCandidates := make([]typeRelationCandidate, 0)
 	diagnostics := make([]lie.Diagnostic, 0)
@@ -1005,6 +1174,7 @@ func collectOutcomes(outcomes []fileOutcome) ([]SemanticFile, []SemanticDeclarat
 	for _, outcome := range outcomes {
 		files = append(files, outcome.file)
 		declarations = append(declarations, outcome.declarations...)
+		referenceCandidates = append(referenceCandidates, outcome.references...)
 		receiverCandidates = append(receiverCandidates, outcome.receivers...)
 		typeRelationCandidates = append(typeRelationCandidates, outcome.typeRelations...)
 		diagnostics = append(diagnostics, outcome.diagnostics...)
@@ -1025,7 +1195,6 @@ func collectOutcomes(outcomes []fileOutcome) ([]SemanticFile, []SemanticDeclarat
 	diagnostics = append(diagnostics, scopeDiagnostics...)
 	receivers, receiverDiagnostics := bindReceivers(declarations, receiverCandidates)
 	diagnostics = append(diagnostics, receiverDiagnostics...)
-	typeRelations := bindTypeRelations(declarations, typeRelationCandidates)
 	sort.Slice(declarations, func(i, j int) bool {
 		if declarations[i].Location.File != declarations[j].Location.File {
 			return declarations[i].Location.File < declarations[j].Location.File
@@ -1050,8 +1219,7 @@ func collectOutcomes(outcomes []fileOutcome) ([]SemanticFile, []SemanticDeclarat
 		}
 	}
 	statistics.ReceiverBindings = len(receivers)
-	statistics.TypeRelations = len(typeRelations)
-	return files, declarations, receivers, typeRelations, diagnostics, statistics
+	return files, declarations, referenceCandidates, receivers, typeRelationCandidates, diagnostics, statistics
 }
 
 func reconcilePackageScopes(declarations []SemanticDeclaration) ([]SemanticDeclaration, []lie.Diagnostic) {
@@ -1133,12 +1301,323 @@ func bindReceivers(declarations []SemanticDeclaration, candidates []receiverCand
 	return bindings, diagnostics
 }
 
-func bindTypeRelations(declarations []SemanticDeclaration, candidates []typeRelationCandidate) []TypeRelation {
+func bindImports(ctx context.Context, reader *sourceReader, syntaxFiles []golang.GoFile, semanticFiles []SemanticFile, packages []golang.GoPackage, proofs []packageidentity.PackageIdentityProof, maximumBytes int64) ([]ImportBinding, []lie.Diagnostic, error) {
+	fileStatuses := make(map[string]SemanticFileStatus, len(semanticFiles))
+	for _, file := range semanticFiles {
+		fileStatuses[file.FileID] = file.Status
+	}
+	packageNames := make(map[string]string, len(packages))
+	for _, pkg := range packages {
+		packageNames[pkg.ID] = pkg.Name
+	}
+	proofsByImport := make(map[string][]packageidentity.PackageIdentityProof)
+	for _, proof := range proofs {
+		key := proof.ImportingPackageID + "\x00" + proof.ImportPath
+		proofsByImport[key] = append(proofsByImport[key], proof)
+	}
+	for key := range proofsByImport {
+		sort.Slice(proofsByImport[key], func(i, j int) bool { return proofsByImport[key][i].ID < proofsByImport[key][j].ID })
+	}
+	freshness := make(map[string]bool)
+	bindings := make([]ImportBinding, 0)
+	diagnostics := make([]lie.Diagnostic, 0)
+	for _, file := range syntaxFiles {
+		semanticStatus := fileStatuses[file.ID]
+		if file.Status != golang.FileStatusParsed || (semanticStatus != SemanticFilePartial && semanticStatus != SemanticFileResolved) {
+			continue
+		}
+		for _, source := range file.Imports {
+			if len(bindings)%256 == 0 {
+				if err := ctx.Err(); err != nil {
+					return nil, nil, err
+				}
+			}
+			binding := ImportBinding{
+				ID: importBindingID(file.ID, source), FileID: file.ID, ImportPath: source.Path,
+				AliasKind: source.AliasKind.String(), Location: source.Location, Status: ResolutionUnresolved,
+			}
+			switch source.AliasKind {
+			case golang.ImportAliasNamed:
+				binding.LocalName = source.Alias
+			case golang.ImportAliasBlank:
+				binding.LocalName = "_"
+			case golang.ImportAliasDot:
+				binding.LocalName = "."
+			}
+			matching := proofsByImport[file.PackageID+"\x00"+source.Path]
+			status, target, proofID, stale := combinePackageProofs(reader, matching, freshness, maximumBytes)
+			binding.Status, binding.TargetPackageID, binding.PackageIdentityProofID = status, target, proofID
+			if source.AliasKind == golang.ImportAliasDefault && status == ResolutionResolved {
+				binding.LocalName = packageNames[target]
+			}
+			if stale {
+				diagnostics = append(diagnostics, declarationDiagnostic(lie.SeverityWarning, "semantic_package_proof_stale", fmt.Sprintf("manifest evidence for import %s no longer matches the package-identity proof", source.Path), source.Location))
+			}
+			bindings = append(bindings, binding)
+		}
+	}
+	sort.Slice(bindings, func(i, j int) bool {
+		if bindings[i].Location.File != bindings[j].Location.File {
+			return bindings[i].Location.File < bindings[j].Location.File
+		}
+		if bindings[i].Location.Start.Offset != bindings[j].Location.Start.Offset {
+			return bindings[i].Location.Start.Offset < bindings[j].Location.Start.Offset
+		}
+		return bindings[i].ID < bindings[j].ID
+	})
+	return bindings, diagnostics, nil
+}
+
+func combinePackageProofs(reader *sourceReader, proofs []packageidentity.PackageIdentityProof, freshness map[string]bool, maximumBytes int64) (ResolutionStatus, string, string, bool) {
+	if len(proofs) == 0 {
+		return ResolutionUnresolved, "", "", false
+	}
+	usable := make([]packageidentity.PackageIdentityProof, 0, len(proofs))
+	stale := false
+	for _, proof := range proofs {
+		fresh, known := freshness[proof.ID]
+		if !known {
+			fresh = proofEvidenceFresh(reader, proof, maximumBytes)
+			freshness[proof.ID] = fresh
+		}
+		if !fresh || proof.Status == packageidentity.ProofStale {
+			stale = true
+			continue
+		}
+		usable = append(usable, proof)
+	}
+	if stale || len(usable) == 0 {
+		return ResolutionUnresolved, "", "", stale
+	}
+	targets := make(map[string]struct{})
+	allResolved, allExternal, ambiguous := true, true, false
+	for _, proof := range usable {
+		switch proof.Status {
+		case packageidentity.ProofResolved:
+			allExternal = false
+			if proof.TargetPackageID == "" {
+				allResolved = false
+			} else {
+				targets[proof.TargetPackageID] = struct{}{}
+			}
+		case packageidentity.ProofExternal:
+			allResolved = false
+		case packageidentity.ProofAmbiguous:
+			allResolved, allExternal, ambiguous = false, false, true
+		default:
+			allResolved, allExternal = false, false
+		}
+	}
+	canonicalProof := usable[0].ID
+	if ambiguous || len(targets) > 1 {
+		return ResolutionAmbiguous, "", "", false
+	}
+	if allResolved && len(targets) == 1 {
+		for target := range targets {
+			return ResolutionResolved, target, canonicalProof, false
+		}
+	}
+	if allExternal {
+		return ResolutionExternal, "", canonicalProof, false
+	}
+	return ResolutionUnresolved, "", "", false
+}
+
+func proofEvidenceFresh(reader *sourceReader, proof packageidentity.PackageIdentityProof, maximumBytes int64) bool {
+	for _, evidence := range proof.Evidence {
+		if evidence.File == "" {
+			continue
+		}
+		data, err := reader.readFile(evidence.File, maximumBytes)
+		if err != nil {
+			return false
+		}
+		digest := sha256.Sum256(data)
+		if fmt.Sprintf("sha256:%x", digest) != evidence.ContentDigest {
+			return false
+		}
+	}
+	return true
+}
+
+func bindReferences(ctx context.Context, declarations []SemanticDeclaration, candidates []referenceCandidate, imports []ImportBinding) ([]SemanticReference, error) {
+	byID := make(map[string]SemanticDeclaration, len(declarations))
+	packageDeclarations := make(map[string][]SemanticDeclaration)
+	for _, declaration := range declarations {
+		byID[declaration.ID] = declaration
+		if declaration.OwnerDeclarationID == "" && declaration.Kind != DeclarationMethod && !(declaration.Kind == DeclarationFunction && declaration.Name == "init") {
+			key := declaration.PackageID + "\x00" + declaration.Name
+			packageDeclarations[key] = append(packageDeclarations[key], declaration)
+		}
+	}
+	importsByAlias := importsByFileAndAlias(imports)
+	dotImports := make(map[string][]ImportBinding)
+	for _, binding := range imports {
+		if binding.AliasKind == golang.ImportAliasDot.String() {
+			dotImports[binding.FileID] = append(dotImports[binding.FileID], binding)
+		}
+	}
+	unique := make(map[string]SemanticReference)
+	for index, candidate := range candidates {
+		if index%256 == 0 {
+			if err := ctx.Err(); err != nil {
+				return nil, err
+			}
+		}
+		if candidate.selectorBase && len(candidate.localCandidates) == 0 {
+			if _, imported := importsByAlias[candidate.fileID+"\x00"+candidate.name]; imported {
+				continue
+			}
+		}
+		reference := SemanticReference{
+			Name: candidate.name, Kind: candidate.kind, FileID: candidate.fileID, PackageID: candidate.packageID,
+			OwnerDeclarationID: candidate.ownerDeclarationID, Location: candidate.location, Status: ResolutionUnresolved,
+		}
+		if candidate.qualifier != "" && len(candidate.qualifierCandidates) == 0 {
+			if binding, exists := importsByAlias[candidate.fileID+"\x00"+candidate.qualifier]; exists {
+				reference.Status, reference.TargetDeclarationID, reference.ExternalIdentity = resolveImportedName(binding, candidate.name, packageDeclarations)
+			} else {
+				reference.Status = ResolutionUnresolved
+			}
+		} else if len(candidate.localCandidates) > 0 {
+			applyDeclarationCandidates(&reference, declarationsForIDs(candidate.localCandidates, byID))
+		} else {
+			applyDeclarationCandidates(&reference, packageDeclarations[candidate.packageID+"\x00"+candidate.name])
+			if reference.Status == ResolutionUnresolved {
+				applyDotImportCandidates(&reference, dotImports[candidate.fileID], candidate.name, packageDeclarations)
+			}
+			if reference.Status == ResolutionUnresolved && isPredeclaredIdentifier(candidate.name) {
+				reference.Status = ResolutionExternal
+				reference.ExternalIdentity = "builtin:" + candidate.name
+			}
+		}
+		reference.ID = semanticReferenceID(reference)
+		unique[reference.ID] = reference
+	}
+	result := make([]SemanticReference, 0, len(unique))
+	for _, reference := range unique {
+		result = append(result, reference)
+	}
+	sort.Slice(result, func(i, j int) bool {
+		if result[i].Location.File != result[j].Location.File {
+			return result[i].Location.File < result[j].Location.File
+		}
+		if result[i].Location.Start.Offset != result[j].Location.Start.Offset {
+			return result[i].Location.Start.Offset < result[j].Location.Start.Offset
+		}
+		return result[i].ID < result[j].ID
+	})
+	return result, nil
+}
+
+func importsByFileAndAlias(imports []ImportBinding) map[string]ImportBinding {
+	result := make(map[string]ImportBinding)
+	for _, binding := range imports {
+		if binding.LocalName == "" || binding.LocalName == "_" || binding.LocalName == "." {
+			continue
+		}
+		key := binding.FileID + "\x00" + binding.LocalName
+		if previous, exists := result[key]; exists && previous.ID != binding.ID {
+			previous.Status = ResolutionAmbiguous
+			previous.TargetPackageID = ""
+			previous.PackageIdentityProofID = ""
+			result[key] = previous
+			continue
+		}
+		result[key] = binding
+	}
+	return result
+}
+
+func resolveImportedName(binding ImportBinding, name string, declarations map[string][]SemanticDeclaration) (ResolutionStatus, string, string) {
+	if !token.IsExported(name) {
+		return ResolutionUnresolved, "", ""
+	}
+	switch binding.Status {
+	case ResolutionResolved:
+		matches := declarations[binding.TargetPackageID+"\x00"+name]
+		if len(matches) == 1 && matches[0].Status == ResolutionResolved {
+			return ResolutionResolved, matches[0].ID, ""
+		}
+		if len(matches) > 1 || (len(matches) == 1 && matches[0].Status == ResolutionAmbiguous) {
+			return ResolutionAmbiguous, "", ""
+		}
+		return ResolutionUnresolved, "", ""
+	case ResolutionExternal:
+		return ResolutionExternal, "", binding.ImportPath + "." + name
+	case ResolutionAmbiguous:
+		return ResolutionAmbiguous, "", ""
+	default:
+		return ResolutionUnresolved, "", ""
+	}
+}
+
+func applyDotImportCandidates(reference *SemanticReference, bindings []ImportBinding, name string, declarations map[string][]SemanticDeclaration) {
+	matches := make([]SemanticDeclaration, 0)
+	external := false
+	for _, binding := range bindings {
+		switch binding.Status {
+		case ResolutionResolved:
+			for _, declaration := range declarations[binding.TargetPackageID+"\x00"+name] {
+				if token.IsExported(declaration.Name) {
+					matches = append(matches, declaration)
+				}
+			}
+		case ResolutionExternal, ResolutionAmbiguous:
+			external = true
+		}
+	}
+	applyDeclarationCandidates(reference, matches)
+	if reference.Status == ResolutionUnresolved && external {
+		reference.Status = ResolutionUnresolved
+	}
+}
+
+func applyDeclarationCandidates(reference *SemanticReference, matches []SemanticDeclaration) {
+	if len(matches) == 0 {
+		reference.Status = ResolutionUnresolved
+		return
+	}
+	ids := make([]string, 0, len(matches))
+	for _, declaration := range matches {
+		ids = append(ids, declaration.ID)
+	}
+	sort.Strings(ids)
+	ids = compactStrings(ids)
+	if len(ids) == 1 {
+		declaration := matches[0]
+		if declaration.Status == ResolutionResolved {
+			reference.Status = ResolutionResolved
+			reference.TargetDeclarationID = ids[0]
+			return
+		}
+		if declaration.Status == ResolutionPartial {
+			reference.Status = ResolutionPartial
+			reference.TargetDeclarationID = ids[0]
+			return
+		}
+	}
+	reference.Status = ResolutionAmbiguous
+	reference.CandidateDeclarationIDs = ids
+}
+
+func declarationsForIDs(ids []string, declarations map[string]SemanticDeclaration) []SemanticDeclaration {
+	result := make([]SemanticDeclaration, 0, len(ids))
+	for _, id := range ids {
+		if declaration, exists := declarations[id]; exists {
+			result = append(result, declaration)
+		}
+	}
+	return result
+}
+
+func bindTypeRelations(declarations []SemanticDeclaration, candidates []typeRelationCandidate, imports []ImportBinding) []TypeRelation {
 	byID := make(map[string]SemanticDeclaration, len(declarations))
 	for _, declaration := range declarations {
 		byID[declaration.ID] = declaration
 	}
 	packageTypes := typeDeclarationsByPackageName(declarations)
+	importsByFileAlias := importsByFileAndAlias(imports)
 	unique := make(map[string]TypeRelation)
 	for _, candidate := range candidates {
 		relation := TypeRelation{
@@ -1164,7 +1643,16 @@ func bindTypeRelations(declarations []SemanticDeclaration, candidates []typeRela
 			relation.Status = ResolutionExternal
 			relation.TargetIdentity = "builtin:" + candidate.targetName
 		default:
-			relation.Status = ResolutionUnresolved
+			if qualifier, name, ok := splitQualifiedIdentity(candidate.targetIdentity); ok {
+				binding, exists := importsByFileAlias[candidate.fileID+"\x00"+qualifier]
+				if exists {
+					relation.Status, relation.TargetDeclarationID, relation.TargetIdentity = resolveImportedName(binding, name, packageTypes)
+				} else {
+					relation.Status = ResolutionUnresolved
+				}
+			} else {
+				relation.Status = ResolutionUnresolved
+			}
 		}
 		relation.ID = typeRelationID(relation)
 		unique[relation.ID] = relation
@@ -1185,17 +1673,71 @@ func bindTypeRelations(declarations []SemanticDeclaration, candidates []typeRela
 	return result
 }
 
-func limitSemanticRelationships(receivers []ReceiverBinding, relations []TypeRelation, maximum int) ([]ReceiverBinding, []TypeRelation, int) {
-	total := len(receivers) + len(relations)
+func limitSemanticRelationships(imports []ImportBinding, receivers []ReceiverBinding, relations []TypeRelation, references []SemanticReference, maximum int) ([]ImportBinding, []ReceiverBinding, []TypeRelation, []SemanticReference, int) {
+	total := len(imports) + len(receivers) + len(relations) + len(references)
 	if total <= maximum {
-		return receivers, relations, 0
+		return imports, receivers, relations, references, 0
 	}
 	omitted := total - maximum
-	if len(receivers) >= maximum {
-		return receivers[:maximum], []TypeRelation{}, omitted
+	if len(imports) >= maximum {
+		return imports[:maximum], []ReceiverBinding{}, []TypeRelation{}, []SemanticReference{}, omitted
 	}
-	remaining := maximum - len(receivers)
-	return receivers, relations[:remaining], omitted
+	remaining := maximum - len(imports)
+	if len(receivers) >= remaining {
+		return imports, receivers[:remaining], []TypeRelation{}, []SemanticReference{}, omitted
+	}
+	remaining -= len(receivers)
+	if len(relations) >= remaining {
+		return imports, receivers, relations[:remaining], []SemanticReference{}, omitted
+	}
+	remaining -= len(relations)
+	return imports, receivers, relations, references[:remaining], omitted
+}
+
+func updateReferenceStatistics(files []SemanticFile, references []SemanticReference, statistics *SemanticStatistics) {
+	indices := make(map[string]int, len(files))
+	for index := range files {
+		indices[files[index].FileID] = index
+	}
+	statistics.ReferencesByStatus = make(map[string]int)
+	for _, reference := range references {
+		statistics.ReferencesByStatus[reference.Status.String()]++
+		if index, exists := indices[reference.FileID]; exists {
+			files[index].ReferenceCount++
+			if reference.Status != ResolutionResolved && reference.Status != ResolutionExternal {
+				files[index].UnresolvedCount++
+			}
+		}
+	}
+}
+
+func statusesForImports(imports []ImportBinding) map[string]int {
+	result := make(map[string]int)
+	for _, binding := range imports {
+		result[binding.Status.String()]++
+	}
+	return result
+}
+
+func splitQualifiedIdentity(value string) (string, string, bool) {
+	if strings.Count(value, ".") != 1 {
+		return "", "", false
+	}
+	parts := strings.SplitN(value, ".", 2)
+	return parts[0], parts[1], parts[0] != "" && parts[1] != ""
+}
+
+func compactStrings(values []string) []string {
+	if len(values) == 0 {
+		return values
+	}
+	result := values[:1]
+	for _, value := range values[1:] {
+		if value != result[len(result)-1] {
+			result = append(result, value)
+		}
+	}
+	return result
 }
 
 func typeDeclarationsByPackageName(declarations []SemanticDeclaration) map[string][]SemanticDeclaration {
@@ -1234,6 +1776,18 @@ func isPredeclaredType(name string) bool {
 	}
 }
 
+func isPredeclaredIdentifier(name string) bool {
+	if isPredeclaredType(name) {
+		return true
+	}
+	switch name {
+	case "append", "cap", "clear", "close", "complex", "copy", "delete", "false", "imag", "iota", "len", "make", "max", "min", "new", "nil", "panic", "print", "println", "real", "recover", "true":
+		return true
+	default:
+		return false
+	}
+}
+
 func receiverBindingID(candidate receiverCandidate) string {
 	return fmt.Sprintf("go:semantic:v1:receiver:%d:%s#%d:%s#%t#%t", len(candidate.methodDeclarationID), candidate.methodDeclarationID, len(candidate.receiverName), candidate.receiverName, candidate.pointer, candidate.generic)
 }
@@ -1244,6 +1798,14 @@ func typeRelationID(relation TypeRelation) string {
 		target = relation.TargetIdentity
 	}
 	return fmt.Sprintf("go:semantic:v1:relation:%d:%s#%s#%d#%d:%s", len(relation.OwnerDeclarationID), relation.OwnerDeclarationID, relation.Kind.String(), relation.Location.Start.Offset, len(target), target)
+}
+
+func importBindingID(fileID string, imported golang.GoImport) string {
+	return fmt.Sprintf("go:semantic:v1:import:%d:%s#%d:%d:%s", len(fileID), fileID, imported.Location.Start.Offset, len(imported.Path), imported.Path)
+}
+
+func semanticReferenceID(reference SemanticReference) string {
+	return fmt.Sprintf("go:semantic:v1:reference:%d:%s#%d#%s#%d:%s", len(reference.FileID), reference.FileID, reference.Location.Start.Offset, reference.Kind.String(), len(reference.Name), reference.Name)
 }
 
 func semanticDiagnostic(severity lie.Severity, code, message, file string) lie.Diagnostic {
