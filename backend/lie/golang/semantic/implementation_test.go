@@ -1,6 +1,7 @@
 package semantic
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -989,6 +990,209 @@ func TestDiagnosticLimitAndArtifactPublication(t *testing.T) {
 	if !ok || published.ArtifactName() != ArtifactName || published.ArtifactVersion() != ArtifactVersion {
 		t.Fatalf("published artifact = %+v, %v", published.Metadata(), ok)
 	}
+}
+
+func TestCandidateIntegratorPublishesDetachedJSONView(t *testing.T) {
+	input := prerequisites(t, map[string]string{
+		"go.mod":  "module example.com/integration\n\ngo 1.26\n",
+		"main.go": "package main\ntype Runner interface { Run() }\ntype Worker struct{}\nfunc (Worker) Run() {}\nvar _ Runner = Worker{}\n",
+	})
+	store := semanticArtifactStore(t, input)
+	candidate, err := NewIntegrator()
+	if err != nil {
+		t.Fatal(err)
+	}
+	inventory, err := candidate.Run(context.Background(), store)
+	if err != nil {
+		t.Fatal(err)
+	}
+	published, ok := InventoryFrom(store)
+	if !ok || !reflect.DeepEqual(inventory.View(), published.View()) {
+		t.Fatal("candidate integration did not publish the returned immutable artifact")
+	}
+
+	left, err := json.Marshal(inventory)
+	if err != nil {
+		t.Fatal(err)
+	}
+	right, err := json.Marshal(inventory.View())
+	if err != nil || !bytes.Equal(left, right) {
+		t.Fatalf("inventory JSON is not its detached view: %v", err)
+	}
+	var decoded map[string]any
+	if err := json.Unmarshal(left, &decoded); err != nil {
+		t.Fatal(err)
+	}
+	for _, field := range []string{"artifact", "source_artifacts", "files", "declarations", "references", "receiver_bindings", "import_bindings", "type_relations", "interface_satisfaction", "diagnostics", "statistics"} {
+		if _, exists := decoded[field]; !exists {
+			t.Fatalf("JSON view omitted %q", field)
+		}
+	}
+
+	view := inventory.View()
+	view.Declarations[0].Name = "mutated"
+	view.Statistics.InterfaceChecksByStatus[SatisfactionProven.String()] = -1
+	if inventory.Declarations()[0].Name == "mutated" || inventory.Statistics().InterfaceChecksByStatus[SatisfactionProven.String()] < 0 {
+		t.Fatal("presentation view mutated the semantic artifact")
+	}
+	if _, ok := golang.InventoryFrom(store); !ok {
+		t.Fatal("candidate integration removed the frozen Phase 2.1 artifact")
+	}
+	if _, ok := packageidentity.InventoryFrom(store); !ok {
+		t.Fatal("candidate integration removed the package identity artifact")
+	}
+}
+
+func TestCandidateIntegratorPrerequisitesAndSingleAssignment(t *testing.T) {
+	candidate, err := NewIntegrator()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := candidate.Run(nil, rie.NewArtifactStore()); !errors.Is(err, ErrContextRequired) {
+		t.Fatalf("nil context error = %v", err)
+	}
+	if _, err := candidate.Run(context.Background(), nil); !errors.Is(err, ErrArtifactStoreRequired) {
+		t.Fatalf("nil store error = %v", err)
+	}
+	canceled, cancel := context.WithCancel(context.Background())
+	cancel()
+	if _, err := candidate.Run(canceled, rie.NewArtifactStore()); !errors.Is(err, context.Canceled) {
+		t.Fatalf("canceled context error = %v", err)
+	}
+
+	input := prerequisites(t, map[string]string{"go.mod": "module example.com/gates\n\ngo 1.26\n", "main.go": "package main\n"})
+	store := rie.NewArtifactStore()
+	if _, err := candidate.Run(context.Background(), store); !errors.Is(err, ErrMissingRepositorySnapshot) {
+		t.Fatalf("missing snapshot error = %v", err)
+	}
+	if err := store.Put(input.Snapshot); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := candidate.Run(context.Background(), store); !errors.Is(err, ErrMissingGoLanguageInventory) {
+		t.Fatalf("missing syntax error = %v", err)
+	}
+	if err := store.Put(input.Syntax); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := candidate.Run(context.Background(), store); !errors.Is(err, ErrMissingPackageIdentityInventory) {
+		t.Fatalf("missing identity error = %v", err)
+	}
+	if err := store.Put(input.PackageIdentities); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := candidate.Run(context.Background(), store); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := candidate.Run(context.Background(), store); !errors.Is(err, rie.ErrArtifactAlreadyExists) {
+		t.Fatalf("duplicate publication error = %v", err)
+	}
+	if _, err := NewIntegrator(DefaultConfig(), DefaultConfig()); !errors.Is(err, ErrTooManyConfigs) {
+		t.Fatalf("invalid integrator configuration error = %v", err)
+	}
+}
+
+func TestCandidateIntegratorRejectsWrongArtifactTypes(t *testing.T) {
+	candidate, _ := NewIntegrator()
+	tests := []struct {
+		name     string
+		artifact rie.Artifact
+		want     error
+	}{
+		{"snapshot", integrationArtifact{name: rie.RepositorySnapshotArtifactName}, ErrIncompatibleRepositorySnapshot},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			store := rie.NewArtifactStore()
+			if err := store.Put(test.artifact); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := candidate.Run(context.Background(), store); !errors.Is(err, test.want) {
+				t.Fatalf("wrong artifact error = %v, want %v", err, test.want)
+			}
+		})
+	}
+
+	input := prerequisites(t, map[string]string{"main.go": "package main\n"})
+	store := rie.NewArtifactStore()
+	for _, artifact := range []rie.Artifact{input.Snapshot, integrationArtifact{name: golang.ArtifactName}} {
+		if err := store.Put(artifact); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := candidate.Run(context.Background(), store); !errors.Is(err, ErrIncompatibleGoInventory) {
+		t.Fatalf("wrong syntax type error = %v", err)
+	}
+
+	store = rie.NewArtifactStore()
+	for _, artifact := range []rie.Artifact{input.Snapshot, input.Syntax, integrationArtifact{name: packageidentity.ArtifactName}} {
+		if err := store.Put(artifact); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := candidate.Run(context.Background(), store); !errors.Is(err, ErrIncompatiblePackageIdentity) {
+		t.Fatalf("wrong identity type error = %v", err)
+	}
+}
+
+func TestCandidateIntegratorAlwaysPerformsFullRebuild(t *testing.T) {
+	candidate, _ := NewIntegrator()
+	firstInput := prerequisites(t, map[string]string{"first.go": "package sample\nfunc First() {}\n"})
+	first, err := candidate.Run(context.Background(), semanticArtifactStore(t, firstInput))
+	if err != nil {
+		t.Fatal(err)
+	}
+	secondInput := prerequisites(t, map[string]string{"second.go": "package sample\nfunc Second() {}\n"})
+	secondStore := semanticArtifactStore(t, secondInput)
+	second, err := candidate.Run(context.Background(), secondStore)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(first.Declarations()) != 1 || first.Declarations()[0].Name != "First" || len(second.Declarations()) != 1 || second.Declarations()[0].Name != "Second" {
+		t.Fatal("candidate integrator reused semantic state from an earlier run")
+	}
+	third, err := candidate.Run(context.Background(), semanticArtifactStore(t, secondInput))
+	if err != nil {
+		t.Fatal(err)
+	}
+	secondJSON, _ := json.Marshal(second)
+	thirdJSON, _ := json.Marshal(third)
+	if !bytes.Equal(secondJSON, thirdJSON) {
+		t.Fatal("identical full rebuilds produced different JSON")
+	}
+}
+
+func TestCandidateJSONViewUsesExplicitEmptyCollections(t *testing.T) {
+	input := prerequisites(t, map[string]string{"README.md": "no Go source\n"})
+	candidate, _ := NewIntegrator()
+	inventory, err := candidate.Run(context.Background(), semanticArtifactStore(t, input))
+	if err != nil {
+		t.Fatal(err)
+	}
+	encoded, err := json.Marshal(inventory)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, field := range []string{"files", "declarations", "references", "receiver_bindings", "import_bindings", "type_relations", "interface_satisfaction", "diagnostics"} {
+		if !bytes.Contains(encoded, []byte(`"`+field+`":[]`)) {
+			t.Fatalf("empty JSON collection %q is not explicit: %s", field, encoded)
+		}
+	}
+}
+
+type integrationArtifact struct{ name string }
+
+func (artifact integrationArtifact) ArtifactName() string { return artifact.name }
+func (integrationArtifact) ArtifactVersion() string       { return "invalid" }
+
+func semanticArtifactStore(t testing.TB, input Input) *rie.ArtifactStore {
+	t.Helper()
+	store := rie.NewArtifactStore()
+	for _, artifact := range []rie.Artifact{input.Snapshot, input.Syntax, input.PackageIdentities} {
+		if err := store.Put(artifact); err != nil {
+			t.Fatal(err)
+		}
+	}
+	return store
 }
 
 func TestEnumJSONContracts(t *testing.T) {

@@ -2,7 +2,7 @@
 
 ## Status
 
-- Design status: Phase 2.2.6 accepted; Phase 2.2.7 authorized
+- Design status: Phase 2.2.7 accepted; Phase 2.2.8 authorized
 - Candidate artifact: `go-semantic-inventory` `0.1.0`
 - Stable target: `1.0.0` after validation and API freeze
 - Prerequisites: `repository-snapshot` `1.0.0`, `go-language-inventory` `1.0.0`, and `go-package-identity-inventory` `0.1.0`
@@ -349,9 +349,16 @@ func (GoSemanticInventory) TypeRelations() []TypeRelation
 func (GoSemanticInventory) InterfaceSatisfaction() []InterfaceSatisfaction
 func (GoSemanticInventory) Diagnostics() []lie.Diagnostic
 func (GoSemanticInventory) Statistics() SemanticStatistics
+func (GoSemanticInventory) View() GoSemanticInventoryView
+func (GoSemanticInventory) MarshalJSON() ([]byte, error)
 ```
 
 The artifact does not expose `LookupSymbol(id) (golang.GoSymbol, bool)`. Consumers retain and query the declared source artifact instead of embedding or copying Phase 2.1 models into the semantic artifact.
+
+`GoSemanticInventoryView` is a detached presentation contract containing
+defensive copies of every collection. It is never accepted as an engine input.
+JSON marshaling delegates to this view, so private artifact storage does not
+become mutable merely to support reporting. Empty collections encode as `[]`.
 
 ## Compatibility Policy
 

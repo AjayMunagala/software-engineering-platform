@@ -38,6 +38,33 @@ func BenchmarkInterfaceSatisfaction1000Files(b *testing.B) {
 	benchmarkInterfaceSatisfaction(b, 1_000)
 }
 
+func BenchmarkCandidateIntegration1000Files(b *testing.B) {
+	const fileCount = 1_000
+	files := map[string]string{"go.mod": "module example.com/integration\n\ngo 1.26\n"}
+	for index := 0; index < fileCount; index++ {
+		files[fmt.Sprintf("pkg/file%05d.go", index)] = fmt.Sprintf("package integration\ntype Worker%05d struct{}\nfunc (Worker%05d) Run() {}\n", index, index)
+	}
+	input := prerequisites(b, files)
+	candidate, err := NewIntegrator()
+	if err != nil {
+		b.Fatal(err)
+	}
+	config := DefaultConfig()
+	b.ReportAllocs()
+	b.ReportMetric(fileCount, "files/op")
+	b.ReportMetric(float64(config.MaxWorkers), "workers/op")
+	b.ResetTimer()
+	for b.Loop() {
+		inventory, err := candidate.Run(context.Background(), semanticArtifactStore(b, input))
+		if err != nil {
+			b.Fatal(err)
+		}
+		if len(inventory.Files()) != fileCount {
+			b.Fatalf("files = %d, want %d", len(inventory.Files()), fileCount)
+		}
+	}
+}
+
 func benchmarkDeclarationReconciliation(b *testing.B, fileCount int) {
 	b.Helper()
 	files := map[string]string{"go.mod": "module example.com/benchmark\n\ngo 1.22\n"}

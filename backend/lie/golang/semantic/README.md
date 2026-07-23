@@ -69,6 +69,16 @@ Phase 2.2.6 additionally:
   and incomplete type information as `unknown`;
 - never compares every concrete type with every interface.
 
+Phase 2.2.7 additionally:
+
+- retrieves the three exact typed prerequisites from `rie.ArtifactStore`;
+- performs a fresh full semantic rebuild on every integration run;
+- publishes `GoSemanticInventory 0.1.0` exactly once without mutable context
+  fields or changes to the Phase 2.1 artifact;
+- rejects missing, wrongly typed, canceled, and duplicate-publication runs;
+- exposes `GoSemanticInventoryView` as a detached JSON/reporting model; and
+- retains no semantic state between repositories or runs.
+
 Files remain `partial` because later semantic relationships are not yet
 authorized. Exact declaration matches are independently marked `resolved`.
 
@@ -89,8 +99,9 @@ The engine is local and read-only. It executes no commands, performs no
 network access or downloads, reads no module cache, writes no repository
 files, and persists no source, AST, token, or `go/types` state.
 
-Candidate integration remains outside the authorized scope. Phase 2.2.7 and
-later are not authorized by this package. A default import of an external
+Real-repository validation remains outside this package's implementation scope
+and is performed by the authorized Phase 2.2.8 validation milestone. Phase
+2.2.9 remains unauthorized. A default import of an external
 package keeps an empty local name when no exact package-name proof exists;
 selectors through that unknown name remain unresolved rather than using the
 import-path suffix as a guess. Interface checking likewise does not import
@@ -100,3 +111,24 @@ external packages or claim complete method sets when package errors remain.
 
 This package contains the mandatory interface, implementation, configuration,
 models, errors, README, tests, and benchmarks.
+
+## Candidate Integration Example
+
+After RIE, Go Phase 2.1, and package identity have published their immutable
+artifacts into the same per-run store:
+
+```go
+candidate, err := semantic.NewIntegrator()
+if err != nil {
+    return err
+}
+inventory, err := candidate.Run(ctx, store)
+if err != nil {
+    return err
+}
+encoded, err := json.MarshalIndent(inventory.View(), "", "  ")
+```
+
+`Run` never consumes an earlier `GoSemanticInventory`. Because artifact names
+are single-assignment, a second run requires a new per-run store and therefore
+cannot silently reuse or overwrite previous semantic state.

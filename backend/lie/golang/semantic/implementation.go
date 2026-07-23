@@ -27,12 +27,78 @@ import (
 
 type engine struct{ config Config }
 
+type integrator struct{ resolver Engine }
+
 func (*engine) Name() string         { return "go-semantic" }
 func (*engine) Version() string      { return engineVersion }
 func (*engine) Language() string     { return "Go" }
 func (*engine) ArtifactName() string { return ArtifactName }
 func (*engine) Description() string {
 	return "Verifies snapshot-authorized Go source and produces a bounded semantic candidate artifact"
+}
+
+func (candidate *integrator) Run(ctx context.Context, store *rie.ArtifactStore) (GoSemanticInventory, error) {
+	if ctx == nil {
+		return GoSemanticInventory{}, ErrContextRequired
+	}
+	if store == nil {
+		return GoSemanticInventory{}, ErrArtifactStoreRequired
+	}
+	if err := ctx.Err(); err != nil {
+		return GoSemanticInventory{}, err
+	}
+	if _, exists := store.Get(ArtifactName); exists {
+		return GoSemanticInventory{}, fmt.Errorf("%w: %s", rie.ErrArtifactAlreadyExists, ArtifactName)
+	}
+
+	input, err := inputFromStore(store)
+	if err != nil {
+		return GoSemanticInventory{}, err
+	}
+	if err := ctx.Err(); err != nil {
+		return GoSemanticInventory{}, err
+	}
+	inventory, err := candidate.resolver.Resolve(ctx, input)
+	if err != nil {
+		return GoSemanticInventory{}, err
+	}
+	if err := ctx.Err(); err != nil {
+		return GoSemanticInventory{}, err
+	}
+	if err := store.Put(inventory); err != nil {
+		return GoSemanticInventory{}, err
+	}
+	return inventory, nil
+}
+
+func inputFromStore(store *rie.ArtifactStore) (Input, error) {
+	snapshotArtifact, exists := store.Get(rie.RepositorySnapshotArtifactName)
+	if !exists {
+		return Input{}, ErrMissingRepositorySnapshot
+	}
+	snapshot, valid := snapshotArtifact.(rie.RepositorySnapshot)
+	if !valid {
+		return Input{}, ErrIncompatibleRepositorySnapshot
+	}
+
+	syntaxArtifact, exists := store.Get(golang.ArtifactName)
+	if !exists {
+		return Input{}, ErrMissingGoLanguageInventory
+	}
+	syntax, valid := syntaxArtifact.(golang.GoLanguageInventory)
+	if !valid {
+		return Input{}, ErrIncompatibleGoInventory
+	}
+
+	identityArtifact, exists := store.Get(packageidentity.ArtifactName)
+	if !exists {
+		return Input{}, ErrMissingPackageIdentityInventory
+	}
+	identities, valid := identityArtifact.(packageidentity.GoPackageIdentityInventory)
+	if !valid {
+		return Input{}, ErrIncompatiblePackageIdentity
+	}
+	return Input{Snapshot: snapshot, Syntax: syntax, PackageIdentities: identities}, nil
 }
 
 func (engine *engine) Resolve(ctx context.Context, input Input) (GoSemanticInventory, error) {

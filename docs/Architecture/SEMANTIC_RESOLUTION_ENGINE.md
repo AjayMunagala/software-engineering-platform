@@ -2,8 +2,8 @@
 
 ## Document Status
 
-- Phase: 2.2.6 conditional interface satisfaction
-- Status: Phase 2.2.6 accepted; Phase 2.2.7 candidate integration authorized
+- Phase: 2.2.7 candidate integration
+- Status: Phase 2.2.7 accepted; Phase 2.2.8 real-repository validation authorized
 - Candidate engine version: `0.1.0`
 - Candidate artifact: `go-semantic-inventory` `0.1.0`
 - Stable artifact target: `1.0.0`, only after implementation, stabilization, and real-repository validation
@@ -314,7 +314,7 @@ The semantic artifact is additive. It does not change or replace either frozen i
 
 ## Approval Gate
 
-Phase 2.2.0 through Phase 2.2.6 are accepted. Phase 2.2.7 alone is authorized; Phase 2.2.8 and later remain unauthorized. The approved architecture covers:
+Phase 2.2.0 through Phase 2.2.7 are accepted. Phase 2.2.8 real-repository validation alone is authorized; Phase 2.2.9 remains unauthorized. The approved architecture covers:
 
 - controlled source re-parsing and digest verification;
 - the authoritative `PackageIdentityProof` contract and supporting artifact;
@@ -325,3 +325,20 @@ Phase 2.2.0 through Phase 2.2.6 are accepted. Phase 2.2.7 alone is authorized; P
 - explicit unresolved/partial/stale behavior;
 - package/API model;
 - staged roadmap and validation gate.
+
+## Phase 2.2.7 Integration Contract
+
+The candidate integrator reads `RepositorySnapshot 1.0.0`,
+`GoLanguageInventory 1.0.0`, and `GoPackageIdentityInventory 0.1.0` by exact
+type from one per-run `rie.ArtifactStore`. It resolves from those facts only,
+then publishes `GoSemanticInventory 0.1.0` through the store's existing
+single-assignment contract.
+
+The integrator holds only immutable configuration and an engine reference. It
+does not read an earlier semantic artifact, cache AST/type state, mutate any
+prerequisite, or add fields to `RunContext`. Reusing an integrator with a new
+store performs a full rebuild. Running twice against the same store fails
+before resolution because semantic publication is already complete.
+
+JSON and reporting use a detached `GoSemanticInventoryView`; presentation data
+is not an artifact and cannot become a semantic input.

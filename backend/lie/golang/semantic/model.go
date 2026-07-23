@@ -459,6 +459,22 @@ type GoSemanticInventory struct {
 	statistics            SemanticStatistics
 }
 
+// GoSemanticInventoryView is a detached presentation view. It is never an
+// engine input and cannot mutate the immutable semantic artifact.
+type GoSemanticInventoryView struct {
+	Artifact              Metadata                `json:"artifact"`
+	SourceArtifacts       []rie.ArtifactReference `json:"source_artifacts"`
+	Files                 []SemanticFile          `json:"files"`
+	Declarations          []SemanticDeclaration   `json:"declarations"`
+	References            []SemanticReference     `json:"references"`
+	ReceiverBindings      []ReceiverBinding       `json:"receiver_bindings"`
+	ImportBindings        []ImportBinding         `json:"import_bindings"`
+	TypeRelations         []TypeRelation          `json:"type_relations"`
+	InterfaceSatisfaction []InterfaceSatisfaction `json:"interface_satisfaction"`
+	Diagnostics           []lie.Diagnostic        `json:"diagnostics"`
+	Statistics            SemanticStatistics      `json:"statistics"`
+}
+
 func newInventory(files []SemanticFile, declarations []SemanticDeclaration, references []SemanticReference, receivers []ReceiverBinding, imports []ImportBinding, typeRelations []TypeRelation, satisfaction []InterfaceSatisfaction, diagnostics []lie.Diagnostic, statistics SemanticStatistics) GoSemanticInventory {
 	return GoSemanticInventory{
 		metadata: Metadata{Name: ArtifactName, Version: ArtifactVersion, IDSchemeVersion: IDSchemeVersion, EngineName: "go-semantic", EngineVersion: engineVersion},
@@ -508,6 +524,28 @@ func (inventory GoSemanticInventory) Diagnostics() []lie.Diagnostic {
 }
 func (inventory GoSemanticInventory) Statistics() SemanticStatistics {
 	return cloneStatistics(inventory.statistics)
+}
+
+// View returns a defensive presentation copy of the complete candidate.
+func (inventory GoSemanticInventory) View() GoSemanticInventoryView {
+	return GoSemanticInventoryView{
+		Artifact: inventory.Metadata(), SourceArtifacts: presentSlice(inventory.SourceArtifacts()), Files: presentSlice(inventory.Files()),
+		Declarations: presentSlice(inventory.Declarations()), References: presentSlice(inventory.References()), ReceiverBindings: presentSlice(inventory.ReceiverBindings()),
+		ImportBindings: presentSlice(inventory.ImportBindings()), TypeRelations: presentSlice(inventory.TypeRelations()), InterfaceSatisfaction: presentSlice(inventory.InterfaceSatisfaction()),
+		Diagnostics: presentSlice(inventory.Diagnostics()), Statistics: inventory.Statistics(),
+	}
+}
+
+// MarshalJSON serializes only the detached presentation view.
+func (inventory GoSemanticInventory) MarshalJSON() ([]byte, error) {
+	return json.Marshal(inventory.View())
+}
+
+func presentSlice[T any](values []T) []T {
+	if values == nil {
+		return []T{}
+	}
+	return values
 }
 
 func cloneReferences(source []SemanticReference) []SemanticReference {

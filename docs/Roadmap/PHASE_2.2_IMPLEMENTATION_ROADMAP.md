@@ -2,13 +2,13 @@
 
 ## Status
 
-- Current state: Phase 2.2.6 accepted; Phase 2.2.7 authorized
-- Implementation authorization: Phase 2.2.7 only
+- Current state: Phase 2.2.7 accepted; Phase 2.2.8 authorized
+- Implementation authorization: Phase 2.2.8 real-repository validation only
 - Stable prerequisite: `GoLanguageInventory 1.0.0`
 - Candidate output: `GoSemanticInventory 0.1.0`
 - Stable target: `GoSemanticInventory 1.0.0`
 
-Engineering accepted the Phase 2.2.0 evidence and ADR 0008 on 2026-07-22. Phase 2.2.1 was accepted on 2026-07-22. Phase 2.2.2 through Phase 2.2.6 were accepted on 2026-07-23. Phase 2.2.7 alone is authorized; Phase 2.2.8 and later remain unauthorized until their preceding exit gates are explicitly accepted.
+Engineering accepted the Phase 2.2.0 evidence and ADR 0008 on 2026-07-22. Phase 2.2.1 was accepted on 2026-07-22. Phase 2.2.2 through Phase 2.2.7 were accepted on 2026-07-23. Phase 2.2.8 real-repository validation alone is authorized; Phase 2.2.9 remains unauthorized until the Phase 2.2.8 exit gate is explicitly accepted.
 
 Phase 2.2.1 implementation and local validation are complete and accepted. Targeted package and full-backend race tests pass with MSYS2 UCRT64 GCC 16.1.0. See [LIE_PHASE_2_2_1_PACKAGE_IDENTITY.md](../Validation/LIE_PHASE_2_2_1_PACKAGE_IDENTITY.md). Authorization advances only to Phase 2.2.2.
 
@@ -179,6 +179,16 @@ Accepted evidence: value and pointer method sets, implicit assignments, compile-
 - Package statement coverage is at least 80%.
 - Security-boundary, digest, ID, ordering, and immutability helpers have complete branch coverage.
 - Benchmarks record time, bytes, allocations, worker count, fixture size, Go version, OS, and hardware/CI identity.
+
+Accepted evidence: typed prerequisite retrieval, additive single-assignment
+publication, immutable JSON view, full-rebuild isolation, deterministic JSON,
+missing/wrong prerequisite rejection, cancellation, diagnostic limits, and
+artifact coexistence pass. Package coverage is 85.5%; ten shuffled runs, full
+backend regression, vet, targeted/full race tests, and a repeatable 1,000-file
+integration benchmark pass. See
+[LIE_PHASE_2_2_7_CANDIDATE_INTEGRATION.md](../Validation/LIE_PHASE_2_2_7_CANDIDATE_INTEGRATION.md).
+Engineering accepted the exit gate on 2026-07-23 and authorized Phase 2.2.8
+only. Phase 2.2.9 remains unauthorized.
 
 ## Phase 2.2.8 — Real-Repository Validation
 

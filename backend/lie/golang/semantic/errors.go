@@ -9,6 +9,8 @@ var (
 	ErrInvalidConfig = errors.New("invalid semantic configuration")
 	// ErrContextRequired indicates a nil context.
 	ErrContextRequired = errors.New("context is required")
+	// ErrArtifactStoreRequired indicates that candidate integration has no typed artifact store.
+	ErrArtifactStoreRequired = errors.New("artifact store is required")
 	// ErrMissingRepositorySnapshot indicates an absent zero-value snapshot.
 	ErrMissingRepositorySnapshot = errors.New("repository snapshot is required")
 	// ErrIncompatibleRepositorySnapshot indicates an unsupported snapshot contract.
