@@ -59,18 +59,37 @@ LanguageInventory 1.0.0 ──┘       └── GoLanguageInventory 1.0.0 froz
 
 Future language engines are siblings of Go and publish separate language-specific artifacts. Dependency Intelligence may consume these artifacts only after their 1.0.0 contracts are frozen.
 
-## Phase 2.2 package-identity candidate
+## Phase 2.2 released Go semantic artifacts
 
 Package identity depends on the lowest-level artifacts that contain its required repository and Go syntax facts. It is a prerequisite sibling artifact, not hidden mutable state in the future semantic engine.
 
 ```text
 RepositorySnapshot 1.0.0 ──────┐
                                ├── Go Package Identity Engine
-GoLanguageInventory 1.0.0 ─────┘       └── GoPackageIdentityInventory 0.1.0
+GoLanguageInventory 1.0.0 ─────┘       └── GoPackageIdentityInventory 1.0.0
 
 RepositorySnapshot 1.0.0 ───────────────┐
-GoLanguageInventory 1.0.0 ───────────────┼── Go Semantic Resolution Engine (through Phase 2.2.6 candidate)
-GoPackageIdentityInventory 0.1.0 ────────┘       └── GoSemanticInventory 0.1.0 candidate
+GoLanguageInventory 1.0.0 ───────────────┼── Go Semantic Resolution Engine
+GoPackageIdentityInventory 1.0.0 ────────┘       └── GoSemanticInventory 1.0.0
 ```
 
-`GoPackageIdentityInventory 0.1.0` is a candidate contract and does not change the frozen RIE or Phase 2.1 artifacts. The semantic candidate verifies source and publishes declarations, exact local receiver bindings, bounded declared-type relations, references, proof-backed import bindings, and bounded conditional interface-satisfaction results without mutating prerequisites or persisting AST/scope/type state. Accepted Phase 2.2.7 integrates these exact typed artifacts through `ArtifactStore`, performs a fresh rebuild, and publishes the semantic candidate additively. Phase 2.2.8 real-repository validation is authorized; release stabilization remains gated behind Phase 2.2.9.
+Both contracts are frozen at `1.0.0`. The semantic engine verifies source and
+publishes declarations, exact local receiver bindings, bounded declared-type
+relations, references, proof-backed import bindings, and bounded conditional
+interface-satisfaction results without mutating prerequisites or persisting
+AST/scope/type state.
+
+## Phase 3.1 persistence consumer
+
+Persistence is not another engine artifact and does not become an input edge in
+this graph. Application orchestration may submit detached exact serialized
+bytes and envelopes for any released artifact to the persistence boundary.
+
+```text
+Released immutable artifacts
+        └── application orchestration
+                └── persistence port
+                        └── PostgreSQL adapter (future)
+```
+
+Removing persistence must not change the artifact graph or engine output.

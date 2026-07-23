@@ -2,7 +2,8 @@
 
 ## Status
 
-Proposed.
+Superseded on 2026-07-23 by accepted ADR 0010, which defines the artifact
+ownership, exact-payload, transaction, and adapter boundaries more precisely.
 
 ## Decision
 

@@ -1,26 +1,34 @@
 # High-Level Architecture
 
-## Product flow
+## Current platform flow
 
 ```text
-User interface
-  -> Planner / workflow controller
-  -> Repository intelligence
-  -> Knowledge layer
-  -> Reasoning engine
-  -> Validation engine
-  -> Model adapter
-  -> Coding model
+Authorized repository
+  -> Repository Intelligence artifacts 1.0.0
+  -> Go Language Inventory 1.0.0
+  -> Go Package Identity Inventory 1.0.0
+  -> Go Semantic Inventory 1.0.0
+  -> Application orchestration
+  -> Persistence Boundary (Phase 3 design)
+  -> PostgreSQL adapter (future)
+  -> REST / gRPC (future)
+  -> React UI (future)
 ```
 
-## Version 1 boundary
+## Delivered boundary
 
-Only **Repository Intelligence** is implemented in Version 1, starting with the Repository Scanner. All other components are architectural placeholders, not current deliverables.
+Repository Intelligence and the frozen Go syntax, package-identity, and semantic
+artifacts are released. Persistence is design-only and is not yet a runtime
+dependency.
 
 ## Future component responsibilities
 
-- Repository intelligence: scan files, parse source, extract symbols and dependencies.
-- Knowledge layer: store repository facts and relationships.
+- Repository intelligence: scan files and publish repository facts.
+- Language/semantic intelligence: publish versioned syntax and semantic facts.
+- Persistence boundary: store exact immutable artifacts without interpreting
+  or modifying them.
+- Knowledge/query layer: expose durable artifact history and rebuildable
+  projections.
 - Reasoning engine: collect evidence, rank hypotheses, and explain conclusions.
 - Validation engine: run approved builds, tests, linters, and static analysis.
 - Model adapter: provide a stable interface to replaceable language models.
@@ -28,3 +36,5 @@ Only **Repository Intelligence** is implemented in Version 1, starting with the 
 ## Safety boundary
 
 No component may edit a repository or execute commands without an explicit, reviewable request and result capture.
+
+No intelligence engine may require a database to produce its artifact.
