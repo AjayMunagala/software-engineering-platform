@@ -459,7 +459,7 @@ type GoSemanticInventory struct {
 	statistics            SemanticStatistics
 }
 
-func newInventory(files []SemanticFile, declarations []SemanticDeclaration, references []SemanticReference, receivers []ReceiverBinding, imports []ImportBinding, typeRelations []TypeRelation, diagnostics []lie.Diagnostic, statistics SemanticStatistics) GoSemanticInventory {
+func newInventory(files []SemanticFile, declarations []SemanticDeclaration, references []SemanticReference, receivers []ReceiverBinding, imports []ImportBinding, typeRelations []TypeRelation, satisfaction []InterfaceSatisfaction, diagnostics []lie.Diagnostic, statistics SemanticStatistics) GoSemanticInventory {
 	return GoSemanticInventory{
 		metadata: Metadata{Name: ArtifactName, Version: ArtifactVersion, IDSchemeVersion: IDSchemeVersion, EngineName: "go-semantic", EngineVersion: engineVersion},
 		sources: []rie.ArtifactReference{
@@ -469,7 +469,7 @@ func newInventory(files []SemanticFile, declarations []SemanticDeclaration, refe
 		},
 		files: append([]SemanticFile(nil), files...), declarations: append([]SemanticDeclaration(nil), declarations...), references: cloneReferences(references),
 		receivers: append([]ReceiverBinding(nil), receivers...), imports: append([]ImportBinding(nil), imports...), typeRelations: cloneTypeRelations(typeRelations),
-		interfaceSatisfaction: []InterfaceSatisfaction{}, diagnostics: cloneDiagnostics(diagnostics), statistics: cloneStatistics(statistics),
+		interfaceSatisfaction: cloneInterfaceSatisfaction(satisfaction), diagnostics: cloneDiagnostics(diagnostics), statistics: cloneStatistics(statistics),
 	}
 }
 

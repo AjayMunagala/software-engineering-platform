@@ -514,6 +514,213 @@ func TestRelationshipBudgetPreservesImportsBeforeDerivedReferences(t *testing.T)
 	}
 }
 
+func TestInterfaceSatisfactionProvesValuePointerEmbeddedAndGenericAssertions(t *testing.T) {
+	input := prerequisites(t, map[string]string{
+		"interfaces.go": `package satisfaction
+type Runner interface { Run() }
+type Base interface { Run() }
+type Extended interface { Base }
+type Mapper[T any] interface { Map(T) T }
+type Implicit interface { Work() }
+`,
+		"types.go": `package satisfaction
+type ValueWorker struct{}
+func (ValueWorker) Run() {}
+type PointerWorker struct{}
+func (*PointerWorker) Run() {}
+type Box[T any] struct{}
+func (Box[T]) Map(value T) T { return value }
+type ImplicitWorker struct{}
+func (ImplicitWorker) Work() {}
+var _ Runner = ValueWorker{}
+var _ Runner = (*PointerWorker)(nil)
+var _ Extended = ValueWorker{}
+var _ Mapper[int] = Box[int]{}
+var assigned Implicit = ImplicitWorker{}
+`,
+	})
+	inventory := resolve(t, input, nil)
+	checks := inventory.InterfaceSatisfaction()
+	if len(checks) != 5 {
+		t.Fatalf("interface checks = %+v", checks)
+	}
+	for _, check := range checks {
+		if check.Status != SatisfactionProven || len(check.MissingMethodNames) != 0 {
+			t.Fatalf("proven check = %+v", check)
+		}
+	}
+	pointer := findSatisfaction(t, checks, "PointerWorker", "Runner", inventory.Declarations())
+	if !pointer.PointerRequired {
+		t.Fatalf("pointer-only satisfaction = %+v", pointer)
+	}
+	implicit := findSatisfaction(t, checks, "ImplicitWorker", "Implicit", inventory.Declarations())
+	if len(implicit.CompileTimeAssertions) != 0 {
+		t.Fatalf("ordinary assignment was mislabeled as compile-time assertion: %+v", implicit)
+	}
+	if inventory.Statistics().InterfaceChecksByStatus[SatisfactionProven.String()] != 5 {
+		t.Fatalf("statistics = %+v", inventory.Statistics())
+	}
+}
+
+func TestInterfaceSatisfactionDisprovesMissingAndWrongSignatures(t *testing.T) {
+	input := prerequisites(t, map[string]string{
+		"main.go": `package satisfaction
+type Complete interface { Run(); Stop() }
+type Signature interface { Run(int) }
+type Worker struct{}
+func (Worker) Run() {}
+var _ Complete = Worker{}
+var _ Signature = Worker{}
+`,
+	})
+	inventory := resolve(t, input, nil)
+	complete := findSatisfaction(t, inventory.InterfaceSatisfaction(), "Worker", "Complete", inventory.Declarations())
+	if complete.Status != SatisfactionDisproven || !reflect.DeepEqual(complete.MissingMethodNames, []string{"Stop"}) {
+		t.Fatalf("missing-method result = %+v", complete)
+	}
+	signature := findSatisfaction(t, inventory.InterfaceSatisfaction(), "Worker", "Signature", inventory.Declarations())
+	if signature.Status != SatisfactionDisproven || !reflect.DeepEqual(signature.MissingMethodNames, []string{"Run"}) {
+		t.Fatalf("signature result = %+v", signature)
+	}
+}
+
+func TestInterfaceCandidatesComeFromAssignmentsConversionsArgumentsAndReturns(t *testing.T) {
+	input := prerequisites(t, map[string]string{
+		"main.go": `package satisfaction
+type AssignI interface { Assign() }
+type AssignW struct{}
+func (AssignW) Assign() {}
+var assignTarget AssignI
+
+type ConvertI interface { Convert() }
+type ConvertW struct{}
+func (ConvertW) Convert() {}
+
+type ArgumentI interface { Argument() }
+type ArgumentW struct{}
+func (ArgumentW) Argument() {}
+func Accept(ArgumentI) {}
+
+type ReturnI interface { Return() }
+type ReturnW struct{}
+func (ReturnW) Return() {}
+func Make() ReturnI { return ReturnW{} }
+
+func Sites() {
+    assignTarget = AssignW{}
+    _ = ConvertI(ConvertW{})
+    Accept(ArgumentW{})
+}
+`,
+	})
+	inventory := resolve(t, input, nil)
+	checks := inventory.InterfaceSatisfaction()
+	for _, pair := range [][2]string{{"AssignW", "AssignI"}, {"ConvertW", "ConvertI"}, {"ArgumentW", "ArgumentI"}, {"ReturnW", "ReturnI"}} {
+		check := findSatisfaction(t, checks, pair[0], pair[1], inventory.Declarations())
+		if check.Status != SatisfactionProven || len(check.CompileTimeAssertions) != 0 {
+			t.Fatalf("site-derived check %s -> %s = %+v", pair[0], pair[1], check)
+		}
+	}
+	if len(checks) != 4 {
+		t.Fatalf("site-derived checks = %+v", checks)
+	}
+}
+
+func TestEmbeddedInterfaceRelationCreatesBoundedCandidate(t *testing.T) {
+	input := prerequisites(t, map[string]string{
+		"main.go": "package satisfaction\ntype Runner interface { Run() }\ntype Wrapper struct { Runner }\n",
+	})
+	inventory := resolve(t, input, nil)
+	check := findSatisfaction(t, inventory.InterfaceSatisfaction(), "Wrapper", "Runner", inventory.Declarations())
+	if check.Status != SatisfactionProven || check.PointerRequired || len(check.CompileTimeAssertions) != 0 {
+		t.Fatalf("embedded interface result = %+v", check)
+	}
+}
+
+func TestIncompleteImportsProduceUnknownInterfaceSatisfaction(t *testing.T) {
+	input := prerequisites(t, map[string]string{
+		"go.mod": "module example.com/app\n\ngo 1.26\n",
+		"main.go": `package satisfaction
+import ext "example.net/types"
+type Runner interface { Run(ext.Value) }
+type Worker struct{}
+func (Worker) Run(ext.Value) {}
+var _ Runner = Worker{}
+`,
+	})
+	inventory := resolve(t, input, nil)
+	check := findSatisfaction(t, inventory.InterfaceSatisfaction(), "Worker", "Runner", inventory.Declarations())
+	if check.Status != SatisfactionUnknown || len(check.MissingMethodNames) != 0 {
+		t.Fatalf("incomplete import result = %+v", check)
+	}
+}
+
+func TestUnrelatedPackageTypeErrorsPreventInterfaceClaims(t *testing.T) {
+	input := prerequisites(t, map[string]string{
+		"main.go": `package satisfaction
+type Runner interface { Run() }
+type Worker struct{}
+func (Worker) Run() {}
+var _ Runner = Worker{}
+func Broken() { var value int = "not-an-int"; _ = value }
+`,
+	})
+	inventory := resolve(t, input, nil)
+	check := findSatisfaction(t, inventory.InterfaceSatisfaction(), "Worker", "Runner", inventory.Declarations())
+	if check.Status != SatisfactionUnknown {
+		t.Fatalf("unrelated package error permitted a semantic claim: %+v", check)
+	}
+}
+
+func TestInterfaceCandidatesAreBoundedAndNeverCartesian(t *testing.T) {
+	withoutEvidence := resolve(t, prerequisites(t, map[string]string{
+		"main.go": "package bounded\ntype First interface { Run() }\ntype Second interface { Stop() }\ntype Worker struct{}\nfunc (Worker) Run() {}\n",
+	}), nil)
+	if len(withoutEvidence.InterfaceSatisfaction()) != 0 {
+		t.Fatalf("unrelated types were compared: %+v", withoutEvidence.InterfaceSatisfaction())
+	}
+
+	input := prerequisites(t, map[string]string{
+		"main.go": "package bounded\ntype Runner interface { Run() }\ntype Worker struct{}\nfunc (Worker) Run() {}\nvar _ Runner = Worker{}\n",
+	})
+	config := DefaultConfig()
+	config.MaxRelationships = 1
+	limited := resolve(t, input, &config)
+	if len(limited.InterfaceSatisfaction()) != 0 || limited.Statistics().OmittedRelationships == 0 || !hasDiagnostic(limited.Diagnostics(), "semantic_relationship_limit") {
+		t.Fatalf("limited satisfaction=%+v statistics=%+v diagnostics=%+v", limited.InterfaceSatisfaction(), limited.Statistics(), limited.Diagnostics())
+	}
+}
+
+func TestInterfacePackageLimitsAreExplicit(t *testing.T) {
+	input := prerequisites(t, map[string]string{
+		"contract.go": "package limits\ntype Runner interface { Run() }\n",
+		"worker.go":   "package limits\ntype Worker struct{}\nfunc (Worker) Run() {}\nvar _ Runner = Worker{}\n",
+	})
+	config := DefaultConfig()
+	config.MaxPackageFiles = 1
+	inventory := resolve(t, input, &config)
+	if len(inventory.InterfaceSatisfaction()) != 0 || !hasDiagnostic(inventory.Diagnostics(), "semantic_package_limit") {
+		t.Fatalf("package limit checks=%+v diagnostics=%+v", inventory.InterfaceSatisfaction(), inventory.Diagnostics())
+	}
+}
+
+func TestInterfaceSatisfactionIsDeterministicAndAggregatesAssertions(t *testing.T) {
+	input := prerequisites(t, map[string]string{
+		"contract.go": "package deterministic\ntype Runner interface { Run() }\ntype Worker struct{}\nfunc (Worker) Run() {}\n",
+		"a.go":        "package deterministic\nvar _ Runner = Worker{}\n",
+		"b.go":        "package deterministic\nvar _ Runner = Worker{}\n",
+	})
+	one, eight := DefaultConfig(), DefaultConfig()
+	one.MaxWorkers, eight.MaxWorkers = 1, 8
+	left, right := resolve(t, input, &one), resolve(t, input, &eight)
+	if !reflect.DeepEqual(left.InterfaceSatisfaction(), right.InterfaceSatisfaction()) {
+		t.Fatalf("worker count changed interface output: left=%+v right=%+v", left.InterfaceSatisfaction(), right.InterfaceSatisfaction())
+	}
+	if len(left.InterfaceSatisfaction()) != 1 || len(left.InterfaceSatisfaction()[0].CompileTimeAssertions) != 2 {
+		t.Fatalf("aggregated assertions = %+v", left.InterfaceSatisfaction())
+	}
+}
+
 func TestRelationshipBudgetIsDeterministicAndExplicit(t *testing.T) {
 	input := prerequisites(t, map[string]string{
 		"types.go": "package budget\ntype Box[T any] struct { Value T }\nfunc (box *Box[T]) Method(input Box[T]) {}\n",
@@ -1041,6 +1248,19 @@ func findOwnedReference(t *testing.T, references []SemanticReference, owner, nam
 	}
 	t.Fatalf("owned reference %s (%s) under %s not found in %+v", name, kind, owner, references)
 	return SemanticReference{}
+}
+
+func findSatisfaction(t *testing.T, values []InterfaceSatisfaction, concreteName, interfaceName string, declarations []SemanticDeclaration) InterfaceSatisfaction {
+	t.Helper()
+	concrete := findDeclarationByName(t, declarations, concreteName)
+	contract := findDeclaration(t, declarations, interfaceName, DeclarationInterface)
+	for _, value := range values {
+		if value.ConcreteTypeDeclarationID == concrete.ID && value.InterfaceDeclarationID == contract.ID {
+			return value
+		}
+	}
+	t.Fatalf("satisfaction %s -> %s not found in %+v", concreteName, interfaceName, values)
+	return InterfaceSatisfaction{}
 }
 
 func ownedDeclaration(t *testing.T, declarations []SemanticDeclaration, owner, name string, kind DeclarationKind) SemanticDeclaration {

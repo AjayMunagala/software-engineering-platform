@@ -2,13 +2,13 @@
 
 ## Status
 
-- Current state: Phase 2.2.5 accepted; Phase 2.2.6 authorized
-- Implementation authorization: Phase 2.2.6 only
+- Current state: Phase 2.2.6 accepted; Phase 2.2.7 authorized
+- Implementation authorization: Phase 2.2.7 only
 - Stable prerequisite: `GoLanguageInventory 1.0.0`
 - Candidate output: `GoSemanticInventory 0.1.0`
 - Stable target: `GoSemanticInventory 1.0.0`
 
-Engineering accepted the Phase 2.2.0 evidence and ADR 0008 on 2026-07-22. Phase 2.2.1 was accepted on 2026-07-22. Phase 2.2.2 through Phase 2.2.5 were accepted on 2026-07-23. Phase 2.2.6 alone is authorized; Phase 2.2.7 and later remain unauthorized until their preceding exit gates are explicitly accepted.
+Engineering accepted the Phase 2.2.0 evidence and ADR 0008 on 2026-07-22. Phase 2.2.1 was accepted on 2026-07-22. Phase 2.2.2 through Phase 2.2.6 were accepted on 2026-07-23. Phase 2.2.7 alone is authorized; Phase 2.2.8 and later remain unauthorized until their preceding exit gates are explicitly accepted.
 
 Phase 2.2.1 implementation and local validation are complete and accepted. Targeted package and full-backend race tests pass with MSYS2 UCRT64 GCC 16.1.0. See [LIE_PHASE_2_2_1_PACKAGE_IDENTITY.md](../Validation/LIE_PHASE_2_2_1_PACKAGE_IDENTITY.md). Authorization advances only to Phase 2.2.2.
 
@@ -157,6 +157,8 @@ Accepted evidence: lexical and import-alias shadowing, same-package cross-file r
 - Tests cover implicit satisfaction, pointer-only satisfaction, embedded interfaces, missing methods, signature mismatch, generics, incomplete imports, and compile-time assertions.
 - Every `proven`/`disproven` result is reproducible from complete evidence.
 - No all-types × all-interfaces scan appears in code or benchmarks.
+
+Accepted evidence: value and pointer method sets, implicit assignments, compile-time assertions, embedded interfaces, missing methods, signature mismatches, local generics, incomplete imports, unrelated type errors, bounded candidate derivation from assignments/conversions/arguments/returns/embeddings, deterministic aggregation, package limits, and relationship limits pass. Package coverage is 85.6%; shuffled tests, package/full regression, vet, targeted/full race tests, and repeatable 100/1,000-check benchmarks pass. See [LIE_PHASE_2_2_6_INTERFACE_SATISFACTION.md](../Validation/LIE_PHASE_2_2_6_INTERFACE_SATISFACTION.md). Engineering accepted the exit gate on 2026-07-23 and authorized Phase 2.2.7 only.
 
 ## Phase 2.2.7 — Candidate Integration (`0.1.0`)
 

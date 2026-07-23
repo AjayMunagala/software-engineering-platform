@@ -3,7 +3,7 @@
 ## Document Status
 
 - Phase: 2.2.6 conditional interface satisfaction
-- Status: Phase 2.2.5 accepted; Phase 2.2.6 authorized
+- Status: Phase 2.2.6 accepted; Phase 2.2.7 candidate integration authorized
 - Candidate engine version: `0.1.0`
 - Candidate artifact: `go-semantic-inventory` `0.1.0`
 - Stable artifact target: `1.0.0`, only after implementation, stabilization, and real-repository validation
@@ -210,6 +210,8 @@ File/package problems produce bounded diagnostics and explicit outcomes where sa
 - `semantic_receiver_unresolved`
 - `semantic_receiver_ambiguous`
 - `semantic_package_proof_stale`
+- `semantic_package_limit`
+- `semantic_interface_parse_error`
 - `semantic_relationship_limit`
 - `semantic_type_error`
 - `semantic_import_unresolved`
@@ -312,7 +314,7 @@ The semantic artifact is additive. It does not change or replace either frozen i
 
 ## Approval Gate
 
-Phase 2.2.0 through Phase 2.2.5 are accepted. Phase 2.2.6 alone is authorized; Phase 2.2.7 and later remain unauthorized. The approved architecture covers:
+Phase 2.2.0 through Phase 2.2.6 are accepted. Phase 2.2.7 alone is authorized; Phase 2.2.8 and later remain unauthorized. The approved architecture covers:
 
 - controlled source re-parsing and digest verification;
 - the authoritative `PackageIdentityProof` contract and supporting artifact;

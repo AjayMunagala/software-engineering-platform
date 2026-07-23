@@ -2,7 +2,7 @@
 
 ## Status
 
-- Design status: Phase 2.2.5 accepted; Phase 2.2.6 authorized
+- Design status: Phase 2.2.6 accepted; Phase 2.2.7 authorized
 - Candidate artifact: `go-semantic-inventory` `0.1.0`
 - Stable target: `1.0.0` after validation and API freeze
 - Prerequisites: `repository-snapshot` `1.0.0`, `go-language-inventory` `1.0.0`, and `go-package-identity-inventory` `0.1.0`
@@ -281,6 +281,9 @@ Rules:
 - Missing imports, incomplete embedded types, or unresolved constraints produce `unknown`, never a guess.
 - Missing method names are sorted and emitted only when the result is proven `disproven`.
 - The engine does not generate the Cartesian product of every type and every interface. It evaluates bounded candidates derived from actual relationships and assertions.
+- Candidate sites are compile-time assertions, typed variable assignments, assignments, conversions, arguments, returns, and exact resolved local embedded-interface relations. Duplicate `(concrete, interface, pointer mode)` candidates merge deterministically.
+- `PointerRequired` is true only when the value method set does not satisfy the interface but the pointer method set does.
+- Any unrelated package type error, missing import, incomplete declaration, or unavailable type forces `unknown`. Only a type error located inside the exact candidate assignment may support a reproducible `disproven` result.
 
 ## Diagnostics and Statistics
 

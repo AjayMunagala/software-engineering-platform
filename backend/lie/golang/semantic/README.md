@@ -55,6 +55,20 @@ Phase 2.2.5 additionally:
 - budgets imports first, then receiver bindings, type relations, and references
   so foundational import evidence is not silently displaced by derived uses.
 
+Phase 2.2.6 additionally:
+
+- rebuilds package type state in process with `go/types` and no importer;
+- derives bounded interface candidates from compile-time assertions, typed
+  variable assignments, assignments, conversions, arguments, returns, and
+  exact local embedded-interface relations;
+- proves value and pointer method sets, including embedded interfaces and
+  instantiated local generic types;
+- reports deterministic `proven`, `disproven`, or `unknown` outcomes and sorted
+  missing or mismatched method names;
+- treats missing imports, unrelated package type errors, ambiguous declarations,
+  and incomplete type information as `unknown`;
+- never compares every concrete type with every interface.
+
 Files remain `partial` because later semantic relationships are not yet
 authorized. Exact declaration matches are independently marked `resolved`.
 
@@ -75,11 +89,12 @@ The engine is local and read-only. It executes no commands, performs no
 network access or downloads, reads no module cache, writes no repository
 files, and persists no source, AST, token, or `go/types` state.
 
-Interface satisfaction remains outside the authorized scope. Phase 2.2.6 and
+Candidate integration remains outside the authorized scope. Phase 2.2.7 and
 later are not authorized by this package. A default import of an external
 package keeps an empty local name when no exact package-name proof exists;
 selectors through that unknown name remain unresolved rather than using the
-import-path suffix as a guess.
+import-path suffix as a guess. Interface checking likewise does not import
+external packages or claim complete method sets when package errors remain.
 
 ## Package Standard
 

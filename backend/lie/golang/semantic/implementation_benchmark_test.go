@@ -30,6 +30,14 @@ func BenchmarkReferencesAndImports1000Files(b *testing.B) {
 	benchmarkReferencesAndImports(b, 1_000)
 }
 
+func BenchmarkInterfaceSatisfaction100Files(b *testing.B) {
+	benchmarkInterfaceSatisfaction(b, 100)
+}
+
+func BenchmarkInterfaceSatisfaction1000Files(b *testing.B) {
+	benchmarkInterfaceSatisfaction(b, 1_000)
+}
+
 func benchmarkDeclarationReconciliation(b *testing.B, fileCount int) {
 	b.Helper()
 	files := map[string]string{"go.mod": "module example.com/benchmark\n\ngo 1.22\n"}
@@ -117,6 +125,32 @@ func benchmarkReferencesAndImports(b *testing.B, fileCount int) {
 		}
 		if inventory.Statistics().ReferencesByStatus[ResolutionResolved.String()] < fileCount {
 			b.Fatalf("resolved references = %d, want at least %d", inventory.Statistics().ReferencesByStatus[ResolutionResolved.String()], fileCount)
+		}
+	}
+}
+
+func benchmarkInterfaceSatisfaction(b *testing.B, fileCount int) {
+	b.Helper()
+	files := map[string]string{"go.mod": "module example.com/interfaces\n\ngo 1.26\n"}
+	for index := 0; index < fileCount; index++ {
+		files[fmt.Sprintf("pkg/interface%05d.go", index)] = fmt.Sprintf("package interfaces\ntype Runner%05d interface { Run%05d() }\ntype Worker%05d struct{}\nfunc (Worker%05d) Run%05d() {}\nvar _ Runner%05d = Worker%05d{}\n", index, index, index, index, index, index, index)
+	}
+	input := prerequisites(b, files)
+	engine, err := New()
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	b.ReportAllocs()
+	b.ReportMetric(float64(fileCount), "checks/op")
+	b.ResetTimer()
+	for iteration := 0; iteration < b.N; iteration++ {
+		inventory, err := engine.Resolve(context.Background(), input)
+		if err != nil {
+			b.Fatal(err)
+		}
+		if len(inventory.InterfaceSatisfaction()) != fileCount {
+			b.Fatalf("interface checks = %d, want %d", len(inventory.InterfaceSatisfaction()), fileCount)
 		}
 	}
 }

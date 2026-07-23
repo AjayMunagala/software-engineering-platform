@@ -10,6 +10,7 @@ import (
 	"go/format"
 	"go/parser"
 	"go/token"
+	"go/types"
 	"io"
 	"os"
 	"path/filepath"
@@ -108,11 +109,18 @@ func (engine *engine) Resolve(ctx context.Context, input Input) (GoSemanticInven
 		return GoSemanticInventory{}, err
 	}
 	typeRelations := bindTypeRelations(declarations, typeRelationCandidates, imports)
-	imports, receivers, typeRelations, references, omittedRelationships := limitSemanticRelationships(imports, receivers, typeRelations, references, engine.config.MaxRelationships)
+	satisfaction, interfaceDiagnostics, interfaceOmitted, err := evaluateInterfaceSatisfaction(ctx, outcomes, declarations, typeRelations, engine.config)
+	if err != nil {
+		return GoSemanticInventory{}, err
+	}
+	diagnostics = append(diagnostics, interfaceDiagnostics...)
+	imports, receivers, typeRelations, references, satisfaction, omittedRelationships := limitSemanticRelationships(imports, receivers, typeRelations, references, satisfaction, engine.config.MaxRelationships)
+	omittedRelationships += interfaceOmitted
 	updateReferenceStatistics(files, references, &statistics)
 	statistics.ReceiverBindings = len(receivers)
 	statistics.ImportBindingsByStatus = statusesForImports(imports)
 	statistics.TypeRelations = len(typeRelations)
+	statistics.InterfaceChecksByStatus = statusesForInterfaceChecks(satisfaction)
 	statistics.OmittedRelationships = omittedRelationships
 	if omittedRelationships > 0 {
 		diagnostics = append(diagnostics, semanticDiagnostic(lie.SeverityWarning, "semantic_relationship_limit", fmt.Sprintf("%d semantic relationships omitted", omittedRelationships), ""))
@@ -124,7 +132,7 @@ func (engine *engine) Resolve(ctx context.Context, input Input) (GoSemanticInven
 	if err := ctx.Err(); err != nil {
 		return GoSemanticInventory{}, err
 	}
-	return newInventory(files, declarations, references, receivers, imports, typeRelations, diagnostics, statistics), nil
+	return newInventory(files, declarations, references, receivers, imports, typeRelations, satisfaction, diagnostics, statistics), nil
 }
 
 func validateInput(input Input) error {
@@ -276,6 +284,7 @@ type fileOutcome struct {
 	receivers     []receiverCandidate
 	typeRelations []typeRelationCandidate
 	diagnostics   []lie.Diagnostic
+	source        []byte
 }
 
 func (engine *engine) verifyFile(ctx context.Context, reader *sourceReader, source golang.GoFile, syntaxSymbols []golang.GoSymbol) fileOutcome {
@@ -340,6 +349,7 @@ func (engine *engine) verifyFile(ctx context.Context, reader *sourceReader, sour
 	}
 	outcome.file.Status = SemanticFilePartial
 	outcome.file.ContentDigest = digest
+	outcome.source = data
 	declarations, references, receivers, typeRelations, diagnostics, err := reconcileDeclarations(ctx, data, source, syntaxSymbols)
 	if err != nil {
 		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
@@ -1611,6 +1621,569 @@ func declarationsForIDs(ids []string, declarations map[string]SemanticDeclaratio
 	return result
 }
 
+type interfaceCandidate struct {
+	packageID              string
+	concreteDeclarationID  string
+	interfaceDeclarationID string
+	concreteExpression     ast.Expr
+	interfaceExpression    ast.Expr
+	valueExpression        ast.Expr
+	interfaceType          types.Type
+	concreteType           types.Type
+	pointerMode            bool
+	location               lie.SourceRange
+	evidence               []rie.Evidence
+}
+
+type parsedSemanticPackage struct {
+	id         string
+	fileSet    *token.FileSet
+	files      []*ast.File
+	candidates []interfaceCandidate
+	typeErrors []error
+}
+
+func evaluateInterfaceSatisfaction(ctx context.Context, outcomes []fileOutcome, declarations []SemanticDeclaration, typeRelations []TypeRelation, config Config) ([]InterfaceSatisfaction, []lie.Diagnostic, int, error) {
+	declarationsByPackageName := make(map[string][]SemanticDeclaration)
+	declarationsByID := make(map[string]SemanticDeclaration, len(declarations))
+	for _, declaration := range declarations {
+		declarationsByID[declaration.ID] = declaration
+		if declaration.OwnerDeclarationID == "" && isTypeDeclaration(declaration.Kind) {
+			key := declaration.PackageID + "\x00" + declaration.Name
+			declarationsByPackageName[key] = append(declarationsByPackageName[key], declaration)
+		}
+	}
+	grouped := make(map[string][]fileOutcome)
+	for _, outcome := range outcomes {
+		if outcome.file.Status == SemanticFilePartial || outcome.file.Status == SemanticFileResolved {
+			grouped[outcome.file.PackageID] = append(grouped[outcome.file.PackageID], outcome)
+		}
+	}
+	packageIDs := make([]string, 0, len(grouped))
+	for packageID := range grouped {
+		packageIDs = append(packageIDs, packageID)
+	}
+	sort.Strings(packageIDs)
+	results := make([]InterfaceSatisfaction, 0)
+	diagnostics := make([]lie.Diagnostic, 0)
+	omitted := 0
+	for _, packageID := range packageIDs {
+		if err := ctx.Err(); err != nil {
+			return nil, nil, 0, err
+		}
+		packageOutcomes := grouped[packageID]
+		bytesTotal := int64(0)
+		for _, outcome := range packageOutcomes {
+			bytesTotal += int64(len(outcome.source))
+		}
+		if len(packageOutcomes) > config.MaxPackageFiles || bytesTotal > config.MaxPackageBytes {
+			diagnostics = append(diagnostics, semanticDiagnostic(lie.SeverityWarning, "semantic_package_limit", fmt.Sprintf("package %s exceeds the configured interface-analysis limit", packageID), ""))
+			continue
+		}
+		parsed, parseDiagnostics, err := parseSemanticPackage(ctx, packageID, packageOutcomes, declarationsByPackageName)
+		if err != nil {
+			return nil, nil, 0, err
+		}
+		diagnostics = append(diagnostics, parseDiagnostics...)
+		info := &types.Info{Types: make(map[ast.Expr]types.TypeAndValue), Defs: make(map[*ast.Ident]types.Object), Uses: make(map[*ast.Ident]types.Object)}
+		checkConfig := types.Config{Error: func(err error) { parsed.typeErrors = append(parsed.typeErrors, err) }}
+		if err := ctx.Err(); err != nil {
+			return nil, nil, 0, err
+		}
+		typedPackage, _ := checkConfig.Check(packageID, parsed.fileSet, parsed.files, info)
+		if err := ctx.Err(); err != nil {
+			return nil, nil, 0, err
+		}
+		typedCandidates, err := typedInterfaceCandidates(ctx, packageID, parsed.fileSet, parsed.files, info, declarationsByPackageName)
+		if err != nil {
+			return nil, nil, 0, err
+		}
+		parsed.candidates = append(parsed.candidates, typedCandidates...)
+		parsed.candidates = append(parsed.candidates, embeddedInterfaceCandidates(packageID, typedPackage, typeRelations, declarationsByID)...)
+		parsed.candidates = mergeInterfaceCandidates(parsed.candidates)
+		if len(parsed.candidates) == 0 {
+			continue
+		}
+		complete := typeErrorsAreCandidateOnly(parsed.typeErrors, parsed.candidates, parsed.fileSet)
+		for index, candidate := range parsed.candidates {
+			if index%256 == 0 {
+				if err := ctx.Err(); err != nil {
+					return nil, nil, 0, err
+				}
+			}
+			if len(results) >= config.MaxRelationships {
+				omitted += len(parsed.candidates) - index
+				break
+			}
+			results = append(results, evaluateInterfaceCandidate(candidate, typedPackage, info, complete))
+		}
+	}
+	sort.Slice(results, func(i, j int) bool { return results[i].ID < results[j].ID })
+	results = mergeInterfaceSatisfaction(results)
+	return results, diagnostics, omitted, nil
+}
+
+func parseSemanticPackage(ctx context.Context, packageID string, outcomes []fileOutcome, declarations map[string][]SemanticDeclaration) (parsedSemanticPackage, []lie.Diagnostic, error) {
+	result := parsedSemanticPackage{id: packageID, fileSet: token.NewFileSet(), files: []*ast.File{}, candidates: []interfaceCandidate{}, typeErrors: []error{}}
+	diagnostics := make([]lie.Diagnostic, 0)
+	sort.Slice(outcomes, func(i, j int) bool { return outcomes[i].path < outcomes[j].path })
+	for _, outcome := range outcomes {
+		if err := ctx.Err(); err != nil {
+			return parsedSemanticPackage{}, nil, err
+		}
+		parsed, err := parser.ParseFile(result.fileSet, outcome.path, outcome.source, parser.SkipObjectResolution|parser.AllErrors)
+		if err != nil {
+			diagnostics = append(diagnostics, semanticDiagnostic(lie.SeverityWarning, "semantic_interface_parse_error", err.Error(), outcome.path))
+			continue
+		}
+		result.files = append(result.files, parsed)
+		result.candidates = append(result.candidates, interfaceCandidatesFromFile(result.fileSet, outcome.path, packageID, parsed, declarations)...)
+	}
+	sort.Slice(result.candidates, func(i, j int) bool {
+		left, right := result.candidates[i], result.candidates[j]
+		if left.location.File != right.location.File {
+			return left.location.File < right.location.File
+		}
+		if left.location.Start.Offset != right.location.Start.Offset {
+			return left.location.Start.Offset < right.location.Start.Offset
+		}
+		if left.concreteDeclarationID != right.concreteDeclarationID {
+			return left.concreteDeclarationID < right.concreteDeclarationID
+		}
+		return left.interfaceDeclarationID < right.interfaceDeclarationID
+	})
+	return result, diagnostics, nil
+}
+
+func interfaceCandidatesFromFile(fileSet *token.FileSet, filePath, packageID string, parsed *ast.File, declarations map[string][]SemanticDeclaration) []interfaceCandidate {
+	result := make([]interfaceCandidate, 0)
+	for _, rawDeclaration := range parsed.Decls {
+		declaration, ok := rawDeclaration.(*ast.GenDecl)
+		if !ok || declaration.Tok != token.VAR {
+			continue
+		}
+		for _, rawSpecification := range declaration.Specs {
+			specification, ok := rawSpecification.(*ast.ValueSpec)
+			if !ok || specification.Type == nil || len(specification.Values) == 0 {
+				continue
+			}
+			interfaceName := localTypeBaseName(specification.Type)
+			interfaceDeclaration, ok := exactTypeDeclaration(declarations[packageID+"\x00"+interfaceName], DeclarationInterface)
+			if !ok {
+				continue
+			}
+			for index, value := range specification.Values {
+				concreteExpression, pointerMode := concreteTypeExpression(value)
+				concreteName := localTypeBaseName(concreteExpression)
+				concreteDeclaration, ok := exactConcreteDeclaration(declarations[packageID+"\x00"+concreteName])
+				if !ok {
+					continue
+				}
+				positionStart, positionEnd := fileSet.Position(specification.Pos()), fileSet.Position(specification.End())
+				location := lie.SourceRange{File: filePath, Start: lie.Position{Offset: positionStart.Offset, Line: positionStart.Line, Column: positionStart.Column}, End: lie.Position{Offset: positionEnd.Offset, Line: positionEnd.Line, Column: positionEnd.Column}}
+				evidence := []rie.Evidence{}
+				if index < len(specification.Names) && specification.Names[index].Name == "_" {
+					evidence = append(evidence, rie.Evidence{File: filePath, Rule: "go.compile-time-interface-assertion", Value: interfaceName + "<-" + concreteName})
+				}
+				result = append(result, interfaceCandidate{
+					packageID: packageID, concreteDeclarationID: concreteDeclaration.ID, interfaceDeclarationID: interfaceDeclaration.ID,
+					concreteExpression: concreteExpression, interfaceExpression: specification.Type, valueExpression: value,
+					pointerMode: pointerMode, location: location, evidence: evidence,
+				})
+			}
+		}
+	}
+	return result
+}
+
+func concreteTypeExpression(expression ast.Expr) (ast.Expr, bool) {
+	switch typed := expression.(type) {
+	case *ast.CompositeLit:
+		return typed.Type, false
+	case *ast.UnaryExpr:
+		if typed.Op == token.AND {
+			if nested, _ := concreteTypeExpression(typed.X); nested != nil {
+				return nested, true
+			}
+		}
+	case *ast.CallExpr:
+		if identifier, ok := typed.Fun.(*ast.Ident); ok && identifier.Name == "new" && len(typed.Args) == 1 {
+			return typed.Args[0], true
+		}
+		return stripPointerExpression(typed.Fun)
+	}
+	return nil, false
+}
+
+func stripPointerExpression(expression ast.Expr) (ast.Expr, bool) {
+	pointer := false
+	for expression != nil {
+		switch typed := expression.(type) {
+		case *ast.ParenExpr:
+			expression = typed.X
+		case *ast.StarExpr:
+			pointer = true
+			expression = typed.X
+		default:
+			return expression, pointer
+		}
+	}
+	return nil, pointer
+}
+
+func localTypeBaseName(expression ast.Expr) string {
+	for expression != nil {
+		switch typed := expression.(type) {
+		case *ast.ParenExpr:
+			expression = typed.X
+		case *ast.StarExpr:
+			expression = typed.X
+		case *ast.IndexExpr:
+			expression = typed.X
+		case *ast.IndexListExpr:
+			expression = typed.X
+		case *ast.Ident:
+			return typed.Name
+		default:
+			return ""
+		}
+	}
+	return ""
+}
+
+func exactTypeDeclaration(values []SemanticDeclaration, kind DeclarationKind) (SemanticDeclaration, bool) {
+	if len(values) != 1 || values[0].Kind != kind || values[0].Status != ResolutionResolved {
+		return SemanticDeclaration{}, false
+	}
+	return values[0], true
+}
+
+func exactConcreteDeclaration(values []SemanticDeclaration) (SemanticDeclaration, bool) {
+	if len(values) != 1 || values[0].Status != ResolutionResolved || (values[0].Kind != DeclarationStruct && values[0].Kind != DeclarationDefinedType) {
+		return SemanticDeclaration{}, false
+	}
+	return values[0], true
+}
+
+func typedInterfaceCandidates(ctx context.Context, packageID string, fileSet *token.FileSet, files []*ast.File, info *types.Info, declarations map[string][]SemanticDeclaration) ([]interfaceCandidate, error) {
+	result := make([]interfaceCandidate, 0)
+	nodes := 0
+	for _, file := range files {
+		ast.Inspect(file, func(node ast.Node) bool {
+			if node != nil {
+				nodes++
+				if nodes%1024 == 0 && ctx.Err() != nil {
+					return false
+				}
+			}
+			switch typed := node.(type) {
+			case *ast.AssignStmt:
+				count := min(len(typed.Lhs), len(typed.Rhs))
+				for index := 0; index < count; index++ {
+					if candidate, ok := interfaceCandidateFromTypes(packageID, fileSet, typed, info.TypeOf(typed.Lhs[index]), info.TypeOf(typed.Rhs[index]), declarations); ok {
+						result = append(result, candidate)
+					}
+				}
+			case *ast.CallExpr:
+				if typeAndValue, exists := info.Types[typed.Fun]; exists && typeAndValue.IsType() && len(typed.Args) == 1 {
+					if candidate, ok := interfaceCandidateFromTypes(packageID, fileSet, typed, typeAndValue.Type, info.TypeOf(typed.Args[0]), declarations); ok {
+						result = append(result, candidate)
+					}
+					break
+				}
+				signature, ok := underlyingSignature(info.TypeOf(typed.Fun))
+				if !ok {
+					break
+				}
+				for index, argument := range typed.Args {
+					parameterType := callParameterType(signature, index, len(typed.Args), typed.Ellipsis.IsValid())
+					if candidate, ok := interfaceCandidateFromTypes(packageID, fileSet, typed, parameterType, info.TypeOf(argument), declarations); ok {
+						result = append(result, candidate)
+					}
+				}
+			case *ast.FuncDecl:
+				object := info.Defs[typed.Name]
+				if object == nil {
+					break
+				}
+				function, ok := object.Type().(*types.Signature)
+				if !ok || typed.Body == nil {
+					break
+				}
+				ast.Inspect(typed.Body, func(bodyNode ast.Node) bool {
+					if _, nested := bodyNode.(*ast.FuncLit); nested {
+						return false
+					}
+					statement, ok := bodyNode.(*ast.ReturnStmt)
+					if !ok {
+						return true
+					}
+					count := min(len(statement.Results), function.Results().Len())
+					for index := 0; index < count; index++ {
+						if candidate, ok := interfaceCandidateFromTypes(packageID, fileSet, statement, function.Results().At(index).Type(), info.TypeOf(statement.Results[index]), declarations); ok {
+							result = append(result, candidate)
+						}
+					}
+					return true
+				})
+			}
+			return true
+		})
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
+	}
+	return result, nil
+}
+
+func embeddedInterfaceCandidates(packageID string, typedPackage *types.Package, relations []TypeRelation, declarations map[string]SemanticDeclaration) []interfaceCandidate {
+	if typedPackage == nil {
+		return nil
+	}
+	result := make([]interfaceCandidate, 0)
+	for _, relation := range relations {
+		if relation.PackageID != packageID || relation.Kind != TypeRelationEmbeds || relation.Status != ResolutionResolved || relation.OwnerDeclarationID == "" || relation.TargetDeclarationID == "" {
+			continue
+		}
+		concreteDeclaration, concreteExists := declarations[relation.OwnerDeclarationID]
+		interfaceDeclaration, interfaceExists := declarations[relation.TargetDeclarationID]
+		if !concreteExists || !interfaceExists || concreteDeclaration.Kind != DeclarationStruct || interfaceDeclaration.Kind != DeclarationInterface {
+			continue
+		}
+		concreteObject := typedPackage.Scope().Lookup(concreteDeclaration.Name)
+		interfaceObject := typedPackage.Scope().Lookup(interfaceDeclaration.Name)
+		if concreteObject == nil || interfaceObject == nil {
+			continue
+		}
+		concreteType, interfaceType := concreteObject.Type(), interfaceObject.Type()
+		if _, ok := interfaceType.Underlying().(*types.Interface); !ok {
+			continue
+		}
+		result = append(result, interfaceCandidate{
+			packageID: packageID, concreteDeclarationID: concreteDeclaration.ID, interfaceDeclarationID: interfaceDeclaration.ID,
+			interfaceType: interfaceType, concreteType: concreteType, pointerMode: false, location: relation.Location, evidence: []rie.Evidence{},
+		})
+	}
+	return result
+}
+
+func interfaceCandidateFromTypes(packageID string, fileSet *token.FileSet, node ast.Node, interfaceType, concreteType types.Type, declarations map[string][]SemanticDeclaration) (interfaceCandidate, bool) {
+	if interfaceType == nil || concreteType == nil {
+		return interfaceCandidate{}, false
+	}
+	if _, ok := interfaceType.Underlying().(*types.Interface); !ok {
+		return interfaceCandidate{}, false
+	}
+	interfaceObject := namedTypeObject(interfaceType)
+	concreteObject := namedTypeObject(concreteType)
+	if interfaceObject == nil || concreteObject == nil || interfaceObject.Pkg() == nil || concreteObject.Pkg() == nil || interfaceObject.Pkg().Path() != packageID || concreteObject.Pkg().Path() != packageID {
+		return interfaceCandidate{}, false
+	}
+	interfaceDeclaration, ok := exactTypeDeclaration(declarations[packageID+"\x00"+interfaceObject.Name()], DeclarationInterface)
+	if !ok {
+		return interfaceCandidate{}, false
+	}
+	concreteDeclaration, ok := exactConcreteDeclaration(declarations[packageID+"\x00"+concreteObject.Name()])
+	if !ok {
+		return interfaceCandidate{}, false
+	}
+	start, end := fileSet.Position(node.Pos()), fileSet.Position(node.End())
+	return interfaceCandidate{
+		packageID: packageID, concreteDeclarationID: concreteDeclaration.ID, interfaceDeclarationID: interfaceDeclaration.ID,
+		interfaceType: interfaceType, concreteType: concreteType, pointerMode: isPointerType(concreteType),
+		location: lie.SourceRange{File: start.Filename, Start: lie.Position{Offset: start.Offset, Line: start.Line, Column: start.Column}, End: lie.Position{Offset: end.Offset, Line: end.Line, Column: end.Column}},
+		evidence: []rie.Evidence{},
+	}, true
+}
+
+func namedTypeObject(value types.Type) *types.TypeName {
+	for value != nil {
+		switch typed := value.(type) {
+		case *types.Pointer:
+			value = typed.Elem()
+		case *types.Named:
+			return typed.Obj()
+		default:
+			return nil
+		}
+	}
+	return nil
+}
+
+func isPointerType(value types.Type) bool {
+	_, ok := value.(*types.Pointer)
+	return ok
+}
+
+func underlyingSignature(value types.Type) (*types.Signature, bool) {
+	if value == nil {
+		return nil, false
+	}
+	signature, ok := value.Underlying().(*types.Signature)
+	return signature, ok
+}
+
+func callParameterType(signature *types.Signature, index, argumentCount int, ellipsis bool) types.Type {
+	parameters := signature.Params()
+	if parameters == nil || parameters.Len() == 0 {
+		return nil
+	}
+	if index < parameters.Len()-1 || !signature.Variadic() {
+		if index >= parameters.Len() {
+			return nil
+		}
+		return parameters.At(index).Type()
+	}
+	last := parameters.At(parameters.Len() - 1).Type()
+	if ellipsis && argumentCount == parameters.Len() {
+		return last
+	}
+	if slice, ok := last.(*types.Slice); ok {
+		return slice.Elem()
+	}
+	return last
+}
+
+func mergeInterfaceCandidates(values []interfaceCandidate) []interfaceCandidate {
+	sort.Slice(values, func(i, j int) bool {
+		left, right := interfaceSatisfactionID(values[i]), interfaceSatisfactionID(values[j])
+		if left != right {
+			return left < right
+		}
+		if values[i].location.File != values[j].location.File {
+			return values[i].location.File < values[j].location.File
+		}
+		return values[i].location.Start.Offset < values[j].location.Start.Offset
+	})
+	result := make([]interfaceCandidate, 0, len(values))
+	for _, value := range values {
+		identifier := interfaceSatisfactionID(value)
+		if len(result) == 0 || interfaceSatisfactionID(result[len(result)-1]) != identifier {
+			result = append(result, value)
+			continue
+		}
+		current := &result[len(result)-1]
+		current.evidence = append(current.evidence, value.evidence...)
+		if current.interfaceType == nil {
+			current.interfaceType = value.interfaceType
+		}
+		if current.concreteType == nil {
+			current.concreteType = value.concreteType
+		}
+	}
+	return result
+}
+
+func typeErrorsAreCandidateOnly(values []error, candidates []interfaceCandidate, fileSet *token.FileSet) bool {
+	for _, value := range values {
+		message := value.Error()
+		if !strings.Contains(message, "does not implement") && !strings.Contains(message, "cannot use") {
+			return false
+		}
+		var typedError types.Error
+		if !errors.As(value, &typedError) {
+			return false
+		}
+		position := fileSet.Position(typedError.Pos)
+		insideCandidate := false
+		for _, candidate := range candidates {
+			if candidate.location.File == position.Filename && position.Offset >= candidate.location.Start.Offset && position.Offset <= candidate.location.End.Offset {
+				insideCandidate = true
+				break
+			}
+		}
+		if !insideCandidate {
+			return false
+		}
+	}
+	return true
+}
+
+func evaluateInterfaceCandidate(candidate interfaceCandidate, typedPackage *types.Package, info *types.Info, complete bool) InterfaceSatisfaction {
+	result := InterfaceSatisfaction{
+		ID: interfaceSatisfactionID(candidate), ConcreteTypeDeclarationID: candidate.concreteDeclarationID,
+		InterfaceDeclarationID: candidate.interfaceDeclarationID, Status: SatisfactionUnknown,
+		CompileTimeAssertions: append([]rie.Evidence(nil), candidate.evidence...),
+	}
+	if typedPackage == nil || !complete {
+		return result
+	}
+	interfaceType := candidate.interfaceType
+	if interfaceType == nil {
+		interfaceType = info.TypeOf(candidate.interfaceExpression)
+	}
+	concreteType := candidate.concreteType
+	if concreteType == nil {
+		concreteType = info.TypeOf(candidate.valueExpression)
+	}
+	if interfaceType == nil || concreteType == nil {
+		return result
+	}
+	contract, ok := interfaceType.Underlying().(*types.Interface)
+	if !ok {
+		return result
+	}
+	contract.Complete()
+	base := concreteType
+	if pointer, ok := concreteType.(*types.Pointer); ok {
+		base = pointer.Elem()
+	}
+	valueImplements := types.Implements(base, contract)
+	pointerImplements := types.Implements(types.NewPointer(base), contract)
+	result.PointerRequired = !valueImplements && pointerImplements
+	if types.Implements(concreteType, contract) {
+		result.Status = SatisfactionProven
+		return result
+	}
+	result.Status = SatisfactionDisproven
+	result.MissingMethodNames = missingInterfaceMethods(concreteType, contract)
+	return result
+}
+
+func missingInterfaceMethods(concrete types.Type, contract *types.Interface) []string {
+	methodSet := types.NewMethodSet(concrete)
+	missing := make([]string, 0)
+	for index := 0; index < contract.NumMethods(); index++ {
+		required := contract.Method(index)
+		selection := methodSet.Lookup(required.Pkg(), required.Name())
+		if selection == nil || !types.Identical(selection.Obj().Type(), required.Type()) {
+			missing = append(missing, required.Name())
+		}
+	}
+	sort.Strings(missing)
+	return compactStrings(missing)
+}
+
+func interfaceSatisfactionID(candidate interfaceCandidate) string {
+	return fmt.Sprintf("go:semantic:v1:satisfaction:%d:%s#%d:%s#%t", len(candidate.concreteDeclarationID), candidate.concreteDeclarationID, len(candidate.interfaceDeclarationID), candidate.interfaceDeclarationID, candidate.pointerMode)
+}
+
+func mergeInterfaceSatisfaction(values []InterfaceSatisfaction) []InterfaceSatisfaction {
+	if len(values) == 0 {
+		return values
+	}
+	result := make([]InterfaceSatisfaction, 0, len(values))
+	for _, value := range values {
+		if len(result) == 0 || result[len(result)-1].ID != value.ID {
+			result = append(result, value)
+			continue
+		}
+		current := &result[len(result)-1]
+		current.CompileTimeAssertions = append(current.CompileTimeAssertions, value.CompileTimeAssertions...)
+		sort.Slice(current.CompileTimeAssertions, func(i, j int) bool {
+			left, right := current.CompileTimeAssertions[i], current.CompileTimeAssertions[j]
+			if left.File != right.File {
+				return left.File < right.File
+			}
+			if left.Rule != right.Rule {
+				return left.Rule < right.Rule
+			}
+			return left.Value < right.Value
+		})
+	}
+	return result
+}
+
 func bindTypeRelations(declarations []SemanticDeclaration, candidates []typeRelationCandidate, imports []ImportBinding) []TypeRelation {
 	byID := make(map[string]SemanticDeclaration, len(declarations))
 	for _, declaration := range declarations {
@@ -1673,25 +2246,29 @@ func bindTypeRelations(declarations []SemanticDeclaration, candidates []typeRela
 	return result
 }
 
-func limitSemanticRelationships(imports []ImportBinding, receivers []ReceiverBinding, relations []TypeRelation, references []SemanticReference, maximum int) ([]ImportBinding, []ReceiverBinding, []TypeRelation, []SemanticReference, int) {
-	total := len(imports) + len(receivers) + len(relations) + len(references)
+func limitSemanticRelationships(imports []ImportBinding, receivers []ReceiverBinding, relations []TypeRelation, references []SemanticReference, satisfaction []InterfaceSatisfaction, maximum int) ([]ImportBinding, []ReceiverBinding, []TypeRelation, []SemanticReference, []InterfaceSatisfaction, int) {
+	total := len(imports) + len(receivers) + len(relations) + len(references) + len(satisfaction)
 	if total <= maximum {
-		return imports, receivers, relations, references, 0
+		return imports, receivers, relations, references, satisfaction, 0
 	}
 	omitted := total - maximum
 	if len(imports) >= maximum {
-		return imports[:maximum], []ReceiverBinding{}, []TypeRelation{}, []SemanticReference{}, omitted
+		return imports[:maximum], []ReceiverBinding{}, []TypeRelation{}, []SemanticReference{}, []InterfaceSatisfaction{}, omitted
 	}
 	remaining := maximum - len(imports)
 	if len(receivers) >= remaining {
-		return imports, receivers[:remaining], []TypeRelation{}, []SemanticReference{}, omitted
+		return imports, receivers[:remaining], []TypeRelation{}, []SemanticReference{}, []InterfaceSatisfaction{}, omitted
 	}
 	remaining -= len(receivers)
 	if len(relations) >= remaining {
-		return imports, receivers, relations[:remaining], []SemanticReference{}, omitted
+		return imports, receivers, relations[:remaining], []SemanticReference{}, []InterfaceSatisfaction{}, omitted
 	}
 	remaining -= len(relations)
-	return imports, receivers, relations, references[:remaining], omitted
+	if len(references) >= remaining {
+		return imports, receivers, relations, references[:remaining], []InterfaceSatisfaction{}, omitted
+	}
+	remaining -= len(references)
+	return imports, receivers, relations, references, satisfaction[:remaining], omitted
 }
 
 func updateReferenceStatistics(files []SemanticFile, references []SemanticReference, statistics *SemanticStatistics) {
@@ -1715,6 +2292,14 @@ func statusesForImports(imports []ImportBinding) map[string]int {
 	result := make(map[string]int)
 	for _, binding := range imports {
 		result[binding.Status.String()]++
+	}
+	return result
+}
+
+func statusesForInterfaceChecks(values []InterfaceSatisfaction) map[string]int {
+	result := make(map[string]int)
+	for _, value := range values {
+		result[value.Status.String()]++
 	}
 	return result
 }
