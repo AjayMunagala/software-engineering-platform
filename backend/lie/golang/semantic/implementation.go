@@ -661,9 +661,6 @@ func (collector *declarationCollector) collectGenDecl(declaration *ast.GenDecl, 
 			typeDisplay := collector.render(specification.Type)
 			owners := make([]string, 0, len(specification.Names))
 			for _, name := range specification.Names {
-				if name.Name == "_" {
-					continue
-				}
 				location := collector.sourceRange(name.Pos(), name.End())
 				collector.collectTypeUses(specification.Type, scope, semanticDeclarationID(collector.path, location.Start.Offset, kind, name.Name))
 				semantic := collector.addDeclaration(name.Name, kind, typeDisplay, location, owner, scope, topLevel, syntaxKind)
@@ -1178,7 +1175,9 @@ func (collector *declarationCollector) addDeclaration(name string, kind Declarat
 	}
 	collector.declarations = append(collector.declarations, declaration)
 	collector.declarationOffsets[location.Start.Offset] = true
-	scope.declare(name, declaration.ID)
+	if name != "_" {
+		scope.declare(name, declaration.ID)
+	}
 	return declaration
 }
 
@@ -1302,7 +1301,7 @@ func reconcilePackageScopes(declarations []SemanticDeclaration) ([]SemanticDecla
 	packageScopes := make(map[string]*lexicalScope)
 	indices := make(map[string][]int)
 	for index, declaration := range declarations {
-		if declaration.OwnerDeclarationID != "" || declaration.Kind == DeclarationMethod || (declaration.Kind == DeclarationFunction && declaration.Name == "init") {
+		if declaration.Name == "_" || declaration.OwnerDeclarationID != "" || declaration.Kind == DeclarationMethod || (declaration.Kind == DeclarationFunction && declaration.Name == "init") {
 			continue
 		}
 		scope := packageScopes[declaration.PackageID]

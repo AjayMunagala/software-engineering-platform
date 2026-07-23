@@ -48,6 +48,33 @@ func TestVerifiedSourceProducesDeclarationsWithoutLaterRelationships(t *testing.
 	}
 }
 
+func TestPackageBlankIdentifiersReconcileWithoutEnteringScope(t *testing.T) {
+	input := prerequisites(t, map[string]string{
+		"go.mod":  "module example.com/blanks\n\ngo 1.26\n",
+		"main.go": "package blanks\ntype Runner interface { Run() }\ntype Worker struct{}\nfunc (Worker) Run() {}\nvar (\n\t_ Runner = Worker{}\n\t_ Runner = (*Worker)(nil)\n)\n",
+	})
+	inventory := resolve(t, input, nil)
+	blanks := make([]SemanticDeclaration, 0, 2)
+	for _, declaration := range inventory.Declarations() {
+		if declaration.Name == "_" {
+			blanks = append(blanks, declaration)
+		}
+	}
+	if len(blanks) != 2 {
+		t.Fatalf("blank declarations = %+v", blanks)
+	}
+	for _, declaration := range blanks {
+		if declaration.SyntaxSymbolID == "" || declaration.Status != ResolutionResolved {
+			t.Fatalf("blank declaration was not reconciled: %+v", declaration)
+		}
+	}
+	for _, diagnostic := range inventory.Diagnostics() {
+		if diagnostic.Code == "semantic_syntax_symbol_unmatched" || diagnostic.Code == "semantic_package_scope_conflict" {
+			t.Fatalf("blank identifier entered a scope or remained unmatched: %+v", diagnostic)
+		}
+	}
+}
+
 func TestDeclarationReconciliationAndLocalDeclarationInventory(t *testing.T) {
 	input := prerequisites(t, map[string]string{
 		"sample.go": `package sample
