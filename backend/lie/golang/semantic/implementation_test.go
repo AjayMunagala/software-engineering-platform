@@ -20,7 +20,7 @@ import (
 	"github.com/AjayMunagala/software-engineering-platform/backend/rie/language"
 )
 
-func TestVerifiedSourceProducesHonestPartialOutcome(t *testing.T) {
+func TestVerifiedSourceProducesDeclarationsWithoutLaterRelationships(t *testing.T) {
 	input := prerequisites(t, map[string]string{
 		"go.mod":  "module example.com/app\n\ngo 1.22\n",
 		"main.go": "package main\nfunc main() {}\n",
@@ -30,15 +30,192 @@ func TestVerifiedSourceProducesHonestPartialOutcome(t *testing.T) {
 	if len(files) != 1 || files[0].Status != SemanticFilePartial || files[0].ContentDigest == "" {
 		t.Fatalf("verified files = %+v", files)
 	}
-	if len(inventory.Declarations()) != 0 || len(inventory.References()) != 0 || len(inventory.ImportBindings()) != 0 {
-		t.Fatal("Phase 2.2.2 emitted unauthorized semantic relationships")
+	declarations := inventory.Declarations()
+	if len(declarations) != 1 || declarations[0].Name != "main" || declarations[0].Kind != DeclarationFunction || declarations[0].SyntaxSymbolID == "" || declarations[0].Status != ResolutionResolved {
+		t.Fatalf("declarations = %+v", declarations)
+	}
+	if len(inventory.References()) != 0 || len(inventory.ReceiverBindings()) != 0 || len(inventory.ImportBindings()) != 0 || len(inventory.TypeRelations()) != 0 || len(inventory.InterfaceSatisfaction()) != 0 {
+		t.Fatal("Phase 2.2.3 emitted unauthorized later semantic relationships")
 	}
 	statistics := inventory.Statistics()
-	if statistics.CandidateFiles != 1 || statistics.PartialFiles != 1 || statistics.Diagnostics != 0 {
+	if statistics.CandidateFiles != 1 || statistics.PartialFiles != 1 || statistics.ResolvedDeclarations != 1 || statistics.Diagnostics != 0 {
 		t.Fatalf("statistics = %+v", statistics)
 	}
 	if inventory.Metadata().IDSchemeVersion != IDSchemeVersion || inventory.Language() != "Go" {
 		t.Fatalf("metadata = %+v language=%s", inventory.Metadata(), inventory.Language())
+	}
+}
+
+func TestDeclarationReconciliationAndLocalDeclarationInventory(t *testing.T) {
+	input := prerequisites(t, map[string]string{
+		"sample.go": `package sample
+
+type Embedded[T any] struct{}
+type Box[T any] struct {
+	Value T
+	*Embedded[T]
+}
+type Runner interface {
+	Run(input string) error
+}
+type Count int
+type Alias = string
+
+const (
+	Alpha = 1
+	Beta = 2
+)
+var One, Two int
+
+func Work[T any](input T) (result T) {
+	value := input
+	value, other := input, input
+	{
+		value := input
+		_ = value
+	}
+	var explicit T
+	const localConstant = 1
+	type Local struct { Field T }
+	for index, item := range []T{input} {
+		_, _ = index, item
+	}
+Label:
+	_, _, _, _ = value, other, explicit, localConstant
+	_ = Local{}
+	if result == input { goto Label }
+	return input
+}
+
+func (box *Box[T]) Method(value T) {}
+`,
+	})
+	inventory := resolve(t, input, nil)
+	declarations := inventory.Declarations()
+	if len(declarations) == 0 {
+		t.Fatal("no semantic declarations emitted")
+	}
+
+	topLevel := make(map[string]SemanticDeclaration)
+	for _, declaration := range declarations {
+		if declaration.OwnerDeclarationID == "" {
+			topLevel[declaration.Name] = declaration
+		}
+	}
+	for _, name := range []string{"Embedded", "Box", "Runner", "Alpha", "Beta", "One", "Two", "Work", "Method"} {
+		declaration, ok := topLevel[name]
+		if !ok || declaration.SyntaxSymbolID == "" || declaration.Status != ResolutionResolved {
+			t.Fatalf("top-level declaration %s was not reconciled: %+v", name, declaration)
+		}
+	}
+	if topLevel["Count"].Kind != DeclarationDefinedType || topLevel["Count"].SyntaxSymbolID != "" {
+		t.Fatalf("defined type = %+v", topLevel["Count"])
+	}
+	if topLevel["Alias"].Kind != DeclarationTypeAlias || topLevel["Alias"].SyntaxSymbolID != "" {
+		t.Fatalf("type alias = %+v", topLevel["Alias"])
+	}
+	if topLevel["Work"].TypeDisplay == "" || topLevel["Box"].TypeDisplay == "" {
+		t.Fatal("normalized type displays were not retained")
+	}
+
+	workID := topLevel["Work"].ID
+	counts := make(map[string]int)
+	for _, declaration := range declarations {
+		if declaration.OwnerDeclarationID == workID {
+			counts[declaration.Kind.String()+":"+declaration.Name]++
+		}
+	}
+	for _, key := range []string{
+		"type-parameter:T", "parameter:input", "result:result", "variable:other", "variable:explicit",
+		"constant:localConstant", "struct:Local", "variable:index", "variable:item", "label:Label",
+	} {
+		if counts[key] == 0 {
+			t.Fatalf("missing owned declaration %s; counts=%+v", key, counts)
+		}
+	}
+	if counts["variable:value"] != 2 {
+		t.Fatalf("lexical value declarations = %d, want outer and nested declarations only", counts["variable:value"])
+	}
+
+	local := findDeclaration(t, declarations, "Local", DeclarationStruct)
+	field := findDeclaration(t, declarations, "Field", DeclarationField)
+	if field.OwnerDeclarationID != local.ID {
+		t.Fatalf("local field owner = %s, want %s", field.OwnerDeclarationID, local.ID)
+	}
+	box := topLevel["Box"]
+	if findDeclaration(t, declarations, "Value", DeclarationField).OwnerDeclarationID != box.ID || findDeclaration(t, declarations, "Embedded", DeclarationField).OwnerDeclarationID != box.ID {
+		t.Fatal("struct fields do not retain their type owner")
+	}
+	runner := topLevel["Runner"]
+	runMethod := findDeclaration(t, declarations, "Run", DeclarationMethod)
+	if runMethod.OwnerDeclarationID != runner.ID {
+		t.Fatal("interface method does not retain its interface owner")
+	}
+	if !hasOwnedDeclaration(declarations, runMethod.ID, "input", DeclarationParameter) {
+		t.Fatal("interface method parameter does not retain its method owner")
+	}
+	if inventory.Statistics().ResolvedDeclarations != len(declarations) || inventory.Statistics().PartialDeclarations != 0 {
+		t.Fatalf("declaration statistics = %+v, declarations=%d", inventory.Statistics(), len(declarations))
+	}
+}
+
+func TestPackageScopeConflictsAreExplicitAndInitIsAllowed(t *testing.T) {
+	input := prerequisites(t, map[string]string{
+		"a.go": "package sample\nvar Shared int\nfunc init() {}\n",
+		"b.go": "package sample\nfunc Shared() {}\nfunc init() {}\n",
+	})
+	inventory := resolve(t, input, nil)
+	shared := make([]SemanticDeclaration, 0, 2)
+	initCount := 0
+	for _, declaration := range inventory.Declarations() {
+		switch declaration.Name {
+		case "Shared":
+			shared = append(shared, declaration)
+		case "init":
+			initCount++
+			if declaration.Status != ResolutionResolved {
+				t.Fatalf("init declaration = %+v", declaration)
+			}
+		}
+	}
+	if len(shared) != 2 || shared[0].Status != ResolutionAmbiguous || shared[1].Status != ResolutionAmbiguous || initCount != 2 {
+		t.Fatalf("shared=%+v initCount=%d", shared, initCount)
+	}
+	if !hasDiagnostic(inventory.Diagnostics(), "semantic_package_scope_conflict") || inventory.Statistics().AmbiguousDeclarations != 2 {
+		t.Fatalf("diagnostics=%+v statistics=%+v", inventory.Diagnostics(), inventory.Statistics())
+	}
+}
+
+func TestUnicodeGroupedDeclarationsAndStableIDs(t *testing.T) {
+	const relativePath = "pkg/μ.go"
+	input := prerequisites(t, map[string]string{
+		relativePath: "package unicode\n\n// grouped Unicode declarations\nvar (\n\tα int\n\tβ string\n)\n\ntype Pair[Τ any] struct { Value Τ }\n",
+	})
+	one := DefaultConfig()
+	one.MaxWorkers = 1
+	eight := DefaultConfig()
+	eight.MaxWorkers = 8
+	left, right := resolve(t, input, &one), resolve(t, input, &eight)
+	if !reflect.DeepEqual(left.Declarations(), right.Declarations()) {
+		t.Fatal("worker count changed Unicode declaration output")
+	}
+	syntaxByID := make(map[string]golang.GoSymbol)
+	for _, symbol := range input.Syntax.Symbols() {
+		syntaxByID[symbol.ID] = symbol
+	}
+	for _, name := range []string{"α", "β", "Pair"} {
+		declaration := findDeclarationByName(t, left.Declarations(), name)
+		if declaration.SyntaxSymbolID == "" || declaration.Location != syntaxByID[declaration.SyntaxSymbolID].Location {
+			t.Fatalf("declaration %s location/reconciliation = %+v, syntax=%+v", name, declaration, syntaxByID[declaration.SyntaxSymbolID])
+		}
+		expectedPrefix := fmt.Sprintf("go:semantic:v1:file:%d:%s#%d:", len(relativePath), relativePath, declaration.Location.Start.Offset)
+		if !strings.HasPrefix(declaration.ID, expectedPrefix) {
+			t.Fatalf("declaration ID %q does not use byte-length/byte-offset prefix %q", declaration.ID, expectedPrefix)
+		}
+	}
+	parameter := findDeclaration(t, left.Declarations(), "Τ", DeclarationTypeParameter)
+	if parameter.OwnerDeclarationID != findDeclarationByName(t, left.Declarations(), "Pair").ID {
+		t.Fatal("generic type parameter owner is not stable")
 	}
 }
 
@@ -436,6 +613,46 @@ func assertFileOutcome(t *testing.T, inventory GoSemanticInventory, status Seman
 		}
 	}
 	t.Fatalf("diagnostic %q not found in %+v", diagnosticCode, inventory.Diagnostics())
+}
+
+func findDeclaration(t *testing.T, declarations []SemanticDeclaration, name string, kind DeclarationKind) SemanticDeclaration {
+	t.Helper()
+	for _, declaration := range declarations {
+		if declaration.Name == name && declaration.Kind == kind {
+			return declaration
+		}
+	}
+	t.Fatalf("declaration %s (%s) not found in %+v", name, kind, declarations)
+	return SemanticDeclaration{}
+}
+
+func findDeclarationByName(t *testing.T, declarations []SemanticDeclaration, name string) SemanticDeclaration {
+	t.Helper()
+	for _, declaration := range declarations {
+		if declaration.Name == name {
+			return declaration
+		}
+	}
+	t.Fatalf("declaration %s not found in %+v", name, declarations)
+	return SemanticDeclaration{}
+}
+
+func hasOwnedDeclaration(declarations []SemanticDeclaration, owner, name string, kind DeclarationKind) bool {
+	for _, declaration := range declarations {
+		if declaration.OwnerDeclarationID == owner && declaration.Name == name && declaration.Kind == kind {
+			return true
+		}
+	}
+	return false
+}
+
+func hasDiagnostic(diagnostics []lie.Diagnostic, code string) bool {
+	for _, diagnostic := range diagnostics {
+		if diagnostic.Code == code {
+			return true
+		}
+	}
+	return false
 }
 
 func resolve(t testing.TB, input Input, config *Config) GoSemanticInventory {

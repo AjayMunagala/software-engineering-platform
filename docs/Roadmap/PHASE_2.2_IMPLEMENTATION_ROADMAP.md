@@ -2,13 +2,13 @@
 
 ## Status
 
-- Current state: Phase 2.2.2 accepted; Phase 2.2.3 authorized
-- Implementation authorization: Phase 2.2.3 only
+- Current state: Phase 2.2.3 accepted; Phase 2.2.4 authorized
+- Implementation authorization: Phase 2.2.4 only
 - Stable prerequisite: `GoLanguageInventory 1.0.0`
 - Candidate output: `GoSemanticInventory 0.1.0`
 - Stable target: `GoSemanticInventory 1.0.0`
 
-Engineering accepted the Phase 2.2.0 evidence and ADR 0008 on 2026-07-22. Phase 2.2.1 was accepted on 2026-07-22. Phase 2.2.2 implementation and validation were accepted on 2026-07-23. Phase 2.2.3 alone is authorized; Phase 2.2.4 and later remain unauthorized until their preceding exit gates are explicitly accepted.
+Engineering accepted the Phase 2.2.0 evidence and ADR 0008 on 2026-07-22. Phase 2.2.1 was accepted on 2026-07-22. Phase 2.2.2 and Phase 2.2.3 were accepted on 2026-07-23. Phase 2.2.4 alone is authorized; Phase 2.2.5 and later remain unauthorized until their preceding exit gates are explicitly accepted.
 
 Phase 2.2.1 implementation and local validation are complete and accepted. Targeted package and full-backend race tests pass with MSYS2 UCRT64 GCC 16.1.0. See [LIE_PHASE_2_2_1_PACKAGE_IDENTITY.md](../Validation/LIE_PHASE_2_2_1_PACKAGE_IDENTITY.md). Authorization advances only to Phase 2.2.2.
 
@@ -103,6 +103,8 @@ Accepted evidence: all behavior tests pass with 88.9% package statement coverage
 - Exact location and ID tests cover Unicode, comments, grouped declarations, and generics.
 - Output is identical across worker counts and shuffled input ordering.
 - No AST, token set, or source text is stored in the artifact.
+
+Accepted evidence: exact reconciliation and stable-ID tests cover comments, grouped declarations, Unicode paths/identifiers, generics, structs, interfaces, functions, methods, constants, variables, aliases, defined types, parameters, results, fields, locals, labels, type parameters, nested scopes, and package-scope conflicts. Package coverage is 87.4%; shuffled tests, package/full regression, vet, targeted/full race tests, and repeatable benchmarks pass. See [LIE_PHASE_2_2_3_DECLARATION_RECONCILIATION.md](../Validation/LIE_PHASE_2_2_3_DECLARATION_RECONCILIATION.md). Engineering accepted the exit gate on 2026-07-23 and authorized Phase 2.2.4 only.
 
 ## Phase 2.2.4 — Receiver and Local Type Binding
 

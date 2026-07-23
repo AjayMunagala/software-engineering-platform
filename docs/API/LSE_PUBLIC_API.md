@@ -2,9 +2,9 @@
 
 ## Status
 
-- Phase: Phase 2.2.2 accepted; Phase 2.2.3 authorized
+- Phase: Phase 2.2.3 accepted; Phase 2.2.4 authorized
 - API status: Architecture-approved candidate; not frozen
-- Authorization: Phase 2.2.3 only; Phase 2.2.4 and later remain unauthorized
+- Authorization: Phase 2.2.4 only; Phase 2.2.5 and later remain unauthorized
 - Package: `backend/lie/golang/semantic`
 - Candidate engine version: `0.1.0`
 - Candidate artifact: `go-semantic-inventory` `0.1.0`

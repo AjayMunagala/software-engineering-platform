@@ -6,9 +6,9 @@ Produce a deterministic, immutable semantic artifact from snapshot-authorized,
 digest-verified Go source and the frozen Go syntax and package-identity
 artifacts.
 
-## Phase 2.2.2 Scope
+## Implemented Scope
 
-This milestone implements only:
+Phase 2.2.2 implements:
 
 - candidate engine and artifact contracts;
 - configuration and prerequisite validation;
@@ -17,8 +17,18 @@ This milestone implements only:
 - immutable semantic file outcomes, diagnostics, provenance, and statistics;
 - deterministic concurrency, ordering, cancellation, and diagnostic limits.
 
-Verified source is intentionally reported as `partial`. Phase 2.2.2 does not
-claim semantic resolution before declaration reconciliation is implemented.
+Phase 2.2.3 additionally:
+
+- re-parses only digest-verified source into ephemeral AST/token state;
+- reconciles top-level structs, interfaces, functions, methods, constants, and
+  variables with exact Phase 2.1 symbol IDs;
+- records defined types, aliases, parameters, results, fields, locals, labels,
+  and type parameters with stable semantic IDs;
+- builds package, file, function, type, and nested lexical scopes during each
+  run without persisting the scope tree.
+
+Files remain `partial` because later semantic relationships are not yet
+authorized. Exact declaration matches are independently marked `resolved`.
 
 ## Inputs
 
@@ -37,9 +47,9 @@ The engine is local and read-only. It executes no commands, performs no
 network access or downloads, reads no module cache, writes no repository
 files, and persists no source, AST, token, or `go/types` state.
 
-Declaration reconciliation, scopes, receiver/type binding, references,
-imports, type relations, and interface satisfaction remain outside this
-milestone. Phase 2.2.3 and later are not authorized by this package.
+Receiver/type binding, references, imports, type relations, and interface
+satisfaction remain outside the authorized scope. Phase 2.2.4 and later are
+not authorized by this package.
 
 ## Package Standard
 

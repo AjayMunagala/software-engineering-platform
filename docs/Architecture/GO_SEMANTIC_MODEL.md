@@ -2,7 +2,7 @@
 
 ## Status
 
-- Design status: Phase 2.2.2 accepted; Phase 2.2.3 authorized
+- Design status: Phase 2.2.3 accepted; Phase 2.2.4 authorized
 - Candidate artifact: `go-semantic-inventory` `0.1.0`
 - Stable target: `1.0.0` after validation and API freeze
 - Prerequisites: `repository-snapshot` `1.0.0`, `go-language-inventory` `1.0.0`, and `go-package-identity-inventory` `0.1.0`
@@ -105,7 +105,7 @@ type SemanticFile struct {
 
 `ContentDigest` is the verified digest analyzed by this engine. It must equal the Phase 2.1 digest. A stale file emits no semantic relations derived from changed source.
 
-In Phase 2.2.2, a digest-matching file is intentionally `partial`, not `resolved`: source authorization and integrity are proven, but declaration reconciliation has not begun. `resolved` becomes possible only after the relevant later semantic milestone is authorized and completed.
+In Phase 2.2.2, a digest-matching file became `partial`, not `resolved`, because only source authorization and integrity were proven. Phase 2.2.3 now reconciles declarations, but files intentionally remain `partial` while later receiver, reference, import, type-relation, and interface results are absent. Individual declarations are independently `resolved`, `partial`, or `ambiguous` according to their own evidence.
 
 ## Semantic Declarations and Reconciliation
 
@@ -143,6 +143,10 @@ type SemanticDeclaration struct {
 ```
 
 For top-level declarations known to Phase 2.1, `SyntaxSymbolID` proves the reconciliation link to the frozen symbol. Declarations intentionally absent from Phase 2.1—such as named scalar types, aliases, parameters, fields, labels, and type parameters—receive stable semantic IDs and leave `SyntaxSymbolID` empty. `OwnerDeclarationID` identifies a containing semantic declaration when applicable. `TypeDisplay` is normalized presentation text only; consumers must not parse it as a type graph.
+
+Phase 2.2.3 requires an exact top-level match on syntax kind, name, file, package, start byte, and end byte before publishing `SyntaxSymbolID`. Missing or multiple matches remain explicit rather than selecting a candidate. Package-block declarations are combined across files; conflicting names become `ambiguous`, while Go's repeatable `init` declarations and receiver methods are not incorrectly inserted into the package namespace.
+
+Package, file, function, type, control-flow, clause, and nested block scopes are rebuilt from the verified AST on every run. Scope trees and AST nodes are ephemeral implementation state and are never stored in the artifact. `OwnerDeclarationID` preserves only stable declaration ownership needed by later milestones.
 
 ## Identifier References
 

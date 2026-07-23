@@ -6,19 +6,19 @@ import (
 	"testing"
 )
 
-func BenchmarkSourceVerification100Files(b *testing.B) {
-	benchmarkSourceVerification(b, 100)
+func BenchmarkDeclarationReconciliation100Files(b *testing.B) {
+	benchmarkDeclarationReconciliation(b, 100)
 }
 
-func BenchmarkSourceVerification1000Files(b *testing.B) {
-	benchmarkSourceVerification(b, 1_000)
+func BenchmarkDeclarationReconciliation1000Files(b *testing.B) {
+	benchmarkDeclarationReconciliation(b, 1_000)
 }
 
-func benchmarkSourceVerification(b *testing.B, fileCount int) {
+func benchmarkDeclarationReconciliation(b *testing.B, fileCount int) {
 	b.Helper()
 	files := map[string]string{"go.mod": "module example.com/benchmark\n\ngo 1.22\n"}
 	for index := 0; index < fileCount; index++ {
-		files[fmt.Sprintf("pkg/file%05d.go", index)] = "package benchmark\nfunc Value() {}\n"
+		files[fmt.Sprintf("pkg/file%05d.go", index)] = fmt.Sprintf("package benchmark\nfunc Value%05d() {}\n", index)
 	}
 	input := prerequisites(b, files)
 	engine, err := New()
@@ -36,6 +36,9 @@ func benchmarkSourceVerification(b *testing.B, fileCount int) {
 		}
 		if inventory.Statistics().PartialFiles != fileCount {
 			b.Fatalf("partial files = %d, want %d", inventory.Statistics().PartialFiles, fileCount)
+		}
+		if inventory.Statistics().ResolvedDeclarations != fileCount {
+			b.Fatalf("resolved declarations = %d, want %d", inventory.Statistics().ResolvedDeclarations, fileCount)
 		}
 	}
 }

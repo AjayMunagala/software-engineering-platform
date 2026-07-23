@@ -458,7 +458,7 @@ type GoSemanticInventory struct {
 	statistics            SemanticStatistics
 }
 
-func newInventory(files []SemanticFile, diagnostics []lie.Diagnostic, statistics SemanticStatistics) GoSemanticInventory {
+func newInventory(files []SemanticFile, declarations []SemanticDeclaration, diagnostics []lie.Diagnostic, statistics SemanticStatistics) GoSemanticInventory {
 	return GoSemanticInventory{
 		metadata: Metadata{Name: ArtifactName, Version: ArtifactVersion, IDSchemeVersion: IDSchemeVersion, EngineName: "go-semantic", EngineVersion: engineVersion},
 		sources: []rie.ArtifactReference{
@@ -466,7 +466,7 @@ func newInventory(files []SemanticFile, diagnostics []lie.Diagnostic, statistics
 			{Name: golang.ArtifactName, Version: golang.ArtifactVersion},
 			{Name: packageidentity.ArtifactName, Version: packageidentity.ArtifactVersion},
 		},
-		files: files, declarations: []SemanticDeclaration{}, references: []SemanticReference{},
+		files: append([]SemanticFile(nil), files...), declarations: append([]SemanticDeclaration(nil), declarations...), references: []SemanticReference{},
 		receivers: []ReceiverBinding{}, imports: []ImportBinding{}, typeRelations: []TypeRelation{},
 		interfaceSatisfaction: []InterfaceSatisfaction{}, diagnostics: cloneDiagnostics(diagnostics), statistics: cloneStatistics(statistics),
 	}
