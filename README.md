@@ -19,6 +19,16 @@ It inventories Go packages, imports, structs, interfaces, functions, methods,
 constants, and variables with deterministic IDs, exact source locations, and
 content digests. Its `1.0.x` line is restricted to compatible defect fixes.
 
+Go Package Identity Inventory **1.0.0** and Go Semantic Inventory **1.0.0** are
+released and tagged. The semantic engine deterministically reconciles
+declarations, scopes, receivers, types, imports, references, and bounded
+interface evidence without network access or repository execution.
+
+Persistence Phases 3.1 and 3.2 are accepted. PostgreSQL benchmark evidence
+freezes ordered four-MiB chunks, a four-GiB operational artifact limit, and an
+eight-GiB schema ceiling. Phase 3.3 Migration Framework is the current
+authorized milestone; the runtime remains database-independent.
+
 ## Run RIE
 
 ```powershell
@@ -46,9 +56,12 @@ The command emits the versioned JSON schema `1.0.0`.
 - [LIE implementation roadmap](docs/Roadmap/LIE_IMPLEMENTATION_ROADMAP.md)
 - [GoLanguageInventory 1.0 public API](docs/API/GO_LANGUAGE_INVENTORY_V1.md)
 - [GoLanguageInventory 1.0 release package](docs/Releases/GoLanguageInventory-1.0.0/README.md)
+- [PostgreSQL benchmark report](docs/Validation/POSTGRESQL_PAYLOAD_BENCHMARK_REPORT.md)
+- [Complete project tests, metrics, and remaining work](PROJECT_TESTS_METRICS_AND_REMAINING_WORK.txt)
 
 ## Next milestone
 
-Language Intelligence Engine Phase 2.2 Semantic Resolution is the next approved
-development cycle. No LLM, patch generation, or repository code modification
-capability has started.
+Phase 3.3 Migration Framework is authorized. It covers migration-tool
+selection, immutable checksum-verified migrations, schema-version tracking,
+install/upgrade validation, and repair policy. The PostgreSQL adapter, APIs,
+UI, LLM, patch generation, and repository mutation remain unauthorized.

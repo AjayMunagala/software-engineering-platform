@@ -1,11 +1,12 @@
 # ADR 0011: PostgreSQL Physical Artifact Schema
 
-- Status: Accepted; benchmark validation pending
+- Status: Accepted
 - Date: 2026-07-23
 - Accepted: 2026-07-24
 - Prerequisite: accepted ADR 0010
 - Decision owners: Phase 3.2 schema review
-- Implementation authorization: isolated disposable payload benchmark only
+- Benchmark accepted: 2026-07-24
+- Implementation authorization: Phase 3.3 migration framework only
 
 ## Context
 
@@ -14,14 +15,14 @@ physical PostgreSQL contract is required before migrations or adapter code, but
 it must preserve exact artifact bytes, atomic publication, storage neutrality,
 and independent version evolution.
 
-## Proposed Decision
+## Decision
 
 1. Support PostgreSQL 18 at its current minor release initially.
 2. Require no PostgreSQL extensions.
 3. Store all application relations in a migration-owned `platform` schema.
 4. Use application-generated UUIDs and application-computed SHA-256 digests.
 5. Store authoritative payload bytes as content-addressed metadata plus ordered
-   one-MiB `bytea` chunks; never use `jsonb` as the artifact source of truth.
+   four-MiB `bytea` chunks; never use `jsonb` as the artifact source of truth.
 6. Enforce Repository → Scan → Envelope → Payload relationships with foreign
    keys and enforce both dependency endpoints within the same scan through
    composite foreign keys.
@@ -37,7 +38,7 @@ and independent version evolution.
 12. Preserve audit subject identifiers without foreign keys so authorized
     operational purges do not erase their historical identity.
 
-The complete proposed contract is
+The complete accepted contract is
 [POSTGRESQL_SCHEMA_SPECIFICATION.md](../Database/POSTGRESQL_SCHEMA_SPECIFICATION.md).
 
 ## Why Chunked `bytea`
@@ -101,17 +102,27 @@ to a language implementation.
 Rejected until measured query, vacuum, retention, or recovery evidence shows a
 specific benefit.
 
-## Validation Required Before Acceptance
+## Accepted Benchmark Evidence — 2026-07-24
 
-- approve the complete physical schema and privilege matrix;
-- approve execution of the isolated payload benchmark plan;
-- validate one-MiB chunks against all released fixtures;
-- freeze the operational payload maximum from measured evidence;
-- validate exact round trips, atomic visibility, dependency constraints,
-  retention safety, backup/restore, WAL, latency, and client memory;
-- update this ADR with the accepted results.
+The isolated benchmark completed every correctness gate and established an
+initial four-GiB operational payload limit. It also found that fixed one-MiB
+chunks missed the proposed 50-MiB/s warm staging floor on the Kubernetes
+fixture, while four-MiB chunks passed the stage, read, WAL, memory, publication,
+metadata, and recovery gates.
 
-Engineering accepted this ADR on 2026-07-24 and authorized the isolated payload
-benchmark. Acceptance of the resulting benchmark report authorizes only Phase
-3.3 migration implementation. It does not authorize APIs, UI, production
-connections, or production credentials.
+The accepted results are:
+
+- ordered four-MiB chunks are the v1 physical contract;
+- the initial operational payload limit is four GiB;
+- the absolute schema ceiling remains eight GiB;
+- no single-value `bytea` path is permitted for authoritative artifacts;
+- exact bytes, SHA-256 addressing, atomic publication, dependency integrity,
+  projection provenance, retention safety, and backup/restore all passed;
+- metadata-only query p95 was 1.643 ms with 1,000,050 dependency rows;
+- publication p95 was 130.15 ms with no partial visibility.
+
+The complete evidence is
+[POSTGRESQL_PAYLOAD_BENCHMARK_REPORT.md](../Validation/POSTGRESQL_PAYLOAD_BENCHMARK_REPORT.md).
+This acceptance authorizes Phase 3.3 migration implementation only. It does not
+authorize the PostgreSQL adapter, APIs, UI, production connections, or
+production credentials.

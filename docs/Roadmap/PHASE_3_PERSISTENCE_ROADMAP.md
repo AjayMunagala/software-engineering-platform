@@ -2,12 +2,13 @@
 
 ## Status
 
-- Current milestone: Phase 3.2 — PostgreSQL Payload Benchmark Spike
-- Current authorization: isolated disposable benchmark only
-- PostgreSQL connection: disposable local benchmark instance only
+- Current milestone: Phase 3.3 — Migration Framework
+- Current authorization: Phase 3.3 migration implementation only
+- PostgreSQL connection: disposable local migration/test databases only
 - Credentials: not required and must not be uploaded
-- Transient benchmark DDL/harness: authorized
-- Migration implementation, Go storage code, APIs, and UI: unauthorized
+- Transient benchmark DDL/harness: accepted evidence
+- Migration implementation: authorized
+- Go storage adapter, APIs, and UI: unauthorized
 
 ## Goal
 
@@ -55,11 +56,13 @@ Design the physical PostgreSQL model without connecting to a database.
 ### Current State
 
 - Physical schema specification: accepted on 2026-07-24.
-- ADR 0011: accepted; benchmark validation pending.
-- Payload benchmark plan: accepted and execution authorized.
+- ADR 0011 and four-MiB amendment: accepted.
+- Payload benchmark plan: accepted; execution completed on 2026-07-24.
+- Benchmark report: accepted on 2026-07-24.
+- Frozen contract: four-MiB chunks and a four-GiB operational limit.
 - Disposable local installation, connection, and transient benchmark DDL:
   authorized only for the documented spike.
-- Credentials, migration implementation, and Go persistence code: unauthorized.
+- Credentials and Go persistence adapter code: unauthorized.
 
 ### Required Decisions
 
@@ -87,10 +90,10 @@ credentials are used.
 
 ### Exit Gate
 
-Schema specification, benchmark plan, and privilege model accepted on
-2026-07-24. The benchmark report, measured operational size limit, and measured
-schema refinements remain the gate. Their acceptance authorizes Phase 3.3
-migration implementation only.
+Schema specification, benchmark plan, benchmark report, four-GiB operational
+limit, four-MiB chunk refinement, and privilege model were accepted on
+2026-07-24. Phase 3.3 migration implementation is authorized. Later milestones
+remain gated.
 
 ## Phase 3.3 — Migration Framework
 
@@ -104,7 +107,7 @@ migration implementation only.
 - lock-duration and backfill policy;
 - migration documentation.
 
-Example names are illustrative only until Phase 3.2 freezes the schema:
+Migration filenames remain illustrative until Phase 3.3 selects its tool:
 
 ```text
 001_create_repositories.sql

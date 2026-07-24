@@ -1,0 +1,542 @@
+SOFTWARE ENGINEERING PLATFORM
+TESTS, METRICS, PREPARED FILES, AND REMAINING WORK
+
+Generated: 2026-07-24
+Workspace: D:\Project_Ai
+Current Git branch: main
+Latest pushed commit: use "git log -1 --oneline" for the current immutable ID
+
+======================================================================
+1. SIMPLE PROJECT STATUS
+======================================================================
+
+The platform can currently:
+
+1. Receive a local repository path.
+2. Scan its files without using an LLM.
+3. apply ignore rules.
+4. Detect supported languages, frameworks, build systems, package managers,
+   workspaces, lock files, Git information, and repository metadata.
+5. Parse Go source code and discover packages, imports, structs, interfaces,
+   functions, methods, constants, variables, fields, parameters, results,
+   local declarations, labels, and type parameters.
+6. Build deterministic Go package-identity evidence.
+7. Build deterministic Go semantic information, including scopes,
+   declaration reconciliation, receiver/type binding, imports, references,
+   interface checks, diagnostics, and explicit unresolved/ambiguous states.
+8. Serialize immutable, versioned artifacts that can later be stored.
+9. Validate a proposed PostgreSQL artifact schema using real artifacts up to
+   the 1.56-GB Kubernetes semantic artifact.
+
+The platform does not yet provide database migrations, a production storage
+adapter, REST/gRPC APIs, a React UI, an LLM reasoning engine, patch generation,
+or patch validation.
+
+======================================================================
+2. COMPLETED RELEASES AND MILESTONES
+======================================================================
+
+Repository Intelligence Engine (RIE) 1.0.0
+  COMPLETE AND FROZEN
+  - Discovery Engine
+  - Ignore Engine
+  - immutable RepositorySnapshot
+  - Language Engine
+  - Framework Engine
+  - Build and Package Intelligence Engine
+  - Repository Metadata Engine
+  - Repository Intelligence Summary
+
+Go Language Intelligence, syntax inventory
+  COMPLETE AND FROZEN
+  - GoLanguageInventory 1.0.0
+
+Go Package Identity
+  COMPLETE AND RELEASED
+  - GoPackageIdentityInventory 1.0.0
+  - Git tag: go-package-identity-inventory/v1.0.0
+
+Go Semantic Intelligence
+  COMPLETE AND RELEASED
+  - GoSemanticInventory 1.0.0
+  - Git tag: go-semantic-inventory/v1.0.0
+  - stable semantic ID scheme: go-semantic-id/v1
+
+Persistence
+  Phase 3.1 architecture: ACCEPTED
+  Phase 3.2 physical schema design: ACCEPTED
+  Phase 3.2 PostgreSQL payload benchmark: ACCEPTED
+  Accepted physical contract: 4-MiB chunks, 4-GiB operational limit
+  Phase 3.3 migration framework: AUTHORIZED
+
+======================================================================
+3. RIE REAL-REPOSITORY VALIDATION
+======================================================================
+
+Repositories validated: 15
+Unique tracked files across one pass: 9,163
+All repositories scanned successfully: 15/15
+Exact file-count agreement with Git: 15/15
+Supported-language count agreement: 15/15
+Git/branch checks: 15/15
+Repeated deterministic output: 15/15
+Unexpected errors: 0
+
+The documented schedule ran every repository twice for functional
+determinism and five more times for performance samples. That equals:
+
+  15 repositories x 7 runs = 105 repository scans
+  9,163 files x 7 runs = 64,141 derived file observations
+
+The 64,141 number is repeated scan work, not 64,141 unique files.
+
+Largest RIE validation repository:
+  sqlc-dev/sqlc
+  Files: 6,761
+  Median complete RIE pipeline: 1.815 seconds
+
+RIE results included Go, JavaScript, TypeScript, SQL, Python, Java, and C#
+language evidence plus framework/build/package/workspace evidence where the
+frozen rules could prove it.
+
+Known RIE 1.0 scope limits:
+  - Rust and PHP files remain unknown language files.
+  - Git-ignore character classes are reported but not interpreted.
+  - .NET project/package detection is not implemented.
+  - project roles inside a monorepo are not classified yet.
+
+======================================================================
+4. GO SYNTAX INVENTORY VALIDATION
+======================================================================
+
+Five real repositories:
+  fzf, PocketBase, lo, OpenTelemetry Go, Kubernetes
+
+Controlled fixture:
+  broken-go, containing one intentionally malformed file
+
+Real repository files discovered: 34,168
+Real Go candidates: 19,380
+Real Go candidates parsed: 19,380
+Unexpected parse failures: 0
+Skipped real Go files: 0
+Crashes or panics: 0
+
+Controlled broken fixture:
+  Files discovered: 4
+  Go candidates: 3
+  Parsed: 2
+  Expected failed parse: 1
+  Neighboring valid files remained available.
+
+Syntax facts discovered across the five real repositories:
+  Structs: 26,461
+  Interfaces: 4,442
+  Functions: 99,271
+  Methods: 116,579
+  Constants: 131,521
+  Variables: 43,270
+
+Largest syntax run, Kubernetes:
+  Retained files: 30,865
+  Go files parsed: 17,521
+  Packages: 4,176
+  Imports: 107,179
+  Initial filesystem-inclusive analysis: 103.348 seconds
+  RIE scan: 11.932 seconds
+  Retained heap: 365.90 MiB
+  Allocation traffic: 2,431.80 MiB
+
+Approved repeatable warm-cache gate:
+  10,000 Go files analyzed in 0.280 seconds for the timed engine operation.
+  Cold filesystem time is recorded separately because Windows cache/filter
+  behavior was not reproducibly controllable.
+
+======================================================================
+5. GO SEMANTIC REAL-REPOSITORY VALIDATION
+======================================================================
+
+Real repositories:
+  fzf, PocketBase, lo, Kustomize, OpenTelemetry Go, Kubernetes
+
+Controlled fixtures:
+  malformed source and stale source
+
+Real Go source candidates: 20,150
+All 20,150 real files were processed as honest partial semantic files.
+The partial state is expected because external importing and compiler build-
+context selection are intentionally unavailable.
+
+Resolved declarations: 1,439,356
+Ambiguous declarations: 73,495
+
+References:
+  Resolved: 605,333
+  External: 171,581
+  Unresolved: 423,197
+  Ambiguous: 8,672
+
+Imports:
+  Resolved: 39,808
+  External: 45,018
+  Unresolved: 35,039
+
+Package-identity proofs:
+  Resolved: 114,139
+  External: 102,659
+  Unresolved: 421
+  Proof conflicts: 0
+
+Relationships and diagnostics:
+  Receiver bindings: 118,044
+  Type relations: 923,912
+  Interface checks emitted: 395
+  Kubernetes relationships omitted at the configured limit: 7,061,102
+  Diagnostics published: 1,055
+  Kubernetes diagnostics omitted at the configured limit: 8,513
+
+Kubernetes determinism:
+  Go files: 17,521
+  Resolved declarations: 1,176,568
+  Semantic relationship limit: 1,000,000
+  Published diagnostics: 1,000
+  Artifact SHA-256:
+    0ee39ff75da62a68e0e674e8cd758b8d26b59f69fa690cd65af4f6cba50f6ce0
+  Separate clean processes produced the same hash and counts.
+
+Stabilized semantic memory:
+  OpenTelemetry: reduced from 1,384.6 MiB to 1,059.1 MiB
+  Kubernetes: reduced from 5,080.3-5,250.7 MiB to 3,884.9-3,918.0 MiB
+  Artifact hashes remained identical after optimization.
+
+Stabilized performance gates:
+  Package identity, 10,000 proofs: 55.0-58.3 ms
+  Full semantic candidate, 1,000 files: 51-248 ms
+  OpenTelemetry semantic rebuild: 14.14 s
+  Kubernetes semantic rebuilds: 116.9 s and 283.0 s
+  OpenTelemetry cancellation: observed 471.28 ms after a 10-ms delay
+
+Final quality gates:
+  Package identity coverage: 86.9%
+  Semantic coverage: 86.0%
+  Package tests: PASS
+  Semantic tests: PASS
+  Ten shuffled runs: PASS
+  Full backend regression: PASS
+  go vet: PASS
+  Targeted race tests: PASS
+  Full backend race tests: PASS
+  Data races: 0
+  gofmt and git diff validation: PASS
+
+======================================================================
+6. POSTGRESQL PAYLOAD BENCHMARK
+======================================================================
+
+Environment:
+  PostgreSQL 18.4 inside Ubuntu 24.04.4 WSL2
+  Go 1.26.2 client using pgx v5.10.0
+  CPU: Intel Core i5-12450H, 8 cores / 12 logical CPUs
+  Host RAM: 7.72 GiB
+  WSL RAM: approximately 3.7 GiB plus 1 GiB swap
+  Storage: SSSTC CL4-8D512 NVMe SSD
+  Database: UTF8, C collation, UTC, data checksums enabled
+  Authentication: local peer authentication; no password was used
+
+Released artifact fixtures: 6
+Source repositories: project, OpenTelemetry Go, Kubernetes
+Unique exact fixture bytes: 2,227,068,854 bytes (2.074 GiB)
+
+Largest fixtures:
+  Project semantic: 34,180,600 bytes
+  OpenTelemetry semantic: 635,557,163 bytes
+  Kubernetes semantic: 1,556,379,091 bytes
+
+Representations compared:
+  one bytea value
+  256-KiB chunks
+  1-MiB chunks
+  4-MiB chunks
+
+Iterations:
+  10 per fixture and representation
+  Measurement records: 240
+  Supported records completed: 220
+  Large single-bytea records intentionally unsupported after failure: 20
+
+Exact logical payload stage plus digest-verified read traffic:
+  134,326,783,240 bytes
+  125.102 GiB
+
+Measured WAL generated across supported representation measurements:
+  5,730,139,456 bytes
+  5.337 GiB
+
+IMPORTANT EXPLANATION OF THE "ABOUT 138 GIB" RUN SIZE
+
+During live monitoring, the full benchmark was described as operating at about
+the 138-GiB scale. That is a useful approximate description of the overall
+large repeated run, but it is not an exact final /proc process counter.
+
+The exact defensible logical stage/read total from the machine report is
+125.102 GiB. It excludes manifest hashing, core fixture staging, database
+protocol traffic, publication, backup, restore, and verification work.
+
+At a late checkpoint before completion, Linux reported:
+  Client read characters: 136,248,602,025 bytes (126.89 GiB)
+  Client written characters: 66,656,309,635 bytes (62.08 GiB)
+  Combined character I/O at that checkpoint: about 188.97 GiB
+
+These operating-system character counters are not physical disk bytes and can
+double-count client/server movement. The final process exited before one last
+/proc I/O snapshot was recorded. Therefore:
+
+  - use 125.102 GiB as the exact logical payload stage/read figure;
+  - use "about 138 GiB of overall benchmark-scale data movement" only as an
+    approximate human summary;
+  - do not present 138 GiB as an exact disk-write measurement.
+
+Representation decision:
+  256-KiB chunks failed the 50-MiB/s minimum stage gate on large fixtures.
+  1-MiB chunks fell to 42.14 MiB/s on Kubernetes and failed that gate.
+  4-MiB chunks remained at or above 52.42 MiB/s and passed.
+
+Accepted decision:
+  Fixed chunk size: 4 MiB
+  Initial operational artifact limit: 4 GiB
+  Schema ceiling: 8 GiB
+
+Four-MiB large-fixture results:
+  OpenTelemetry:
+    Chunks: 152
+    Minimum stage: 86.73 MiB/s
+    Minimum verified read: 642.57 MiB/s
+    Maximum client RSS above baseline: 48.18 MiB
+  Kubernetes:
+    Chunks: 372
+    Minimum stage: 52.42 MiB/s
+    Minimum verified read: 499.64 MiB/s
+    Maximum client RSS above baseline: 46.91 MiB
+
+Single-bytea finding:
+  34,180,600 bytes succeeded.
+  A 635,557,163-byte insert exhausted the constrained WSL runner.
+  Linux terminated the PostgreSQL backend and PostgreSQL recovered correctly.
+  The unsafe probe was not repeated.
+  This confirms that authoritative artifacts require streaming chunks.
+
+Correctness gates:
+  Exact bytes and SHA-256 round trips: PASS
+  Duplicate staging idempotency: PASS
+  Rollback invisibility: PASS
+  Atomic publication visibility: PASS
+  Cross-scan dependency rejection: PASS
+  Wrong projection digest rejection: PASS
+  Referenced-payload protection: PASS
+  Unreferenced-payload garbage collection: PASS
+  Metadata query avoids payload chunks: PASS
+  Backup/restore verification: PASS
+
+Publication:
+  Runs: 10
+  p50: 5.32 ms
+  p95/max: 130.15 ms
+  Partial publications observed: 0
+
+Metadata scale:
+  Synthetic dependency rows added: 1,000,000
+  Total dependency rows including correctness fixtures: 1,000,050
+  Dependency relation size: 157 MiB
+  Query runs: 10
+  Metadata query p50: 0.103 ms
+  Metadata query p95/max: 1.643 ms
+  Payload-chunk blocks fetched: 0
+
+Backup and restore:
+  Dump bytes: 150,187,276
+  Dump time: 33.991 s
+  Restore time: 30.347 s
+  Payloads verified after restore: 6/6
+
+Raw machine evidence retained outside Git:
+  D:\Project_Ai_persistence_spike\full-report.json
+  SHA-256:
+    2432ddbc48f0e7b4c381100b742111a7340205e553ca43c85b1ab206e84f52ad
+
+  D:\Project_Ai_persistence_spike\metadata-scale-report.json
+  SHA-256:
+    064c193d1c5152466681f635aaadf00ee2ea9fe44412c7bf160bbb6529ae8787
+
+Database state after testing:
+  Ubuntu PostgreSQL 18.4 remains installed.
+  PostgreSQL service is stopped.
+  Disposable benchmark database was deleted.
+  Temporary WSL fixture copy was deleted.
+  No project table or project data remains in Ubuntu PostgreSQL.
+  Standard PostgreSQL system databases remain.
+  Separately installed Windows PostgreSQL was not accessed or modified.
+
+======================================================================
+7. PREPARED TEST AND EVIDENCE FILES
+======================================================================
+
+Primary validation reports:
+  docs\Validation\RIE_VALIDATION_REPORT.md
+  docs\Validation\LIE_PHASE_2_1_10_REAL_REPOSITORY_VALIDATION.md
+  docs\Validation\LIE_PHASE_2_2_0_DESIGN_SPIKE.md
+  docs\Validation\LIE_PHASE_2_2_1_PACKAGE_IDENTITY.md
+  docs\Validation\LIE_PHASE_2_2_2_SEMANTIC_SKELETON.md
+  docs\Validation\LIE_PHASE_2_2_3_DECLARATION_RECONCILIATION.md
+  docs\Validation\LIE_PHASE_2_2_4_RECEIVER_TYPE_BINDING.md
+  docs\Validation\LIE_PHASE_2_2_5_REFERENCES_IMPORTS.md
+  docs\Validation\LIE_PHASE_2_2_6_INTERFACE_SATISFACTION.md
+  docs\Validation\LIE_PHASE_2_2_7_CANDIDATE_INTEGRATION.md
+  docs\Validation\LIE_PHASE_2_2_8_REAL_REPOSITORY_VALIDATION.md
+  docs\Validation\LIE_PHASE_2_2_9_STABILIZATION.md
+  docs\Validation\POSTGRESQL_PAYLOAD_BENCHMARK_REPORT.md
+
+PostgreSQL benchmark harness:
+  experiments\phase-3.2-postgresql-spike\cmd\spike\main.go
+  experiments\phase-3.2-postgresql-spike\spike\interface.go
+  experiments\phase-3.2-postgresql-spike\spike\implementation.go
+  experiments\phase-3.2-postgresql-spike\spike\config.go
+  experiments\phase-3.2-postgresql-spike\spike\model.go
+  experiments\phase-3.2-postgresql-spike\spike\errors.go
+  experiments\phase-3.2-postgresql-spike\spike\implementation_test.go
+  experiments\phase-3.2-postgresql-spike\spike\implementation_benchmark_test.go
+  experiments\phase-3.2-postgresql-spike\spike\README.md
+  experiments\phase-3.2-postgresql-spike\sql\metadata_scale.sql
+
+Additional prepared evidence:
+  - unit tests in every implemented engine package;
+  - repeatable Go benchmark tests;
+  - malformed and stale source fixtures;
+  - real-repository validation harnesses;
+  - release notes, changelogs, API contracts, supported feature matrices,
+    architecture documents, ADRs, and benchmark summaries.
+
+No generated artifact payload or credential is committed to Git.
+
+======================================================================
+8. REMAINING WORK — IMMEDIATE
+======================================================================
+
+PHASE 3.2 ACCEPTANCE GATE
+
+COMPLETED on 2026-07-24.
+
+Engineering accepted:
+  - the PostgreSQL payload benchmark report;
+  - the measured change from 1-MiB to 4-MiB chunks;
+  - the 4-GiB operational artifact limit;
+  - the unchanged 8-GiB schema ceiling;
+  - the rule forbidding a single-value bytea path for authoritative artifacts;
+  - the ADR 0011 amendment.
+
+Phase 3.3 migration implementation is authorized.
+
+PHASE 3.3 — MIGRATION FRAMEWORK
+
+Remaining tasks:
+  - select a PostgreSQL migration tool and record an ADR;
+  - implement ordered immutable migrations;
+  - add migration checksums and schema-version tracking;
+  - test installation on an empty disposable database;
+  - test supported upgrades;
+  - define forward-repair and rollback policies;
+  - validate migration locking and failure recovery;
+  - implement least-privilege roles without committing secrets.
+
+PHASE 3.4 — STORAGE-NEUTRAL PORT AND POSTGRESQL ADAPTER
+
+Remaining tasks:
+  - define Go persistence interfaces independent of PostgreSQL;
+  - stream exact artifacts in 4-MiB chunks;
+  - verify sizes and SHA-256 digests;
+  - stage idempotently;
+  - publish scans atomically;
+  - retrieve exact artifacts and bounded projections;
+  - implement retention and garbage collection;
+  - add integration, race, failure, performance, and recovery tests.
+
+PHASE 3.5 — DEVELOPMENT DATABASE ENVIRONMENT
+
+Remaining tasks:
+  - create a dedicated development database;
+  - create restricted migrator, ingestor, reader, retention, audit, and backup
+    roles as approved;
+  - keep credentials in ignored local configuration;
+  - never use the PostgreSQL administrator account in the application;
+  - document start, stop, reset, backup, and restore commands.
+
+PHASE 3.6 — APIs
+
+Remaining tasks:
+  - design REST and/or gRPC contracts;
+  - list repositories and scans;
+  - read artifact metadata and exact artifacts with authorization;
+  - expose diagnostics/statistics projections;
+  - implement pagination, limits, errors, security, and API tests.
+
+======================================================================
+9. REMAINING WORK — LATER PLATFORM PHASES
+======================================================================
+
+After persistence and APIs stabilize:
+
+1. React user interface.
+2. Additional language engines:
+   TypeScript/JavaScript, SQL, Python, Java, C#, and others one at a time.
+3. Dependency Intelligence Engine.
+4. Architecture Intelligence Engine.
+5. Database Intelligence Engine.
+6. Git Intelligence Engine.
+7. Documentation Intelligence Engine.
+8. Testing Intelligence Engine.
+9. Reasoning Engine and LLM integration.
+10. Minimal Patch Generation Engine.
+11. Validation Engine for builds, tests, formatting, linting, and safety.
+12. Controlled autonomous engineering only after all lower layers are proven.
+
+Current Go semantic limitations that remain intentional future work:
+  - no compiler-equivalent build-context selection;
+  - no external dependency or standard-library importer;
+  - full semantic rebuild rather than incremental invalidation;
+  - relationship caps can omit later relationship categories;
+  - Kubernetes-scale analysis remains memory intensive;
+  - cancellation is cooperative around bounded synchronous work units;
+  - no reproducible local Windows cold-cache performance gate.
+
+======================================================================
+10. GIT AND GOVERNANCE STATE
+======================================================================
+
+Already committed and pushed before the benchmark acceptance:
+  2aefd88 Define PostgreSQL artifact schema
+
+Released tags:
+  go-package-identity-inventory/v1.0.0
+  go-semantic-inventory/v1.0.0
+
+Accepted for the Phase 3.2 milestone commit and push:
+  PostgreSQL benchmark harness
+  PostgreSQL benchmark report
+  accepted 4-MiB ADR/schema amendment
+  measured status/roadmap updates
+  this consolidated TXT report
+
+The exact resulting commit ID is recorded in Git history rather than embedded
+inside this same commit.
+
+======================================================================
+11. FINAL CURRENT DECISION
+======================================================================
+
+The repository and Go intelligence foundation is released and stable.
+The PostgreSQL benchmark is accepted and its correctness gates passed.
+The frozen v1 contract uses 4-MiB chunks and a 4-GiB operational artifact
+limit beneath the unchanged 8-GiB schema ceiling.
+
+NEXT ACTION:
+  Commit and push the accepted Phase 3.2 milestone, then begin only Phase 3.3,
+  the Migration Framework. Phase 3.4 and later remain unauthorized.

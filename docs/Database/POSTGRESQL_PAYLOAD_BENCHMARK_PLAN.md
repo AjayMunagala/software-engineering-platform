@@ -3,11 +3,15 @@
 ## Status
 
 - Phase: 3.2 — PostgreSQL Schema Specification
-- Status: Accepted and authorized for isolated execution
+- Status: Executed and accepted
 - Date: 2026-07-23
 - Authorized: 2026-07-24
 - Database installation and connection: disposable local benchmark instance only
 - Credentials: not required
+
+The accepted evidence and four-MiB schema refinement are recorded in
+[POSTGRESQL_PAYLOAD_BENCHMARK_REPORT.md](../Validation/POSTGRESQL_PAYLOAD_BENCHMARK_REPORT.md).
+Phase 3.3 migration implementation is authorized.
 
 ## Purpose
 

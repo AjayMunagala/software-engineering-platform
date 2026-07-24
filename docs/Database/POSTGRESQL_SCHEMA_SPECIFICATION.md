@@ -3,13 +3,16 @@
 ## Status
 
 - Phase: 3.2 — PostgreSQL Schema Specification
-- Status: Design accepted; benchmark validation pending
+- Status: Accepted and frozen for Phase 3.3 migration implementation
 - Date: 2026-07-23
 - Accepted: 2026-07-24
 - Architecture prerequisite: accepted ADR 0010
-- Implementation authorization: isolated disposable payload benchmark only
+- Benchmark accepted: 2026-07-24
+- Implementation authorization: Phase 3.3 migration framework only
 - Production/shared connections, migration implementation, credentials,
   environment variables, and Go persistence code remain unauthorized
+- Accepted benchmark result: fixed four-MiB chunks and a four-GiB operational
+  artifact limit; the absolute schema ceiling remains eight GiB
 
 ## Purpose
 
@@ -242,8 +245,8 @@ its chunks become immutable after their staging transaction commits.
 |---|---|---:|---|
 | `payload_digest` | `bytea` | no | primary key; SHA-256 of concatenated exact bytes |
 | `payload_size` | `bigint` | no | 0 through 8 GiB |
-| `chunk_size` | `integer` | no | fixed at 1,048,576 bytes |
-| `chunk_count` | `integer` | no | 0 for empty payload; otherwise 1–8192 |
+| `chunk_size` | `integer` | no | fixed at 4,194,304 bytes |
+| `chunk_count` | `integer` | no | 0 for empty payload; otherwise 1–2048 |
 | `created_at` | `timestamptz` | no | immutable |
 
 Keys and constraints:
@@ -252,17 +255,18 @@ Keys and constraints:
 - unique: `(payload_digest, payload_size)` for envelope integrity;
 - check: digest is exactly 32 octets;
 - check: size is between 0 and 8,589,934,592 bytes;
-- check: chunk size is exactly 1 MiB;
+- check: chunk size is exactly 4 MiB;
 - check: empty size means zero chunks and non-empty size means the mathematically
   expected chunk count;
 - no update is granted to runtime roles.
 
-Eight GiB is the absolute schema safety ceiling, not the initial operational
-default. The operational limit must be lower and will be frozen only after the
-authorized payload spike measures the largest released fixture. A payload over
-the operational limit is rejected before staging; the system never truncates
-it. Raising the operational limit within the eight-GiB ceiling is compatible.
-Raising the schema ceiling requires a reviewed migration.
+Eight GiB is the absolute schema safety ceiling, not the operational default.
+The accepted initial operational limit is four GiB, derived from the largest
+released fixture and the approved headroom formula. A payload over that limit
+is rejected before staging; the system never truncates it. Raising the
+operational limit within the eight-GiB ceiling requires new benchmark evidence.
+Raising the schema ceiling requires an accepted migration and architecture
+review.
 
 ## Table: `artifact_payload_chunks`
 
@@ -273,8 +277,8 @@ the ordered concatenation is the one exact payload covered by SHA-256.
 | Column | Type | Null | Rule |
 |---|---|---:|---|
 | `payload_digest` | `bytea` | no | parent payload |
-| `chunk_ordinal` | `integer` | no | zero-based, 0–8191 |
-| `chunk_bytes` | `bytea` | no | 1–1,048,576 octets |
+| `chunk_ordinal` | `integer` | no | zero-based, 0–2047 |
+| `chunk_bytes` | `bytea` | no | 1–4,194,304 octets |
 
 Keys and constraints:
 
@@ -586,8 +590,8 @@ audited. Backups and legal holds are evaluated before deletion.
 
 | Item | Absolute schema ceiling | Operational behavior |
 |---|---:|---|
-| exact artifact payload | 8 GiB | lower runtime maximum frozen after payload spike |
-| payload chunk | 1 MiB | fixed physical chunk size |
+| exact artifact payload | 8 GiB | initial runtime maximum is 4 GiB |
+| payload chunk | 4 MiB | fixed physical chunk size |
 | artifacts per scan | 256 | reject publication above limit |
 | dependencies per artifact | 4096 | reject publication above limit |
 | projection JSON document | 8 MiB | projection fails without affecting exact payload |
@@ -595,11 +599,10 @@ audited. Backups and legal holds are evaluated before deletion.
 | diagnostic message | 4 KiB | projector emits bounded safe message |
 | relative path | 4 KiB | no absolute path |
 
-The initial operational payload default is deliberately not invented. The
-approved spike will set it to the smallest power-of-two ceiling that is at
-least twice the largest measured released payload, with a 64-MiB minimum and
-the eight-GiB schema ceiling. The result and fixture digest become release
-evidence before the operational schema freeze and Phase 3.3 authorization.
+The accepted initial operational payload limit is four GiB. The benchmark
+doubled the 1,556,379,091-byte Kubernetes fixture and rounded upward to the next
+power of two. The application rejects larger artifacts before staging. Future
+increases require equivalent benchmark and engineering evidence.
 
 ## Integrity Verification
 
@@ -648,23 +651,26 @@ The future adapter maps constraint outcomes to storage-neutral errors:
 Database object names, SQL text, connection details, and payload bytes are not
 included in public errors.
 
-## Required Benchmark Validation Before Phase 3.3
+## Accepted Benchmark Validation
 
-1. Review every relation, column, key, nullability, and delete behavior.
-2. Approve PostgreSQL 18 and the zero-extension baseline.
-3. Approve chunked exact-byte storage as the primary candidate.
-4. Approve the explicit foreign-key graph and audit retention exception.
-5. Approve the initial query/index list and no-partitioning decision.
-6. Approve the role/privilege matrix.
-7. Execute the now-authorized isolated Phase 3.2 payload benchmark described in
-   [POSTGRESQL_PAYLOAD_BENCHMARK_PLAN.md](POSTGRESQL_PAYLOAD_BENCHMARK_PLAN.md).
-8. Run that spike without user/production credentials, then freeze the
-   operational payload limit and performance gates from evidence.
-9. Record accepted decisions in ADR 0011.
+1. PostgreSQL 18.4 with no extensions passed the isolated run.
+2. Exact bytes and SHA-256 digests survived stage, read, publication, backup,
+   and restore for all six released fixtures.
+3. Four-MiB chunks passed the accepted stage, read, WAL, and client-memory
+   gates; one-MiB and 256-KiB candidates missed the Kubernetes stage floor.
+4. The 1,556,379,091-byte Kubernetes artifact established a four-GiB
+   operational limit through the approved headroom formula.
+5. Dependency, projection, lifecycle, rollback, retention, and atomic
+   publication constraints passed.
+6. Metadata access p95 was 1.643 ms with 1,000,050 dependency rows and no
+   payload-chunk reads.
+7. Publication p95 was 130.15 ms and no reader observed a partial publication.
+8. Logical backup and isolated restore digest-verified all six payloads.
+9. ADR 0011 records the accepted measured contract and remaining boundaries.
 
-The Phase 3.2 design was accepted on 2026-07-24 and the isolated payload spike
-was authorized. Phase 3.3 remains unauthorized until the benchmark evidence,
-operational payload limit, and any measured schema refinements are accepted.
+Phase 3.2 and its measured four-MiB refinement were accepted on 2026-07-24.
+Phase 3.3 migration implementation is authorized. Later persistence adapter,
+API, UI, and production-connection work remains gated by the roadmap.
 
 ## Primary References
 

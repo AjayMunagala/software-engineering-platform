@@ -44,12 +44,12 @@
 
 - Add TypeScript, SQL, Python, Java, and other languages one at a time after Go stabilizes.
 
-## Phase 3 — Durable Artifact Persistence (current design phase)
+## Phase 3 — Durable Artifact Persistence (current implementation phase)
 
 - Phase 3.1: persistence architecture and ADR accepted.
-- Phase 3.2: PostgreSQL schema accepted; isolated payload benchmark spike
-  authorized and current.
-- Phase 3.3: migration framework.
+- Phase 3.2: accepted and frozen with four-MiB chunks and a four-GiB
+  operational artifact limit.
+- Phase 3.3: migration framework — authorized and current.
 - Phase 3.4: storage-neutral Go port and PostgreSQL adapter.
 - Phase 3.5: disposable development environment and secret handling.
 - Phase 3.6: REST/gRPC query APIs.
