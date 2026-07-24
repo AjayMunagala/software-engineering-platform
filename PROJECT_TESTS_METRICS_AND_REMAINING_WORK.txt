@@ -70,7 +70,9 @@ Persistence
   Phase 3.2 PostgreSQL payload benchmark: ACCEPTED
   Accepted physical contract: 4-MiB chunks, 4-GiB operational limit
   Phase 3.3 migration framework: ACCEPTED AND FROZEN
-  Phase 3.4 storage adapter: AUTHORIZED
+  Phase 3.4.1 storage-neutral port design: ACCEPTED
+  Phase 3.4.2 neutral Go port implementation: AUTHORIZED
+  Phase 3.4.3 PostgreSQL adapter: NOT YET AUTHORIZED
 
 ======================================================================
 3. RIE REAL-REPOSITORY VALIDATION
@@ -470,12 +472,37 @@ Engineering acceptance:
   - ADR 0012 accepted on 2026-07-24;
   - migration implementation and validation evidence accepted;
   - commit and push authorized;
-  - Phase 3.4 storage-adapter implementation authorized.
+  - Phase 3.4 architecture work authorized; the refined roadmap requires the
+    Phase 3.4.1 neutral-port design gate before implementation.
 
 PHASE 3.4 — STORAGE-NEUTRAL PORT AND POSTGRESQL ADAPTER
 
+Phase 3.4.1 design prepared for engineering review:
+  - storage-neutral port responsibility and dependency direction;
+  - detached request/record/receipt model with no RIE, LIE, SQL, or driver
+    types;
+  - small repository, scan, staging, publication, reader, verification, and
+    retention capabilities;
+  - explicit decision not to expose a generic transaction manager;
+  - artifact lifecycle from repository registration through bounded purge;
+  - exact-byte streaming and SHA-256 verification rules;
+  - atomic publication transaction boundaries;
+  - idempotency, cancellation, ambiguous-commit, and rollback rules;
+  - stable storage-neutral error classifications;
+  - PostgreSQL adapter responsibility and exclusions;
+  - adapter-independent conformance and benchmark strategy;
+  - proposed ADR 0013 and candidate API version 0.1.0.
+
+Current gate:
+  - design documents and ADR 0013 accepted on 2026-07-24;
+  - Phase 3.4.2 neutral port and conformance work authorized;
+  - scope isolation must be tested for every public operation;
+  - no PostgreSQL adapter code is authorized.
+
 Remaining tasks:
-  - define Go persistence interfaces independent of PostgreSQL;
+  - implement the accepted neutral Go port and conformance harness;
+  - review and freeze the neutral contract candidate;
+  - implement the PostgreSQL adapter only after its separate authorization;
   - stream exact artifacts in 4-MiB chunks;
   - verify sizes and SHA-256 digests;
   - stage idempotently;
@@ -562,9 +589,9 @@ inside this same commit.
 
 The repository and Go intelligence foundation is released and stable. The
 PostgreSQL schema, benchmark, and migration framework are accepted and frozen.
-Phase 3.4 is the current authorized milestone.
+Phase 3.4.1 storage-neutral port design is accepted. Phase 3.4.2 is current.
 
 NEXT ACTION:
-  Commit and push the accepted Phase 3.3 milestone. Then begin only Phase 3.4,
-  the storage-neutral port and PostgreSQL adapter. Phase 3.5 and later remain
-  unauthorized.
+  Implement only the Phase 3.4.2 neutral Go port and adapter-independent
+  conformance harness. Do not implement the PostgreSQL adapter until its
+  explicit gate is accepted. Phase 3.5 and later remain unauthorized.
