@@ -27,10 +27,12 @@ The platform can currently:
 8. Serialize immutable, versioned artifacts that can later be stored.
 9. Validate a proposed PostgreSQL artifact schema using real artifacts up to
    the 1.56-GB Kubernetes semantic artifact.
+10. Install the frozen PostgreSQL schema through ordered, checksum-verified
+    migrations in an isolated PostgreSQL 18 cluster.
 
-The platform does not yet provide database migrations, a production storage
-adapter, REST/gRPC APIs, a React UI, an LLM reasoning engine, patch generation,
-or patch validation.
+The Phase 3.3 database migrations are accepted and frozen. The platform does
+not yet provide a production storage adapter, REST/gRPC APIs, a React UI, an
+LLM reasoning engine, patch generation, or patch validation.
 
 ======================================================================
 2. COMPLETED RELEASES AND MILESTONES
@@ -67,7 +69,8 @@ Persistence
   Phase 3.2 physical schema design: ACCEPTED
   Phase 3.2 PostgreSQL payload benchmark: ACCEPTED
   Accepted physical contract: 4-MiB chunks, 4-GiB operational limit
-  Phase 3.3 migration framework: AUTHORIZED
+  Phase 3.3 migration framework: ACCEPTED AND FROZEN
+  Phase 3.4 storage adapter: AUTHORIZED
 
 ======================================================================
 3. RIE REAL-REPOSITORY VALIDATION
@@ -369,10 +372,14 @@ Raw machine evidence retained outside Git:
 
 Database state after testing:
   Ubuntu PostgreSQL 18.4 remains installed.
-  PostgreSQL service is stopped.
+  Installed PostgreSQL service is active and was not used by the final
+  Phase 3.3 isolated-cluster validation.
   Disposable benchmark database was deleted.
+  Disposable Phase 3.3 test clusters and databases were deleted.
   Temporary WSL fixture copy was deleted.
   No project table or project data remains in Ubuntu PostgreSQL.
+  No aegis_phase33_% database or platform_% role remains in the installed
+  Ubuntu PostgreSQL cluster.
   Standard PostgreSQL system databases remain.
   Separately installed Windows PostgreSQL was not accessed or modified.
 
@@ -394,6 +401,7 @@ Primary validation reports:
   docs\Validation\LIE_PHASE_2_2_8_REAL_REPOSITORY_VALIDATION.md
   docs\Validation\LIE_PHASE_2_2_9_STABILIZATION.md
   docs\Validation\POSTGRESQL_PAYLOAD_BENCHMARK_REPORT.md
+  docs\Validation\POSTGRESQL_MIGRATION_FRAMEWORK_VALIDATION_REPORT.md
 
 PostgreSQL benchmark harness:
   experiments\phase-3.2-postgresql-spike\cmd\spike\main.go
@@ -437,15 +445,32 @@ Phase 3.3 migration implementation is authorized.
 
 PHASE 3.3 — MIGRATION FRAMEWORK
 
-Remaining tasks:
-  - select a PostgreSQL migration tool and record an ADR;
-  - implement ordered immutable migrations;
-  - add migration checksums and schema-version tracking;
-  - test installation on an empty disposable database;
-  - test supported upgrades;
-  - define forward-repair and rollback policies;
-  - validate migration locking and failure recovery;
-  - implement least-privilege roles without committing secrets.
+Implemented and locally validated:
+  - Atlas Community CLI v1.2.3 selected in proposed ADR 0012;
+  - 7 ordered SQL migration files plus atlas.sum;
+  - 11 platform tables;
+  - 185 constraints;
+  - 34 indexes;
+  - 9 non-login capability/owner roles;
+  - empty install: 1,460 ms on the latest candidate run;
+  - repeat no-op apply: 482 ms;
+  - complete isolated-cluster suite: approximately 15.6 seconds;
+  - checksum tamper rejected;
+  - 3-version partial install upgraded through version 7;
+  - failed migration rolled back with no table or revision residue;
+  - two concurrent migration processes serialized successfully;
+  - migrations 2 through 7 applied under a non-superuser login granted only
+    platform_migrator; only migration 1 used bootstrap role-creation authority;
+  - runtime DDL, payload, and audit privilege boundaries passed;
+  - full backend regression and go vet passed;
+  - targeted and full backend race tests passed with the MSYS2 UCRT toolchain;
+  - no credentials or application database configuration introduced.
+
+Engineering acceptance:
+  - ADR 0012 accepted on 2026-07-24;
+  - migration implementation and validation evidence accepted;
+  - commit and push authorized;
+  - Phase 3.4 storage-adapter implementation authorized.
 
 PHASE 3.4 — STORAGE-NEUTRAL PORT AND POSTGRESQL ADAPTER
 
@@ -514,6 +539,9 @@ Current Go semantic limitations that remain intentional future work:
 Already committed and pushed before the benchmark acceptance:
   2aefd88 Define PostgreSQL artifact schema
 
+Accepted and pushed Phase 3.2 milestone:
+  a5fe86e Accept PostgreSQL payload benchmark
+
 Released tags:
   go-package-identity-inventory/v1.0.0
   go-semantic-inventory/v1.0.0
@@ -532,11 +560,11 @@ inside this same commit.
 11. FINAL CURRENT DECISION
 ======================================================================
 
-The repository and Go intelligence foundation is released and stable.
-The PostgreSQL benchmark is accepted and its correctness gates passed.
-The frozen v1 contract uses 4-MiB chunks and a 4-GiB operational artifact
-limit beneath the unchanged 8-GiB schema ceiling.
+The repository and Go intelligence foundation is released and stable. The
+PostgreSQL schema, benchmark, and migration framework are accepted and frozen.
+Phase 3.4 is the current authorized milestone.
 
 NEXT ACTION:
-  Commit and push the accepted Phase 3.2 milestone, then begin only Phase 3.3,
-  the Migration Framework. Phase 3.4 and later remain unauthorized.
+  Commit and push the accepted Phase 3.3 milestone. Then begin only Phase 3.4,
+  the storage-neutral port and PostgreSQL adapter. Phase 3.5 and later remain
+  unauthorized.

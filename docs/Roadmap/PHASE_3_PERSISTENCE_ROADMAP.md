@@ -2,13 +2,15 @@
 
 ## Status
 
-- Current milestone: Phase 3.3 — Migration Framework
-- Current authorization: Phase 3.3 migration implementation only
+- Current milestone: Phase 3.4 — Persistence Layer
+- Current authorization: Phase 3.4 storage-adapter implementation only
 - PostgreSQL connection: disposable local migration/test databases only
 - Credentials: not required and must not be uploaded
 - Transient benchmark DDL/harness: accepted evidence
-- Migration implementation: authorized
-- Go storage adapter, APIs, and UI: unauthorized
+- Migration implementation: accepted and frozen
+- Phase 3.3 exit gate: accepted on 2026-07-24
+- Go storage adapter: authorized
+- Environment configuration, APIs, and UI: unauthorized
 
 ## Goal
 
@@ -97,6 +99,16 @@ remain gated.
 
 ## Phase 3.3 — Migration Framework
 
+### Current State
+
+- Atlas Community CLI v1.2.3 selected in accepted ADR 0012.
+- Seven ordered SQL migrations and `atlas.sum` implemented.
+- Fresh-cluster install, partial upgrade, repeat apply, checksum tamper,
+  transaction rollback, concurrent apply, ownership, and least-privilege tests
+  passed on PostgreSQL 18.4.
+- Validation report completed on 2026-07-24.
+- Engineering accepted Phase 3.3 on 2026-07-24 and authorized Phase 3.4.
+
 ### Deliverables
 
 - selected migration tool and ADR;
@@ -107,16 +119,16 @@ remain gated.
 - lock-duration and backfill policy;
 - migration documentation.
 
-Migration filenames remain illustrative until Phase 3.3 selects its tool:
+Implemented migration dependency layers:
 
 ```text
-001_create_repositories.sql
-002_create_repository_scans.sql
-003_create_artifact_payloads.sql
-004_create_artifact_envelopes.sql
-005_create_artifact_dependencies.sql
-006_create_query_projections.sql
-007_create_audit_events.sql
+202607240001_bootstrap_roles_and_schema.sql
+202607240002_create_repositories_and_scans.sql
+202607240003_create_artifact_payloads.sql
+202607240004_create_artifact_envelopes.sql
+202607240005_create_query_projections.sql
+202607240006_create_audit_and_indexes.sql
+202607240007_apply_runtime_privileges.sql
 ```
 
 ### Exit Gate
@@ -124,7 +136,18 @@ Migration filenames remain illustrative until Phase 3.3 selects its tool:
 Migrations pass disposable-database installation, upgrade, concurrency,
 least-privilege, and checksum tests. Acceptance authorizes Phase 3.4 only.
 
+Accepted on 2026-07-24. Phase 3.4 storage-adapter implementation is
+authorized; later phases remain gated.
+
 ## Phase 3.4 — Persistence Layer
+
+### Current State
+
+- Authorized on 2026-07-24.
+- Implementation has not started.
+- Scope is limited to the storage-neutral Go port and PostgreSQL adapter.
+- Runtime migration execution, environment credentials, APIs, and UI remain
+  outside this milestone.
 
 Implement the storage-neutral Go port and PostgreSQL adapter.
 

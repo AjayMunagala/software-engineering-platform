@@ -26,8 +26,10 @@ interface evidence without network access or repository execution.
 
 Persistence Phases 3.1 and 3.2 are accepted. PostgreSQL benchmark evidence
 freezes ordered four-MiB chunks, a four-GiB operational artifact limit, and an
-eight-GiB schema ceiling. Phase 3.3 Migration Framework is the current
-authorized milestone; the runtime remains database-independent.
+eight-GiB schema ceiling. Phase 3.3 Migration Framework is accepted and frozen
+after disposable PostgreSQL 18 validation. Phase 3.4 Storage Adapter is the
+current authorized milestone; the intelligence runtime remains
+database-independent.
 
 ## Run RIE
 
@@ -57,11 +59,14 @@ The command emits the versioned JSON schema `1.0.0`.
 - [GoLanguageInventory 1.0 public API](docs/API/GO_LANGUAGE_INVENTORY_V1.md)
 - [GoLanguageInventory 1.0 release package](docs/Releases/GoLanguageInventory-1.0.0/README.md)
 - [PostgreSQL benchmark report](docs/Validation/POSTGRESQL_PAYLOAD_BENCHMARK_REPORT.md)
+- [PostgreSQL migration framework](docs/Database/POSTGRESQL_MIGRATION_FRAMEWORK.md)
+- [Phase 3.3 migration validation](docs/Validation/POSTGRESQL_MIGRATION_FRAMEWORK_VALIDATION_REPORT.md)
 - [Complete project tests, metrics, and remaining work](PROJECT_TESTS_METRICS_AND_REMAINING_WORK.txt)
 
 ## Next milestone
 
-Phase 3.3 Migration Framework is authorized. It covers migration-tool
-selection, immutable checksum-verified migrations, schema-version tracking,
-install/upgrade validation, and repair policy. The PostgreSQL adapter, APIs,
-UI, LLM, patch generation, and repository mutation remain unauthorized.
+Phase 3.4 Storage Adapter is authorized. It covers the storage-neutral Go port,
+four-MiB exact-payload streaming, digest verification, idempotent staging,
+atomic publication, exact retrieval, and persistence conformance tests.
+Environment credentials, APIs, UI, LLM, patch generation, and repository
+mutation remain unauthorized.

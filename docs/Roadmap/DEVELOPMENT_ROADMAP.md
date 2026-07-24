@@ -49,8 +49,9 @@
 - Phase 3.1: persistence architecture and ADR accepted.
 - Phase 3.2: accepted and frozen with four-MiB chunks and a four-GiB
   operational artifact limit.
-- Phase 3.3: migration framework — authorized and current.
-- Phase 3.4: storage-neutral Go port and PostgreSQL adapter.
+- Phase 3.3: migration framework — accepted and frozen.
+- Phase 3.4: storage-neutral Go port and PostgreSQL adapter — authorized and
+  current.
 - Phase 3.5: disposable development environment and secret handling.
 - Phase 3.6: REST/gRPC query APIs.
 

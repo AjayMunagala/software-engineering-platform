@@ -1,0 +1,4 @@
+*.sh text eol=lf
+backend/persistence/postgres/migrations/*.sql text eol=lf
+backend/persistence/postgres/migrations/atlas.sum text eol=lf
+backend/persistence/postgres/tests/*.sql text eol=lf
