@@ -3,7 +3,8 @@
 ## Status
 
 - Phase 3.1 architecture: accepted on 2026-07-23
-- Current milestone: Phase 3.2 schema specification (design only)
+- Phase 3.2 schema design: accepted on 2026-07-24
+- Current milestone: isolated PostgreSQL payload benchmark
 - PostgreSQL: planned first adapter; not connected
 - Schema/SQL/migrations: not implemented
 - Credentials: not required
@@ -25,5 +26,12 @@ The complete Phase 3.1 design is
 [PERSISTENCE_BOUNDARY.md](../Architecture/PERSISTENCE_BOUNDARY.md). The staged
 delivery plan is
 [PHASE_3_PERSISTENCE_ROADMAP.md](../Roadmap/PHASE_3_PERSISTENCE_ROADMAP.md).
+
+The accepted Phase 3.2 physical contract is
+[POSTGRESQL_SCHEMA_SPECIFICATION.md](POSTGRESQL_SCHEMA_SPECIFICATION.md). Its
+isolated, authorized measurement plan is
+[POSTGRESQL_PAYLOAD_BENCHMARK_PLAN.md](POSTGRESQL_PAYLOAD_BENCHMARK_PLAN.md).
+ADR 0011 records the proposed schema decision. No executable database artifact
+has been created.
 
 Qdrant remains a future rebuildable retrieval index, never a source of truth.

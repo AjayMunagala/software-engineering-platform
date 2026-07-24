@@ -2,11 +2,12 @@
 
 ## Status
 
-- Current milestone: Phase 3.2 — PostgreSQL Schema Specification
-- Current authorization: design documents only
-- PostgreSQL connection: unauthorized
+- Current milestone: Phase 3.2 — PostgreSQL Payload Benchmark Spike
+- Current authorization: isolated disposable benchmark only
+- PostgreSQL connection: disposable local benchmark instance only
 - Credentials: not required and must not be uploaded
-- SQL, migrations, Go storage code, APIs, and UI: unauthorized
+- Transient benchmark DDL/harness: authorized
+- Migration implementation, Go storage code, APIs, and UI: unauthorized
 
 ## Goal
 
@@ -51,6 +52,15 @@ Accepted on 2026-07-23. Phase 3.2 schema specification is authorized.
 
 Design the physical PostgreSQL model without connecting to a database.
 
+### Current State
+
+- Physical schema specification: accepted on 2026-07-24.
+- ADR 0011: accepted; benchmark validation pending.
+- Payload benchmark plan: accepted and execution authorized.
+- Disposable local installation, connection, and transient benchmark DDL:
+  authorized only for the documented spike.
+- Credentials, migration implementation, and Go persistence code: unauthorized.
+
 ### Required Decisions
 
 - supported PostgreSQL baseline and extensions;
@@ -77,8 +87,10 @@ credentials are used.
 
 ### Exit Gate
 
-Approve the schema specification, size limits, benchmark plan, and privilege
-model. Acceptance authorizes Phase 3.3 migration implementation only.
+Schema specification, benchmark plan, and privilege model accepted on
+2026-07-24. The benchmark report, measured operational size limit, and measured
+schema refinements remain the gate. Their acceptance authorizes Phase 3.3
+migration implementation only.
 
 ## Phase 3.3 — Migration Framework
 
