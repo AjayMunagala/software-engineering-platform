@@ -52,9 +52,8 @@
 - Phase 3.3: migration framework — accepted and frozen.
 - Phase 3.4.1: storage-neutral persistence port architecture and candidate API
   — accepted.
-- Phase 3.4.2: neutral Go port and reusable conformance harness — current and
-  authorized.
-- Phase 3.4.3: PostgreSQL adapter — gated.
+- Phase 3.4.2: neutral Go port and reusable conformance harness — accepted.
+- Phase 3.4.3: PostgreSQL adapter — current and authorized.
 - Phase 3.4.4: adapter validation and `1.0.0` freeze — gated.
 - Phase 3.5: disposable development environment and secret handling.
 - Phase 3.6: REST/gRPC query APIs.

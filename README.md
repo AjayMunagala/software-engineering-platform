@@ -28,9 +28,9 @@ Persistence Phases 3.1 and 3.2 are accepted. PostgreSQL benchmark evidence
 freezes ordered four-MiB chunks, a four-GiB operational artifact limit, and an
 eight-GiB schema ceiling. Phase 3.3 Migration Framework is accepted and frozen
 after disposable PostgreSQL 18 validation. Phase 3.4.1 Storage-Neutral
-Persistence Port Design and ADR 0013 are accepted. Phase 3.4.2 Neutral Go Port
-and Conformance Harness is the current authorized milestone; the intelligence
-runtime remains database-independent.
+Persistence Port Design, ADR 0013, and Phase 3.4.2 Neutral Go Port and
+Conformance Harness are accepted. Phase 3.4.3 PostgreSQL Adapter is the current
+authorized milestone; the intelligence runtime remains database-independent.
 
 ## Run RIE
 
@@ -64,13 +64,13 @@ The command emits the versioned JSON schema `1.0.0`.
 - [Phase 3.3 migration validation](docs/Validation/POSTGRESQL_MIGRATION_FRAMEWORK_VALIDATION_REPORT.md)
 - [Storage-neutral persistence port design](docs/Architecture/STORAGE_NEUTRAL_PERSISTENCE_PORT.md)
 - [Persistence port candidate API](docs/API/PERSISTENCE_PORT_CANDIDATE.md)
+- [Phase 3.4.2 persistence port validation](docs/Validation/PERSISTENCE_PORT_CONFORMANCE_VALIDATION_REPORT.md)
 - [Complete project tests, metrics, and remaining work](PROJECT_TESTS_METRICS_AND_REMAINING_WORK.txt)
 
 ## Next milestone
 
-Phase 3.4.1 is accepted. Phase 3.4.2 may implement only the neutral Go
-persistence package, immutable models, validation, stable errors, and reusable
-adapter conformance harness—including scope-isolation tests for every public
-operation. PostgreSQL SQL/driver code, connection pools, runtime configuration,
-environment credentials, APIs, UI, LLM, patch generation, and repository
-mutation remain unauthorized.
+Phases 3.4.1 and 3.4.2 are accepted. Phase 3.4.3 may implement the PostgreSQL
+adapter, with neutral conformance running before adapter-specific integration
+tests. Runtime environment configuration, production connection-pool strategy,
+credentials, APIs, UI, LLM, patch generation, and repository mutation remain
+unauthorized.

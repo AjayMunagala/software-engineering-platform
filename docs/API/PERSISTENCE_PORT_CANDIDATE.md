@@ -4,7 +4,7 @@
 
 - Candidate package: `backend/persistence`
 - Candidate contract version: `0.1.0`
-- State: accepted candidate; Phase 3.4.2 implementation authorized
+- State: Phase 3.4.2 accepted; frozen for PostgreSQL adapter conformance
 - Freeze target: `1.0.0` after adapter conformance and engineering acceptance
 
 This document gives the neutral contract a concrete Go shape for review. It is

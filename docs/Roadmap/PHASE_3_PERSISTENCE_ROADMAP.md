@@ -2,14 +2,14 @@
 
 ## Status
 
-- Current milestone: Phase 3.4.2 — Neutral Port and Conformance Harness
-- Current authorization: neutral Go package and conformance tests only
+- Current milestone: Phase 3.4.3 — PostgreSQL Adapter
+- Current authorization: PostgreSQL adapter and isolated validation only
 - PostgreSQL connection: disposable local migration/test databases only
 - Credentials: not required and must not be uploaded
 - Transient benchmark DDL/harness: accepted evidence
 - Migration implementation: accepted and frozen
 - Phase 3.3 exit gate: accepted on 2026-07-24
-- Go storage adapter: not yet authorized; Phase 3.4.2 is the current gate
+- Go storage adapter: authorized on 2026-07-25
 - Environment configuration, APIs, and UI: unauthorized
 
 ## Goal
@@ -147,6 +147,8 @@ implementation; later phases remain gated.
 - Architecture work authorized on 2026-07-24.
 - Phase 3.4.1 design and ADR 0013 were accepted on 2026-07-24.
 - Phase 3.4.2 neutral package and conformance implementation is authorized.
+- Phase 3.4.2 implementation and validation were accepted on 2026-07-25.
+- Phase 3.4.3 PostgreSQL adapter implementation is authorized.
 - No Go persistence or PostgreSQL adapter implementation has started.
 - Runtime migration execution, environment credentials, APIs, and UI remain
   outside this milestone.
@@ -183,7 +185,7 @@ ADR 0013, dependency direction, lifecycle, transaction, error, and conformance
 model together. Scope isolation must be tested across every public operation.
 Phase 3.4.2 only is authorized.
 
-### Phase 3.4.2 — Neutral Port and Conformance Harness (Current)
+### Phase 3.4.2 — Neutral Port and Conformance Harness (Accepted)
 
 After explicit authorization, implement only:
 
@@ -194,11 +196,27 @@ After explicit authorization, implement only:
 
 PostgreSQL adapter code remains gated until this neutral contract is accepted.
 
+Candidate evidence:
+
+- neutral interfaces and immutable models implemented;
+- reusable scope-isolation harness covers all 18 public operations;
+- `persistence` statement coverage: 86.5%;
+- `persistence/conformance` statement coverage: 88.1%;
+- package/full regression, vet, shuffled, repeated, targeted/full race tests:
+  pass with zero races;
+- forbidden engine/database dependencies: zero;
+- validation report:
+  `docs/Validation/PERSISTENCE_PORT_CONFORMANCE_VALIDATION_REPORT.md`.
+
+Engineering accepted this evidence on 2026-07-25. The neutral contract is
+frozen for adapter work. Neutral conformance must be the first adapter gate.
+
 #### Exit Gate
 
-Engineering freezes the neutral contract candidate and authorizes Phase 3.4.3.
+Accepted on 2026-07-25. Engineering froze the neutral contract candidate and
+authorized Phase 3.4.3.
 
-### Phase 3.4.3 — PostgreSQL Adapter
+### Phase 3.4.3 — PostgreSQL Adapter (Current)
 
 Implement the accepted port against the frozen migrated schema. The adapter
 owns parameterized SQL, transaction execution, locking, ordered 4 MiB chunks,
@@ -208,6 +226,9 @@ retention, and garbage collection.
 The adapter receives an approved database execution capability in tests. It
 does not load environment variables, construct production connection pools, or
 run migrations.
+
+The reusable neutral conformance suite runs before adapter-specific integration
+tests. PostgreSQL behavior may not weaken or replace a neutral requirement.
 
 #### Exit Gate
 
