@@ -1,7 +1,6 @@
 package persistence
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"path"
@@ -489,7 +488,7 @@ func NewScanRecord(scopeID string, repositoryID RepositoryID, scanID ScanID, ana
 }
 
 func NewArtifactRecord(scopeID string, repositoryID RepositoryID, scanID ScanID, artifactID ArtifactID, artifact VersionedName, stableIDScheme string, codec Codec, producer VersionedName, digest Digest, size ByteCount, createdAt time.Time) (ArtifactRecord, error) {
-	if err := validateMachine("scope ID", scopeID, 128); err != nil || artifact.IsZero() || codec.IsZero() || producer.IsZero() || digest.IsZero() || createdAt.IsZero() || size > maximumSchemaPayloadBytes {
+	if err := validateMachine("scope ID", scopeID, 128); err != nil || artifact.IsZero() || codec.IsZero() || producer.IsZero() || digest.IsZero() || createdAt.IsZero() || size > defaultMaxPayloadBytes {
 		return ArtifactRecord{}, invalid("artifact record")
 	}
 	if err := validateID("repository ID", string(repositoryID)); err != nil {
@@ -522,7 +521,7 @@ func NewArtifactPage(records []ArtifactRecord, next Cursor) ArtifactPage {
 }
 
 func NewPayloadReceipt(digest Digest, size ByteCount, disposition Disposition) (PayloadReceipt, error) {
-	if digest.IsZero() || size > maximumSchemaPayloadBytes || !disposition.valid() {
+	if digest.IsZero() || size > defaultMaxPayloadBytes || !disposition.valid() {
 		return PayloadReceipt{}, invalid("payload receipt")
 	}
 	return PayloadReceipt{digest: digest, size: size, disposition: disposition}, nil
@@ -542,7 +541,7 @@ func NewPublicationReceipt(scanID ScanID, manifestScheme string, manifestDigest 
 }
 
 func NewVerificationReceipt(digest Digest, size ByteCount) (VerificationReceipt, error) {
-	if digest.IsZero() || size > maximumSchemaPayloadBytes {
+	if digest.IsZero() || size > defaultMaxPayloadBytes {
 		return VerificationReceipt{}, invalid("verification receipt")
 	}
 	return VerificationReceipt{digest: digest, size: size}, nil
@@ -741,7 +740,3 @@ func (state ScanState) valid() bool {
 func (disposition Disposition) valid() bool {
 	return disposition == DispositionCreated || disposition == DispositionAlreadyPresent
 }
-
-// EqualJSON reports exact canonical projection equality and is intentionally
-// independent of database JSON normalization.
-func EqualJSON(left, right []byte) bool { return bytes.Equal(left, right) }

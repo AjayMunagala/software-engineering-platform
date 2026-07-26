@@ -2,8 +2,8 @@
 
 ## Status
 
-- Current milestone: Phase 3.4.4 — Adapter Validation and Freeze
-- Current authorization: Phase 3.4.4 only
+- Current milestone: Phase 3.5 — Development Environment and Runtime Wiring
+- Current authorization: Phase 3.5 only
 - PostgreSQL connection: disposable local migration/test databases only
 - Credentials: not required and must not be uploaded
 - Transient benchmark DDL/harness: accepted evidence
@@ -12,7 +12,8 @@
 - Go storage adapter: authorized on 2026-07-25
 - PostgreSQL adapter local exit gate: reached on 2026-07-25
 - PostgreSQL adapter accepted: 2026-07-26
-- Environment configuration, APIs, and UI: unauthorized
+- Environment configuration and runtime adapter wiring: authorized
+- APIs and UI: unauthorized
 
 ## Goal
 
@@ -152,7 +153,9 @@ implementation; later phases remain gated.
 - Phase 3.4.2 implementation and validation were accepted on 2026-07-25.
 - Phase 3.4.3 PostgreSQL adapter implementation and validation were accepted
   on 2026-07-26.
-- Phase 3.4.4 final contract validation and `1.0.0` freeze are authorized.
+- Phase 3.4.4 final contract validation was accepted on 2026-07-26.
+- Persistence Port and PostgreSQL Adapter `1.0.0` are frozen.
+- Phase 3.5 runtime infrastructure is authorized.
 - Runtime migration execution, environment credentials, APIs, and UI remain
   outside this milestone.
 
@@ -175,7 +178,7 @@ Design only:
 Documents:
 
 - `docs/Architecture/STORAGE_NEUTRAL_PERSISTENCE_PORT.md`;
-- `docs/API/PERSISTENCE_PORT_CANDIDATE.md`;
+- `docs/API/PERSISTENCE_PORT_V1.md`;
 - `docs/Decisions/0013-storage-neutral-persistence-port.md`.
 
 No code, SQL, connections, credentials, APIs, UI, connection pooling, runtime
@@ -249,14 +252,24 @@ Accepted on 2026-07-26 after the PostgreSQL adapter passed the neutral
 conformance suite, disposable database integration tests, failure and recovery
 tests, and large-payload gates. Phase 3.4.4 only is authorized.
 
-### Phase 3.4.4 — Adapter Validation and Freeze (Current)
+### Phase 3.4.4 — Adapter Validation and Freeze (Accepted)
 
 Complete regression, shuffled, vet, targeted/full race, dependency, security,
 memory, performance, documentation, and API reviews. Record the execution
 environment and compare against the accepted Phase 3.2 benchmark baseline.
 
-Acceptance freezes Persistence Port and PostgreSQL Adapter `1.0.0` and
-authorizes Phase 3.5 only.
+Local evidence on 2026-07-26 records final API and compatibility review,
+mandatory conformance-first adapter validation, 86.0% neutral coverage, 88.1%
+conformance coverage, 85.1% PostgreSQL integration coverage, zero Windows and
+Linux race findings, a clean dependency/security audit, and an exact
+1,556,379,091-byte adapter round trip. Engineering accepted the evidence and
+promoted the Persistence Port and PostgreSQL Adapter to `1.0.0` on 2026-07-26.
+
+Evidence:
+[`PERSISTENCE_CONTRACT_STABILIZATION_REPORT.md`](../Validation/PERSISTENCE_CONTRACT_STABILIZATION_REPORT.md).
+
+Accepted on 2026-07-26. Persistence Port and PostgreSQL Adapter `1.0.0` are
+frozen. Phase 3.5 only is authorized.
 
 ### Planned Package Direction
 

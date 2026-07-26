@@ -16,9 +16,10 @@ engine imports, artifact imports, or serialization logic.
 - `implementation_test.go` — contract, validation, immutability, and concurrency tests;
 - `implementation_benchmark_test.go` — repeatable construction/copy benchmarks.
 
-The reusable adapter suite lives in `persistence/conformance`. The Phase 3.4.3
-PostgreSQL candidate passes it; engineering acceptance and Phase 3.4.4
-stabilization remain required before the port can be frozen at `1.0.0`.
+The reusable adapter suite lives in `persistence/conformance`. The accepted
+Phase 3.4.3 PostgreSQL adapter passes it. Phase 3.4.4 final validation and
+engineering acceptance remain required before the port can be frozen at
+`1.0.0`.
 
 ## Dependency Rule
 
@@ -43,5 +44,5 @@ untrusted until the method returns success.
 
 ## Current Status
 
-Candidate API `0.1.0`. The PostgreSQL adapter has reached its Phase 3.4.3 local
-exit gate but remains a release candidate pending engineering acceptance.
+Stable API `1.0.0`. Phase 3.4.4 was accepted on 2026-07-26. Compatibility rules
+are frozen in `docs/API/PERSISTENCE_PORT_V1.md`.

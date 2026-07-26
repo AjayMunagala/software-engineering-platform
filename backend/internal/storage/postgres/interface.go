@@ -5,9 +5,15 @@ package postgres
 import (
 	"context"
 
+	"github.com/AjayMunagala/software-engineering-platform/backend/persistence"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 )
+
+// AdapterVersion identifies the frozen PostgreSQL reference adapter contract.
+const AdapterVersion = "1.0.0"
+
+var _ persistence.Port = (*Adapter)(nil)
 
 // Database is the smallest pgx-compatible capability required by the adapter.
 // A *pgxpool.Pool satisfies it; pool construction and runtime configuration

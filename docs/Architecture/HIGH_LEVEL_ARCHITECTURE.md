@@ -10,7 +10,7 @@ Authorized repository
   -> Go Semantic Inventory 1.0.0
   -> Application orchestration
   -> Persistence Boundary (Phase 3 design)
-  -> PostgreSQL adapter (Phase 3.4.3 candidate)
+  -> PostgreSQL adapter (Phase 3.4.3 accepted; 1.0 release candidate)
   -> REST / gRPC (future)
   -> React UI (future)
 ```

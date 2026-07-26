@@ -149,7 +149,6 @@ microbenchmarks measure deterministic in-process helpers only.
 
 Phase 3.4.3 implementation and validation satisfy the documented exit gate.
 Engineering accepted the milestone and ADR 0014 on 2026-07-26 and authorized
-Phase 3.4.4 only. The persistence contract remains a `0.1.0` candidate until
-the Phase 3.4.4 API, performance, security, dependency, conformance, and
-documentation reviews complete. Credentials, APIs, UI, and runtime
-orchestration remain unauthorized.
+Phase 3.4.4 only. Phase 3.4.4 was subsequently accepted on 2026-07-26 and the
+Persistence Port and PostgreSQL Adapter were promoted to `1.0.0`. This
+historical Phase 3.4.3 evidence does not authorize APIs or UI.

@@ -44,7 +44,7 @@ func BenchmarkPublishRequestConstruction(b *testing.B) {
 func BenchmarkProjectionDefensiveCopy(b *testing.B) {
 	contract, _ := New()
 	document := make([]byte, 1<<20)
-	document[0], document[len(document)-1] = '[', ']'
+	document[0], document[len(document)-1] = '{', '}'
 	for index := 1; index < len(document)-1; index++ {
 		document[index] = ' '
 	}

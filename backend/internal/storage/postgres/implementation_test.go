@@ -22,6 +22,9 @@ import (
 )
 
 func TestConfigurationAndHelpers(t *testing.T) {
+	if AdapterVersion != "1.0.0" || persistence.ContractVersion != "1.0.0" {
+		t.Fatal("adapter and neutral contract versions diverged")
+	}
 	if _, err := New(nil); err != ErrInvalidConfig {
 		t.Fatalf("nil database accepted: %v", err)
 	}

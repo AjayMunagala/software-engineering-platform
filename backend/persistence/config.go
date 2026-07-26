@@ -4,7 +4,6 @@ import "fmt"
 
 const (
 	defaultMaxPayloadBytes            ByteCount = 4 << 30
-	maximumSchemaPayloadBytes         ByteCount = 8 << 30
 	defaultMaxArtifactsPerPublication           = 256
 	defaultMaxDependenciesPerArtifact           = 4_096
 	defaultMaxProjectionBytes         ByteCount = 8 << 20
@@ -70,10 +69,10 @@ func (config Config) withDefaults() Config {
 	return config
 }
 
-// Validate rejects limits that weaken the frozen physical contract.
+// Validate rejects limits that weaken the accepted operational contract.
 func (config Config) Validate() error {
-	if config.MaxPayloadBytes < 1 || config.MaxPayloadBytes > maximumSchemaPayloadBytes {
-		return fmt.Errorf("%w: MaxPayloadBytes must be between 1 and %d", ErrInvalidConfig, maximumSchemaPayloadBytes)
+	if config.MaxPayloadBytes < 1 || config.MaxPayloadBytes > defaultMaxPayloadBytes {
+		return fmt.Errorf("%w: MaxPayloadBytes must be between 1 and %d", ErrInvalidConfig, defaultMaxPayloadBytes)
 	}
 	if config.MaxArtifactsPerPublication < 1 || config.MaxArtifactsPerPublication > defaultMaxArtifactsPerPublication {
 		return fmt.Errorf("%w: MaxArtifactsPerPublication must be between 1 and %d", ErrInvalidConfig, defaultMaxArtifactsPerPublication)

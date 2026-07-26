@@ -10,6 +10,9 @@ import (
 	"io"
 )
 
+// ContractVersion identifies the frozen storage-neutral API contract.
+const ContractVersion = "1.0.0"
+
 // RepositoryStore owns repository lifecycle records.
 type RepositoryStore interface {
 	RegisterRepository(context.Context, RegisterRepositoryRequest) (RepositoryRecord, error)

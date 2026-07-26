@@ -127,7 +127,7 @@ capability in its later implementation phase.
 Engineering reviewed and accepted together:
 
 - `docs/Architecture/STORAGE_NEUTRAL_PERSISTENCE_PORT.md`;
-- `docs/API/PERSISTENCE_PORT_CANDIDATE.md`;
+- `docs/API/PERSISTENCE_PORT_V1.md`;
 - the updated Phase 3 roadmap;
 - dependency direction and forbidden imports;
 - lifecycle and transaction ownership;

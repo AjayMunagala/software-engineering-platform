@@ -1,15 +1,15 @@
-# Persistence Port Candidate API
+# Persistence Port 1.0 Public API
 
 ## Status
 
-- Candidate package: `backend/persistence`
-- Candidate contract version: `0.1.0`
-- State: Phase 3.4.2 accepted; Phase 3.4.3 candidate reached its local exit gate
-- Freeze target: `1.0.0` after adapter conformance and engineering acceptance
+- Package: `backend/persistence`
+- Contract version: `1.0.0`
+- State: frozen after Phase 3.4.4 acceptance on 2026-07-26
 
-This document records the implemented neutral Go contract. Phase 3.4.3
-evidence may refine its `0.x` physical compatibility details before the
-`1.0.0` freeze; later phases remain separately gated.
+This document records the frozen neutral Go contract. Phase 3.4.3 evidence
+resolved the physical compatibility details and Phase 3.4.4 completed final
+API, conformance, compatibility, security, performance, and documentation
+review.
 
 ## Design Rules
 
@@ -76,8 +76,9 @@ type Port interface {
 }
 ```
 
-The exact method spelling remains candidate. The capability split and absence
-of a generic transaction API are architectural decisions.
+The method names and signatures are the proposed `1.0.0` public surface. The
+capability split and absence of a generic transaction API are architectural
+decisions.
 
 ## Candidate Identity and Integrity Values
 
@@ -361,7 +362,7 @@ expired, or scope-mismatched cursors return `invalid_input`.
 
 ## Configuration Boundary
 
-Neutral validation limits are explicit immutable configuration. The candidate
+Neutral validation limits are explicit immutable configuration. The release candidate
 includes operational payload size (default 4 GiB), artifact/dependency limits,
 bounded page sizes, safe-string limits, and retention batch limits.
 
@@ -371,12 +372,19 @@ deferred beyond this design gate.
 
 ## Compatibility Policy
 
-- `0.x` may refine signatures after measured implementation evidence.
+- The frozen contract is identified by `persistence.ContractVersion` as
+  `1.0.0`.
 - The accepted lifecycle, exact-byte authority, integrity, atomicity,
   idempotency, scope, and safe-error semantics require a reviewed ADR to change.
-- `1.0.0` freezes exported names and documented behavior.
-- Compatible fields may be added only when zero-value behavior is unambiguous.
+- Existing exported names, signatures, interface method sets, validation
+  behavior, and zero-value defaults do not change incompatibly in `1.x`.
+- Adding a method to an existing capability interface or `Port` is breaking;
+  optional capabilities use new standalone interfaces.
+- Compatible symbols or fields may be added only when existing behavior and
+  zero-value semantics remain unambiguous.
 - Breaking request/receipt or error-kind changes require a major version.
+- The Go values are not a JSON wire contract. Exact intelligence-artifact bytes
+  remain separately versioned and authoritative.
 - PostgreSQL schema, codec, projector, artifact, and port versions evolve
   independently.
 
@@ -395,6 +403,6 @@ Engineering review must answer:
 9. Does every public operation, including reads and lists, reject a target from
    a different authorization scope without revealing whether it exists?
 
-Engineering accepted this design on 2026-07-24 and authorized creation of the
-neutral Go package and its adapter-independent conformance harness. PostgreSQL
-adapter implementation remains a later Phase 3.4 gate.
+Engineering accepted this design on 2026-07-24, the neutral implementation on
+2026-07-25, the PostgreSQL adapter on 2026-07-26, and the final Phase 3.4.4
+freeze on 2026-07-26.

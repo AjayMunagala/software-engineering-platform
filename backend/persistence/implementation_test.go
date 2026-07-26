@@ -18,7 +18,7 @@ func TestDefaultConfigAndBounds(t *testing.T) {
 		t.Fatalf("unexpected operational limit: %d", config.MaxPayloadBytes)
 	}
 	invalid := []Config{
-		{MaxPayloadBytes: 8<<30 + 1},
+		{MaxPayloadBytes: 4<<30 + 1},
 		{MaxArtifactsPerPublication: 257},
 		{MaxDependenciesPerArtifact: 4_097},
 		{MaxProjectionBytes: 8<<20 + 1},
@@ -374,8 +374,11 @@ func TestCompletePublicModelSurface(t *testing.T) {
 	consume(purgeReceipt.RemovedArtifacts(), purgeReceipt.RemovedScans(), purgeReceipt.Complete())
 	gcReceipt := NewGarbageCollectionReceipt(1, 42)
 	consume(gcReceipt.RemovedPayloads(), gcReceipt.RemovedBytes())
-	if !EqualJSON(document, append([]byte(nil), document...)) {
-		t.Fatal("exact JSON equality failed")
+}
+
+func TestFrozenContractVersion(t *testing.T) {
+	if ContractVersion != "1.0.0" {
+		t.Fatalf("unexpected contract version %q", ContractVersion)
 	}
 }
 
@@ -448,14 +451,23 @@ func TestValidationFailuresAcrossPublicConstructors(t *testing.T) {
 	if _, err := NewArtifactRecord("scope", "repo", "scan", "artifact", producer, "bad scheme", codec, producer, digest, 1, now); KindOf(err) != ErrorInvalidInput {
 		t.Fatalf("invalid artifact record accepted: %v", err)
 	}
+	if _, err := NewArtifactRecord("scope", "repo", "scan", "artifact", producer, "", codec, producer, digest, 4<<30+1, now); KindOf(err) != ErrorInvalidInput {
+		t.Fatalf("artifact above operational limit accepted: %v", err)
+	}
 	if _, err := NewPayloadReceipt(Digest{}, 0, DispositionCreated); KindOf(err) != ErrorInvalidInput {
 		t.Fatalf("invalid receipt accepted: %v", err)
+	}
+	if _, err := NewPayloadReceipt(digest, 4<<30+1, DispositionCreated); KindOf(err) != ErrorInvalidInput {
+		t.Fatalf("payload receipt above operational limit accepted: %v", err)
 	}
 	if _, err := NewPublicationReceipt("", "scan", digest, 1, DispositionCreated); KindOf(err) != ErrorInvalidInput {
 		t.Fatalf("invalid publication receipt accepted: %v", err)
 	}
 	if _, err := NewVerificationReceipt(Digest{}, 0); KindOf(err) != ErrorInvalidInput {
 		t.Fatalf("invalid verification receipt accepted: %v", err)
+	}
+	if _, err := NewVerificationReceipt(digest, 4<<30+1); KindOf(err) != ErrorInvalidInput {
+		t.Fatalf("verification receipt above operational limit accepted: %v", err)
 	}
 }
 

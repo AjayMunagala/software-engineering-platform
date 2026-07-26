@@ -76,7 +76,9 @@ Persistence
   Phase 3.4.1 storage-neutral port design: ACCEPTED
   Phase 3.4.2 neutral Go port implementation: ACCEPTED
   Phase 3.4.3 PostgreSQL adapter: ACCEPTED
-  Phase 3.4.4 persistence contract stabilization: AUTHORIZED
+  Phase 3.4.4 persistence contract stabilization: ACCEPTED AND FROZEN
+  Persistence Port: 1.0.0
+  PostgreSQL Adapter: 1.0.0
 
 ======================================================================
 3. RIE REAL-REPOSITORY VALIDATION
@@ -554,9 +556,45 @@ Large adapter streaming gate:
   - database: disposable PostgreSQL 18.4 cluster under /tmp, removed on exit.
 
 Remaining Phase 3.4 tasks:
-  - Phase 3.4.4 final API, naming, performance, memory, dependency, security,
-    documentation, and compatibility review;
-  - freeze Persistence Port and PostgreSQL Adapter 1.0.0 only after Phase 3.4.4.
+  - commit/push the accepted freeze changes;
+  - create annotated persistence-port/v1.0.0 and
+    postgresql-adapter/v1.0.0 tags.
+
+Phase 3.4.4 stabilization evidence (2026-07-26):
+  - operational MaxPayloadBytes is now hard-capped at the accepted 4-GiB
+    runtime boundary; the 8-GiB schema ceiling is not caller-configurable;
+  - unnecessary EqualJSON and unused ErrContextRequired public symbols removed
+    before 1.0;
+  - explicit ContractVersion and AdapterVersion: 1.0.0;
+  - compile-time PostgreSQL adapter implementation of persistence.Port: PASS;
+  - full backend regression: PASS;
+  - three shuffled full-backend repetitions: PASS;
+  - go vet: PASS;
+  - full Windows race and Linux adapter race: PASS, zero races;
+  - persistence coverage: 86.0%;
+  - conformance coverage: 88.1%;
+  - PostgreSQL integration coverage: 85.1%;
+  - secret and dependency audits: PASS;
+  - no engine imports persistence; pgx/SQL remain adapter-private.
+
+Phase 3.4.4 exact large-payload gate:
+  - exact bytes: 1,556,379,091;
+  - ordered 4-MiB chunks: 372;
+  - stage: 6.893 seconds, 215.32 MiB/s;
+  - export and SHA-256 recheck: 1.593 seconds, 931.75 MiB/s;
+  - end-to-end test: 9.33 seconds;
+  - measured process maximum RSS: 176,760 KiB.
+
+Phase 3.4.4 Windows benchmark ranges (five repetitions):
+  - 100-artifact publication request: 14.92-15.69 us/op,
+    44,647-44,648 B/op, 107 allocs/op;
+  - 1-MiB projection validation/copy: 5.46-5.95 ms/op,
+    176.21-192.07 MiB/s, about 1.05 MiB/op;
+  - 18-operation conformance catalogue: 70.97-79.51 ns/op,
+    288 B/op, 1 alloc/op;
+  - 256-entry manifest digest: 6.552-6.846 us/op,
+    32 B/op, 1 alloc/op;
+  - 4-GiB chunk count: 0.134-0.192 ns/op, zero allocations.
 
 PHASE 3.5 — DEVELOPMENT DATABASE ENVIRONMENT
 
@@ -636,10 +674,9 @@ inside this same commit.
 
 The repository and Go intelligence foundation is released and stable. The
 PostgreSQL schema, benchmark, and migration framework are accepted and frozen.
-Phases 3.4.1 through 3.4.3 are accepted. Phase 3.4.4 is authorized for final
-contract validation and the Persistence Port/PostgreSQL Adapter 1.0.0 freeze.
+Phases 3.4.1 through 3.4.4 are accepted. Persistence Port and PostgreSQL
+Adapter 1.0.0 are frozen.
 
 NEXT ACTION:
-  Complete Phase 3.4.4 final API, conformance, performance, security,
-  dependency, compatibility, and documentation review. Phase 3.5 and later
-  remain unauthorized.
+  Complete the approved release-management actions, then begin only Phase 3.5
+  runtime infrastructure. Phase 3.6 and later remain unauthorized.

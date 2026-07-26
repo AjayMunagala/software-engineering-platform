@@ -3,9 +3,10 @@
 ## Status
 
 - Phase: 3.4.1
-- Contract version: candidate `0.1.0`
+- Contract version: `1.0.0`
+- Status: frozen after Phase 3.4.4 acceptance on 2026-07-26
 - State: accepted on 2026-07-24
-- Implementation: Phase 3.4.2 accepted; Phase 3.4.3 adapter at local exit gate
+- Implementation: Phases 3.4.2 and 3.4.3 accepted; Phase 3.4.4 in progress
 - PostgreSQL credentials or connection: not required
 
 ## Exact Responsibility
@@ -98,7 +99,7 @@ would allow callers to create unsupported partial-publication states and would
 leak adapter behavior into application logic.
 
 The detailed candidate Go surface is specified in
-[`PERSISTENCE_PORT_CANDIDATE.md`](../API/PERSISTENCE_PORT_CANDIDATE.md).
+[`PERSISTENCE_PORT_V1.md`](../API/PERSISTENCE_PORT_V1.md).
 
 ## Core Values
 
@@ -412,9 +413,9 @@ count, latency distribution, throughput, WAL, and peak client/database memory.
 
 ## API Evolution
 
-The candidate contract begins at `0.1.0`. It is not frozen by this document.
-Implementation evidence may refine naming and ergonomics without changing the
-accepted ownership, lifecycle, atomicity, integrity, or error semantics.
+The reviewed contract is frozen at `1.0.0`. Compatible `1.x` evolution follows
+the policy in `docs/API/PERSISTENCE_PORT_V1.md`; breaking changes require a new
+major version and reviewed decision.
 
 The contract may become `1.0.0` only after:
 

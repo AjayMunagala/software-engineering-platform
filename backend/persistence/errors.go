@@ -7,8 +7,7 @@ import (
 )
 
 var (
-	ErrInvalidConfig   = errors.New("invalid persistence configuration")
-	ErrContextRequired = errors.New("context is required")
+	ErrInvalidConfig = errors.New("invalid persistence configuration")
 )
 
 // ErrorKind is a stable storage-neutral failure category.
