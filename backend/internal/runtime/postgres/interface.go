@@ -18,6 +18,12 @@ type Factory interface {
 	Open(context.Context, runtimeconfig.LoadedConfiguration) (*Runtime, error)
 }
 
+// Checker is the opaque, read-only runtime capability consumed by health.
+// It exposes no pool statistics, SQL, credentials, or driver objects.
+type Checker interface {
+	Check(context.Context) error
+}
+
 // IngestCapabilities is the narrow persistence surface routed to ingestion.
 type IngestCapabilities interface {
 	persistence.RepositoryStore

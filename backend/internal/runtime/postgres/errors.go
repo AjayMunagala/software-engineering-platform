@@ -96,6 +96,24 @@ func (failure *Error) Capability() Capability {
 	return failure.capability
 }
 
+// HealthReason provides a bounded category without importing the health
+// package or exposing driver details.
+func (failure *Error) HealthReason() string {
+	if failure == nil {
+		return "database_unavailable"
+	}
+	switch failure.code {
+	case ErrorTimeout:
+		return "database_timeout"
+	case ErrorSchemaIncompatible:
+		return "schema_incompatible"
+	case ErrorPrivilegeDenied:
+		return "privilege_incompatible"
+	default:
+		return "database_unavailable"
+	}
+}
+
 // CodeOf returns a stable category for any failure.
 func CodeOf(err error) ErrorCode {
 	if err == nil {

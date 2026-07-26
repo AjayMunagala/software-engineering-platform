@@ -6,7 +6,7 @@
 - Contract: candidate `0.1.0`
 - Local implementation gate: complete
 - Engineering acceptance: accepted on 2026-07-26
-- Phase 3.5.3: authorized by subsequent engineering decision
+- Phase 3.5.3 integration: accepted on 2026-07-26
 
 ## Purpose
 
@@ -113,6 +113,6 @@ wsl.exe -d Ubuntu-24.04 -u postgres -- bash -lc `
 
 ## Future Work
 
-Phase 3.5.3 may consume this package only through its public capabilities to
+Phase 3.5.3 consumes this package only through its public capabilities to
 implement lifecycle coordination, liveness, readiness, admission, drain, and
 graceful shutdown. Pool internals remain private.

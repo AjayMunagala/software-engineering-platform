@@ -104,6 +104,6 @@ echo '[4/4] running the Windows runtime integration test against the disposable 
 backend_windows="$(wslpath -w "$backend_dir")"
 ca_windows="$(wslpath -w "$ca_cert")"
 powershell.exe -NoProfile -NonInteractive -Command \
-    "\$env:AEGIS_RUNTIME_POSTGRES_INTEGRATION='1'; \$env:AEGIS_RUNTIME_POSTGRES_PORT='$cluster_port'; \$env:AEGIS_RUNTIME_POSTGRES_DATABASE='$database_name'; \$env:AEGIS_RUNTIME_POSTGRES_USER='$runtime_login'; \$env:AEGIS_RUNTIME_POSTGRES_INGEST_USER='$ingest_login'; \$env:AEGIS_RUNTIME_POSTGRES_READ_USER='$read_login'; \$env:AEGIS_RUNTIME_POSTGRES_RETENTION_USER='$retention_login'; \$env:AEGIS_RUNTIME_POSTGRES_ROOT_CA='$ca_windows'; Set-Location -LiteralPath '$backend_windows'; go test ./internal/runtime/postgres -run '^TestDisposablePostgreSQL' -count=1 -v"
+    "\$env:AEGIS_RUNTIME_POSTGRES_INTEGRATION='1'; \$env:AEGIS_RUNTIME_POSTGRES_PORT='$cluster_port'; \$env:AEGIS_RUNTIME_POSTGRES_DATABASE='$database_name'; \$env:AEGIS_RUNTIME_POSTGRES_USER='$runtime_login'; \$env:AEGIS_RUNTIME_POSTGRES_INGEST_USER='$ingest_login'; \$env:AEGIS_RUNTIME_POSTGRES_READ_USER='$read_login'; \$env:AEGIS_RUNTIME_POSTGRES_RETENTION_USER='$retention_login'; \$env:AEGIS_RUNTIME_POSTGRES_ROOT_CA='$ca_windows'; Set-Location -LiteralPath '$backend_windows'; go test ./internal/runtime/postgres ./internal/runtime/app -run '^TestDisposablePostgreSQL' -count=1 -v"
 
 echo 'disposable PostgreSQL runtime validation passed'

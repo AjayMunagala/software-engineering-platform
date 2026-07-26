@@ -3,7 +3,8 @@
 `validate.sh` creates a fresh PostgreSQL 18 cluster under `/tmp`, applies the
 accepted checksum-verified migrations, creates temporary combined and
 capability-specific logins, generates a disposable certificate authority, and
-runs both disabled-TLS and verify-full-TLS tests from Windows. The cluster,
+runs disabled-TLS, verify-full-TLS, and application lifecycle tests from
+Windows. The cluster,
 database, roles, certificates, and data are destroyed when the script exits.
 
 Run from PowerShell:

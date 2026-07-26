@@ -170,6 +170,17 @@ func (value factory) Open(ctx context.Context, loaded runtimeconfig.LoadedConfig
 		} else if !equalCompatibilityProof(acceptedProof, proof) {
 			return nil, newError(ErrorSchemaIncompatible, "schema-consistency", plan.capability, nil)
 		}
+		checkPlan := plan
+		checkPool := pool
+		checkConfiguration := configuration
+		checkClock := value.clock
+		runtime.checks = append(runtime.checks, func(checkCtx context.Context) error {
+			if err := checkPool.Ping(checkCtx); err != nil {
+				return newError(ErrorUnavailable, "health-ping", checkPlan.capability, err)
+			}
+			_, err := verifyPool(checkCtx, checkPool, checkConfiguration, checkPlan, checkClock.Now())
+			return err
+		})
 
 		adapter, err := storagepostgres.New(pool)
 		if err != nil {

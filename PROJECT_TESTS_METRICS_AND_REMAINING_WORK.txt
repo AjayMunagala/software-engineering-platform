@@ -83,7 +83,8 @@ Persistence
   ADR 0015 runtime infrastructure: ACCEPTED
   Phase 3.5.1 runtime configuration: ACCEPTED
   Phase 3.5.2 PostgreSQL runtime: ACCEPTED
-  Phase 3.5.3 Runtime Lifecycle & Health: AUTHORIZED
+  Phase 3.5.3 Runtime Lifecycle & Health: ACCEPTED
+  Phase 3.5.4 Runtime Integration & Release Freeze: AUTHORIZED
 
 ======================================================================
 3. RIE REAL-REPOSITORY VALIDATION
@@ -666,9 +667,8 @@ lifecycle, health/observability implementation, API listener, UI, or engine
 change. Persistence Port and PostgreSQL Adapter 1.0.0 remain unchanged.
 
 Remaining governance and implementation work:
-  - implement and validate only Phase 3.5.3 Runtime Lifecycle & Health;
-  - later gates separately control observability and Phase 3.5.4
-    integrated validation and runtime freeze;
+  - implement and validate Phase 3.5.4 observability, integrated validation,
+    and runtime release freeze;
   - production credentials, APIs, UI, authentication, business logic, AI
     orchestration, engine changes, and new persistence capabilities remain out
     of scope.
@@ -751,8 +751,10 @@ PostgreSQL Adapter 1.0.0 are accepted and frozen.
 Phase 3.5.0 runtime infrastructure design and ADR 0015 are accepted.
 
 NEXT ACTION:
-  Implement and validate only Phase 3.5.3 Runtime Lifecycle & Health.
-  HTTP endpoints, observability, Phase 3.5.4, and later work remain gated.
+  Implement Phase 3.5.4 Runtime Integration & Release Freeze, including
+  structured logging, metrics, Linux race validation, deployment validation,
+  documentation, and release-candidate stabilization. HTTP endpoints and later
+  phases remain gated.
 
 ======================================================================
 12. PHASE 3.5.2 POSTGRESQL RUNTIME LOCAL EXIT GATE
@@ -789,3 +791,43 @@ Validation:
 No health subsystem, observability, startup coordinator, API, UI, business
 logic, runtime migration, engine change, persistent local database, personal
 credential, or committed secret was introduced.
+
+Phase 3.5.2 accepted release commit:
+  3e0c3b1 Add PostgreSQL runtime infrastructure
+
+======================================================================
+13. PHASE 3.5.3 RUNTIME LIFECYCLE & HEALTH LOCAL EXIT GATE
+======================================================================
+
+Implemented:
+  - opaque public PostgreSQL Check capability with no pool/SQL exposure;
+  - monotonic application runtime state machine;
+  - callable liveness and readiness with stable bounded reason codes;
+  - three-failure readiness removal, one-success recovery, and stale proof;
+  - caller cancellation does not mutate the shared readiness failure count;
+  - admission, in-flight tracking, drain, cancellation, and forced shutdown;
+  - one stable result for repeated and concurrent shutdown calls;
+  - bounded resource closure without falsely reporting stopped;
+  - disposable PostgreSQL application lifecycle integration.
+
+Validation:
+  - focused lifecycle/health/PostgreSQL tests: PASS;
+  - full backend regression and go vet: PASS;
+  - three shuffled full-backend repetitions: PASS;
+  - targeted/full Windows race: PASS, zero races;
+  - Ubuntu WSL PostgreSQL 18.4 integration: PASS;
+  - application integration startup/readiness/shutdown: 0.03 s;
+  - application lifecycle statement coverage: 91.6%;
+  - health statement coverage: 88.2%;
+  - PostgreSQL runtime statement coverage: 85.3%;
+  - 10,000 concurrent health evaluations: PASS;
+  - 50 concurrent shutdown callers: identical result;
+  - one-second drain timeout and blocking-close bound: PASS;
+  - health benchmark: 0.381-0.439 us/op, 272 B/op, 4 allocs/op;
+  - zero-work shutdown benchmark: 2.848-3.031 us/op,
+    648 B/op, 9 allocs/op.
+
+No HTTP endpoint, listener, observability implementation, API, UI,
+authentication, business logic, AI orchestration, migration, SQL, credential,
+or engine change was introduced. Phase 3.5.3 was accepted on 2026-07-26 and
+authorized Phase 3.5.4 only.

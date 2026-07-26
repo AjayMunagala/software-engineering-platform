@@ -172,10 +172,16 @@ func TestOpenCombinedOwnsOnePool(t *testing.T) {
 	if runtime.Compatibility().SchemaVersion() != SchemaContractVersion {
 		t.Fatalf("schema version = %q", runtime.Compatibility().SchemaVersion())
 	}
+	if err := runtime.Check(context.Background()); err != nil {
+		t.Fatalf("opaque runtime Check() error = %v", err)
+	}
 	runtime.Close()
 	runtime.Close()
 	if !pool.closed {
 		t.Fatal("owned pool was not closed")
+	}
+	if CodeOf(runtime.Check(context.Background())) != ErrorUnavailable {
+		t.Fatal("closed runtime remained healthy")
 	}
 }
 
@@ -522,6 +528,11 @@ func TestStableErrorContract(t *testing.T) {
 	if nilFailure.Error() != "postgres-runtime: internal: postgres-runtime" || nilFailure.Code() != ErrorInternal ||
 		nilFailure.Step() != "postgres-runtime" || nilFailure.Capability() != "" || nilFailure.Unwrap() != nil {
 		t.Fatal("nil error accessors are not safe")
+	}
+	if newError(ErrorSchemaIncompatible, "schema", "", nil).(*Error).HealthReason() != "schema_incompatible" ||
+		newError(ErrorPrivilegeDenied, "privilege", "", nil).(*Error).HealthReason() != "privilege_incompatible" ||
+		newError(ErrorUnavailable, "database", "", nil).(*Error).HealthReason() != "database_unavailable" {
+		t.Fatal("health reason mapping is unstable")
 	}
 	if CodeOf(context.Canceled) != ErrorCanceled || CodeOf(context.DeadlineExceeded) != ErrorTimeout {
 		t.Fatal("context failures were not classified")

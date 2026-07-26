@@ -1,7 +1,9 @@
 package postgres
 
 import (
+	"context"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	storagepostgres "github.com/AjayMunagala/software-engineering-platform/backend/internal/storage/postgres"
@@ -38,6 +40,8 @@ type Runtime struct {
 	retention RetentionCapabilities
 	proof     CompatibilityProof
 	pools     []ownedPool
+	checks    []func(context.Context) error
+	closed    atomic.Bool
 	closeOnce sync.Once
 }
 
@@ -84,12 +88,33 @@ func (runtime *Runtime) PoolCount() int {
 	return len(runtime.pools)
 }
 
+// Check verifies every required PostgreSQL capability through the same
+// read-only startup proof. Pool internals remain opaque to health callers.
+func (runtime *Runtime) Check(ctx context.Context) error {
+	if runtime == nil || ctx == nil {
+		return newError(ErrorInvalidInput, "runtime-check", "", nil)
+	}
+	if err := ctx.Err(); err != nil {
+		return newError(ErrorCanceled, "runtime-check", "", err)
+	}
+	if runtime.closed.Load() {
+		return newError(ErrorUnavailable, "runtime-closed", "", nil)
+	}
+	for _, check := range runtime.checks {
+		if err := check(ctx); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // Close idempotently closes unique pools in reverse construction order.
 func (runtime *Runtime) Close() {
 	if runtime == nil {
 		return
 	}
 	runtime.closeOnce.Do(func() {
+		runtime.closed.Store(true)
 		for index := len(runtime.pools) - 1; index >= 0; index-- {
 			runtime.pools[index].pool.Close()
 		}

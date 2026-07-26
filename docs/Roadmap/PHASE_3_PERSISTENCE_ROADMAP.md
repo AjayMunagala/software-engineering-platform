@@ -2,8 +2,8 @@
 
 ## Status
 
-- Current milestone: Phase 3.5.3 — Runtime Lifecycle & Health
-- Current authorization: Phase 3.5.3 implementation only
+- Current milestone: Phase 3.5.4 — Runtime Integration & Release Freeze
+- Current authorization: Phase 3.5.4 only
 - PostgreSQL connection: disposable local migration/test databases only
 - Credentials: not required and must not be uploaded
 - Transient benchmark DDL/harness: accepted evidence
@@ -16,7 +16,8 @@
 - Phase 3.5.1 runtime configuration local exit gate: reached on 2026-07-26
 - Phase 3.5.1 engineering acceptance: accepted on 2026-07-26
 - Phase 3.5.2 PostgreSQL runtime: accepted on 2026-07-26
-- Phase 3.5.3 Runtime Lifecycle & Health: authorized
+- Phase 3.5.3 Runtime Lifecycle & Health: accepted on 2026-07-26
+- Phase 3.5.4 Runtime Integration & Release Freeze: authorized on 2026-07-26
 - APIs and UI: unauthorized
 
 ## Goal
@@ -347,13 +348,17 @@ Local implementation and validation completed and engineering accepted the
 milestone on 2026-07-26. Evidence:
 [`POSTGRESQL_RUNTIME_VALIDATION_REPORT.md`](../Validation/POSTGRESQL_RUNTIME_VALIDATION_REPORT.md).
 
-### Phase 3.5.3 — Runtime Lifecycle & Health (Current, Authorized)
+### Phase 3.5.3 — Runtime Lifecycle & Health (Accepted)
 
 Implement startup resource ownership, narrow capability routing, admission and
 drain, graceful shutdown, runtime state, callable liveness/readiness, and
 failure injection. HTTP endpoints and observability remain unauthorized.
 
-### Phase 3.5.4 — Integrated Validation and Freeze (Gated)
+Implementation, validation, and engineering acceptance completed on 2026-07-26. Evidence:
+[`RUNTIME_LIFECYCLE_HEALTH_VALIDATION_REPORT.md`](../Validation/RUNTIME_LIFECYCLE_HEALTH_VALIDATION_REPORT.md).
+Acceptance authorized Phase 3.5.4 only.
+
+### Phase 3.5.4 — Runtime Integration & Release Freeze (Authorized)
 
 Run local/CI/profile, TLS, compatibility, regression, shuffle, vet, race,
 coverage, leak, security, benchmark, recovery, and documentation gates. Create
