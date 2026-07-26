@@ -2,8 +2,8 @@
 
 ## Status
 
-- Current milestone: Phase 3.5.2 — PostgreSQL Runtime
-- Current authorization: Phase 3.5.2 implementation only
+- Current milestone: Phase 3.5.3 — Runtime Lifecycle & Health
+- Current authorization: Phase 3.5.3 implementation only
 - PostgreSQL connection: disposable local migration/test databases only
 - Credentials: not required and must not be uploaded
 - Transient benchmark DDL/harness: accepted evidence
@@ -15,7 +15,8 @@
 - Phase 3.5.0 design and ADR 0015: accepted on 2026-07-26
 - Phase 3.5.1 runtime configuration local exit gate: reached on 2026-07-26
 - Phase 3.5.1 engineering acceptance: accepted on 2026-07-26
-- Phase 3.5.2 PostgreSQL runtime implementation: authorized
+- Phase 3.5.2 PostgreSQL runtime: accepted on 2026-07-26
+- Phase 3.5.3 Runtime Lifecycle & Health: authorized
 - APIs and UI: unauthorized
 
 ## Goal
@@ -336,17 +337,21 @@ Local implementation and validation completed on 2026-07-26. Evidence:
 Engineering accepted the implementation and evidence on 2026-07-26 and
 authorized Phase 3.5.2 only.
 
-### Phase 3.5.2 — PostgreSQL Runtime (Current, Authorized)
+### Phase 3.5.2 — PostgreSQL Runtime (Accepted)
 
 Implement TLS loading, capability pool set, additive compatibility-record
 migration, deployment/runtime compatibility verification, adapter construction,
 and disposable TLS/PostgreSQL integration tests.
 
-### Phase 3.5.3 — Lifecycle, Health, and Observability (Gated)
+Local implementation and validation completed and engineering accepted the
+milestone on 2026-07-26. Evidence:
+[`POSTGRESQL_RUNTIME_VALIDATION_REPORT.md`](../Validation/POSTGRESQL_RUNTIME_VALIDATION_REPORT.md).
+
+### Phase 3.5.3 — Runtime Lifecycle & Health (Current, Authorized)
 
 Implement startup resource ownership, narrow capability routing, admission and
-drain, graceful/forced shutdown, callable health, structured logging, bounded
-metrics, and failure injection.
+drain, graceful shutdown, runtime state, callable liveness/readiness, and
+failure injection. HTTP endpoints and observability remain unauthorized.
 
 ### Phase 3.5.4 — Integrated Validation and Freeze (Gated)
 

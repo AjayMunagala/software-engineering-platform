@@ -47,6 +47,22 @@ BEGIN
         'platform.artifact_envelopes', 'DELETE') THEN
         RAISE EXCEPTION 'retention worker cannot delete selected operational rows';
     END IF;
+    IF NOT has_table_privilege('platform_ingestor',
+        'platform.runtime_compatibility', 'SELECT')
+       OR NOT has_table_privilege('platform_artifact_reader',
+            'platform.runtime_compatibility', 'SELECT')
+       OR NOT has_table_privilege('platform_retention_worker',
+            'platform.runtime_compatibility', 'SELECT') THEN
+        RAISE EXCEPTION 'runtime roles cannot read the compatibility proof';
+    END IF;
+    IF has_table_privilege('platform_ingestor',
+        'platform.runtime_compatibility', 'INSERT,UPDATE,DELETE')
+       OR has_table_privilege('platform_artifact_reader',
+            'platform.runtime_compatibility', 'INSERT,UPDATE,DELETE')
+       OR has_table_privilege('platform_retention_worker',
+            'platform.runtime_compatibility', 'INSERT,UPDATE,DELETE') THEN
+        RAISE EXCEPTION 'runtime role can mutate the compatibility proof';
+    END IF;
     IF NOT has_table_privilege('platform_audit_writer', 'platform.audit_events', 'INSERT')
        OR has_table_privilege('platform_audit_writer', 'platform.audit_events', 'SELECT') THEN
         RAISE EXCEPTION 'audit-writer privilege boundary is invalid';

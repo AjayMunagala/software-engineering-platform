@@ -82,7 +82,8 @@ Persistence
   Phase 3.5.0 runtime infrastructure design: ACCEPTED
   ADR 0015 runtime infrastructure: ACCEPTED
   Phase 3.5.1 runtime configuration: ACCEPTED
-  Phase 3.5.2 PostgreSQL runtime: AUTHORIZED
+  Phase 3.5.2 PostgreSQL runtime: ACCEPTED
+  Phase 3.5.3 Runtime Lifecycle & Health: AUTHORIZED
 
 ======================================================================
 3. RIE REAL-REPOSITORY VALIDATION
@@ -665,9 +666,8 @@ lifecycle, health/observability implementation, API listener, UI, or engine
 change. Persistence Port and PostgreSQL Adapter 1.0.0 remain unchanged.
 
 Remaining governance and implementation work:
-  - implement and validate only Phase 3.5.2 PostgreSQL runtime;
-  - later gates separately control Phase 3.5.2 PostgreSQL pool/TLS/schema
-    compatibility, Phase 3.5.3 lifecycle/health/observability, and Phase 3.5.4
+  - implement and validate only Phase 3.5.3 Runtime Lifecycle & Health;
+  - later gates separately control observability and Phase 3.5.4
     integrated validation and runtime freeze;
   - production credentials, APIs, UI, authentication, business logic, AI
     orchestration, engine changes, and new persistence capabilities remain out
@@ -751,5 +751,41 @@ PostgreSQL Adapter 1.0.0 are accepted and frozen.
 Phase 3.5.0 runtime infrastructure design and ADR 0015 are accepted.
 
 NEXT ACTION:
-  Implement and validate only Phase 3.5.2 PostgreSQL runtime. Phase 3.5.3 and
-  later remain separately gated and unauthorized.
+  Implement and validate only Phase 3.5.3 Runtime Lifecycle & Health.
+  HTTP endpoints, observability, Phase 3.5.4, and later work remain gated.
+
+======================================================================
+12. PHASE 3.5.2 POSTGRESQL RUNTIME LOCAL EXIT GATE
+======================================================================
+
+Implemented:
+  - bounded TLS/CA/client-certificate loading and verify-full enforcement;
+  - one local/CI combined pool or three staging/production capability pools;
+  - immediate ping, PostgreSQL 18/session verification, compatibility proof,
+    and positive/negative privilege checks;
+  - narrow PostgreSQL Adapter routing and reverse-order failure cleanup;
+  - read-only migration-maintained compatibility record;
+  - disposable PostgreSQL 18.4 disabled-TLS and verify-full-TLS integration.
+
+Validation:
+  - migration files: 8;
+  - schema tables: 12;
+  - schema constraints: 198;
+  - schema indexes: 35;
+  - capability roles: 9;
+  - migration empty install: 1,311 ms;
+  - migration no-op apply: 404 ms;
+  - target tests, backend regression, vet, and three shuffled runs: PASS;
+  - target/full Windows race with MSYS2 UCRT64 GCC: PASS, zero races;
+  - Ubuntu WSL disposable PostgreSQL integration: PASS;
+  - combined integration: 0.03 s;
+  - separate verify-full TLS integration: 0.30 s;
+  - statement coverage: 85.9%;
+  - 1,000 open/close cycles: 1,000 created and 1,000 closed;
+  - required third-pool failure: read closed, then ingest closed;
+  - combined runtime benchmark: 42.042-70.410 us/op,
+    14,098-14,105 B/op, 130 allocs/op.
+
+No health subsystem, observability, startup coordinator, API, UI, business
+logic, runtime migration, engine change, persistent local database, personal
+credential, or committed secret was introduced.

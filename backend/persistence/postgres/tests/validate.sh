@@ -155,7 +155,7 @@ noop_apply_ms="$(( (noop_finished - noop_started) / 1000000 ))"
 echo '[7/10] rejecting a database newer than the available migration directory'
 older_dir="$temporary_root/older"
 cp -R "$migration_dir" "$older_dir"
-rm -- "$older_dir/202607240007_apply_runtime_privileges.sql"
+rm -- "$older_dir/202607260008_create_runtime_compatibility.sql"
 atlas migrate hash --dir "file://$older_dir"
 if bash "$compatibility_check" "$(migration_url "$upgrade_db")" "$older_dir" \
     >/dev/null 2>&1; then
@@ -166,7 +166,7 @@ fi
 echo '[8/10] validating transactional failure rollback'
 failure_dir="$temporary_root/failure"
 cp -R "$migration_dir" "$failure_dir"
-cat >"$failure_dir/202607240008_intentional_failure.sql" <<'SQL'
+cat >"$failure_dir/202607260009_intentional_failure.sql" <<'SQL'
 SET lock_timeout = '5s';
 SET statement_timeout = '5min';
 CREATE TABLE platform.must_rollback (id integer PRIMARY KEY);
@@ -187,7 +187,7 @@ rollback_residue="$("${psql_command[@]}" -At -d "$failure_db" -c \
     exit 1
 }
 failed_revision="$("${psql_command[@]}" -At -d "$failure_db" -c \
-    "SELECT count(*) FROM atlas_schema_revisions.atlas_schema_revisions WHERE version = '202607240008'")"
+    "SELECT count(*) FROM atlas_schema_revisions.atlas_schema_revisions WHERE version = '202607260009'")"
 [[ "$failed_revision" == '0' ]] || {
     echo 'failed transactional migration was recorded as a revision' >&2
     exit 1
@@ -196,7 +196,7 @@ failed_revision="$("${psql_command[@]}" -At -d "$failure_db" -c \
 echo '[9/10] validating advisory-lock concurrency'
 concurrent_dir="$temporary_root/concurrent"
 cp -R "$migration_dir" "$concurrent_dir"
-cat >"$concurrent_dir/202607240008_lock_probe.sql" <<'SQL'
+cat >"$concurrent_dir/202607260009_lock_probe.sql" <<'SQL'
 SET lock_timeout = '5s';
 SET statement_timeout = '5min';
 SELECT pg_sleep(1);
@@ -219,8 +219,8 @@ wait "$first_pid"
 wait "$second_pid"
 concurrent_revisions="$("${psql_command[@]}" -At -d "$concurrent_db" -c \
     'SELECT count(*) FROM atlas_schema_revisions.atlas_schema_revisions')"
-[[ "$concurrent_revisions" == '8' ]] || {
-    echo "expected eight serialized revisions, got $concurrent_revisions" >&2
+[[ "$concurrent_revisions" == '9' ]] || {
+    echo "expected nine serialized revisions, got $concurrent_revisions" >&2
     exit 1
 }
 
@@ -238,7 +238,7 @@ printf 'PASS Phase 3.3 migration validation\n'
 printf 'atlas_version=v1.2.3\n'
 printf 'postgres_version=%s\n' \
     "$("${psql_command[@]}" -At -d "$empty_db" -c 'SHOW server_version')"
-printf 'migration_files=7\n'
+printf 'migration_files=8\n'
 printf 'schema_tables=%s\n' "$table_count"
 printf 'schema_constraints=%s\n' "$constraint_count"
 printf 'schema_indexes=%s\n' "$index_count"

@@ -34,8 +34,9 @@ Conformance Harness are accepted. The Phase 3.4.3 PostgreSQL Adapter and ADR
 storage-neutral Persistence Port and PostgreSQL reference adapter are frozen at
 **1.0.0**. Phase 3.5.0 runtime infrastructure design and ADR 0015 are accepted.
 Phase 3.5.1 runtime configuration implementation and validation are accepted.
-Phase 3.5.2 PostgreSQL runtime implementation is authorized. Intelligence
-engines remain database-independent.
+Phase 3.5.2 PostgreSQL runtime implementation and validation are accepted.
+Phase 3.5.3 Runtime Lifecycle & Health is authorized.
+Intelligence engines remain database-independent.
 
 ## Run RIE
 
@@ -80,11 +81,12 @@ The command emits the versioned JSON schema `1.0.0`.
 - [ADR 0015 — Runtime infrastructure](docs/Decisions/0015-runtime-infrastructure.md)
 - [Runtime infrastructure validation plan](docs/Validation/RUNTIME_INFRASTRUCTURE_VALIDATION_PLAN.md)
 - [Phase 3.5.1 runtime configuration validation](docs/Validation/RUNTIME_CONFIGURATION_VALIDATION_REPORT.md)
+- [Phase 3.5.2 PostgreSQL runtime validation](docs/Validation/POSTGRESQL_RUNTIME_VALIDATION_REPORT.md)
 - [Complete project tests, metrics, and remaining work](PROJECT_TESTS_METRICS_AND_REMAINING_WORK.txt)
 
 ## Next milestone
 
 Phases 3.4.1 through 3.4.4 are accepted. Persistence Port and PostgreSQL
-Adapter **1.0.0** are frozen. Phase 3.5.1 is accepted and Phase 3.5.2 PostgreSQL
-runtime is authorized. Health, observability, broader startup orchestration,
+Adapter **1.0.0** are frozen. Phases 3.5.1 and 3.5.2 are accepted. Phase 3.5.3
+Runtime Lifecycle & Health is authorized. HTTP health endpoints, observability,
 APIs, UI, LLM, patch generation, and repository mutation remain unauthorized.
