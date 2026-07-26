@@ -65,8 +65,9 @@
   `1.0.0` on 2026-07-27.
 - Phase 4.0.0: Repository Service Layer design package and ADR 0016 accepted on
   2026-07-27.
-- Phase 4.0.1: bounded design spike authorized; production implementation
-  remains gated.
+- Phase 4.0.1: bounded design spike accepted on 2026-07-27.
+- Phase 4.0.2: neutral service contract and conformance harness authorized;
+  repository lifecycle and scan orchestration remain gated.
 - Phase 4.1: REST/gRPC query APIs remain gated.
 
 PostgreSQL remains downstream from immutable artifacts and is not an engine
@@ -85,8 +86,9 @@ dependency.
   IDE integration, or new intelligence-engine behavior.
 - Architecture, candidate API, ADR 0016, staged implementation roadmap, and
   validation plan were accepted together on 2026-07-27.
-- Only the bounded Phase 4.0.1 design spike is authorized; production
-  implementation remains separately gated.
+- The bounded Phase 4.0.1 design spike is accepted. Only Phase 4.0.2 neutral
+  contract and conformance work is authorized; repository lifecycle, scan
+  orchestration, and later implementation remain separately gated.
 
 Detailed milestones are defined in
 `docs/Roadmap/PHASE_4_REPOSITORY_SERVICE_ROADMAP.md`.

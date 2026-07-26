@@ -191,6 +191,13 @@ Every phase consumes the lowest immutable artifact containing its required
 facts. The service does not modify artifacts or reuse mutable engine state
 between scans. Each execution owns a new per-run artifact store.
 
+Phase 4.0.1 confirmed that released RIE, Go syntax, Go package identity, and Go
+semantic stages compose in that order without changing their public APIs. It
+also confirmed that RIE presentation output requires an explicit durable view
+that removes run IDs, wall-clock timing, throughput, and local root paths. The
+Go syntax artifact similarly requires an external detached codec view built
+from its frozen accessors; persistence does not interpret either artifact.
+
 ## Exact-byte materialization
 
 Persistence requires digest and size before staging. To avoid a second
@@ -208,6 +215,11 @@ Large artifacts use a permission-restricted temporary file outside the scanned
 repository. Small-artifact in-memory optimization is allowed only behind the
 same sealed abstraction. The service never persists ASTs, source text, raw
 repository files, or an unversioned serialization.
+
+The design spike uses the file-backed path for every size so bounded behavior
+can be measured directly. Its 64-MiB exact-byte proof allocates approximately
+70 KiB on the Go heap, excluding the already-existing artifact object and
+operating-system page cache.
 
 The operational payload maximum remains 4 GiB. Materialization fails before
 staging when an artifact exceeds this limit.

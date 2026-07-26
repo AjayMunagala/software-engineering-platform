@@ -3,7 +3,8 @@
 ## Status
 
 - Phase 4.0 design: accepted on 2026-07-27
-- Phase 4.0.1 design spike: authorized
+- Phase 4.0.1 design spike: accepted on 2026-07-27
+- Phase 4.0.2 neutral service contract and conformance harness: authorized
 - Production implementation: not started
 - Phase 4.1 transports: unauthorized
 - Date: 2026-07-27
@@ -44,7 +45,7 @@ Exit gate:
 - source, idempotency, cancellation, transaction, and failure policies approved;
 - authorization granted only for Phase 4.0.1.
 
-## Phase 4.0.1 — Design spike (current, authorized)
+## Phase 4.0.1 — Design spike ✅
 
 Purpose: validate the risky integration assumptions without creating the
 production service implementation.
@@ -72,7 +73,11 @@ Exit gate:
 Spike code is experimental and must not become a production dependency by
 accident.
 
-## Phase 4.0.2 — Neutral service contract and conformance harness
+Local evidence is recorded in
+`docs/Validation/REPOSITORY_SERVICE_DESIGN_SPIKE_REPORT.md` and was accepted on
+2026-07-27.
+
+## Phase 4.0.2 — Neutral service contract and conformance harness (current, authorized)
 
 Implement only:
 

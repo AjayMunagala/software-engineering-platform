@@ -40,7 +40,8 @@ Phase 3.5.4 Runtime Integration & Release Freeze was accepted on 2026-07-27.
 Runtime Infrastructure and its five component contracts are frozen at
 **1.0.0**. Phase 4.0 Repository Service Layer is authorized. Its design
 package and ADR 0016 were accepted on 2026-07-27. The bounded Phase 4.0.1
-design spike is authorized; production implementation has not started.
+design spike is accepted. Phase 4.0.2 neutral contract and conformance work is
+authorized; repository lifecycle and scan orchestration have not started.
 Intelligence engines remain database-independent.
 
 ## Run RIE
@@ -97,6 +98,7 @@ The command emits the versioned JSON schema `1.0.0`.
 - [ADR 0016 — Repository Service Layer](docs/Decisions/0016-repository-service-layer.md)
 - [Phase 4 Repository Service roadmap](docs/Roadmap/PHASE_4_REPOSITORY_SERVICE_ROADMAP.md)
 - [Repository Service validation plan](docs/Validation/REPOSITORY_SERVICE_LAYER_VALIDATION_PLAN.md)
+- [Phase 4.0.1 Repository Service design-spike report](docs/Validation/REPOSITORY_SERVICE_DESIGN_SPIKE_REPORT.md)
 - [Complete project tests, metrics, and remaining work](PROJECT_TESTS_METRICS_AND_REMAINING_WORK.txt)
 
 ## Next milestone
@@ -106,6 +108,7 @@ Adapter **1.0.0** are frozen. Phases 3.5.1 through 3.5.3 are accepted.
 Phase 3.5.4 Runtime Integration & Release Freeze is accepted and Runtime
 Infrastructure **1.0.0** is frozen. Phase 4.0 Repository Service Layer is the
 only authorized next milestone. The Phase 4.0 design package is accepted, but
-production implementation remains gated. Only the Phase 4.0.1 design spike is
-authorized. HTTP health endpoints, REST/gRPC, UI, LLM, patch generation, and
-repository mutation remain unauthorized.
+production implementation remains gated. Phase 4.0.1 spike evidence is
+accepted, and Phase 4.0.2 is authorized. Repository lifecycle, scan
+orchestration, HTTP health endpoints, REST/gRPC, UI, LLM, patch generation,
+and repository mutation remain unauthorized.

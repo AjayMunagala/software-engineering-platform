@@ -931,3 +931,51 @@ Acceptance sequence:
   4. The spike must validate artifact identity, materialization, single-flight, scope
      isolation, path redaction, cancellation, and publication reconciliation.
   5. Authorize production milestones one at a time only after their exit gates.
+
+======================================================================
+16. PHASE 4.0.1 REPOSITORY SERVICE DESIGN SPIKE
+======================================================================
+
+Status on 2026-07-27:
+  - spike implementation and local validation: COMPLETE;
+  - engineering acceptance: ACCEPTED;
+  - Phase 4.0.2: AUTHORIZED;
+  - production Repository Service: NOT STARTED.
+
+Validated evidence:
+  - canonical repository-service-artifact-id/v1 byte representation;
+  - frozen golden ID:
+    rsaid1_3c55ac33a130d92a42bd4f782ad7868d9310b94e3fbb91cc3ba9abb85df8fce8;
+  - released RIE and Go LIE stages compose through fresh per-run artifacts;
+  - repeated semantic and redacted RIE JSON are deterministic;
+  - sealed file-backed payloads serialize once and independently re-verify;
+  - 64-MiB exact materialization allocated 69,840-70,200 Go heap bytes;
+  - 100 identical callers execute one keyed flight;
+  - waiter cancellation, all-waiter cancellation, and cleanup pass;
+  - committed-but-response-lost publication reconciles from durable state;
+  - root paths are removed and native/slash/JSON-escaped leaks are rejected;
+  - package statement coverage: 86.8%;
+  - Windows and Ubuntu targeted/full race: PASS, zero races;
+  - backend regression, shuffle, and vet: PASS on Windows and Ubuntu.
+
+Windows benchmark ranges:
+  - artifact ID: 399.3-426.1 ns/op, 384 B/op, 4 allocs/op;
+  - twenty IDs: 8.259-9.233 us/op, 8,000 B/op, 100 allocs/op;
+  - 16-MiB materialize/verify: 66.68-67.87 ms, 247.20-251.60 MB/s,
+    about 68 KiB/op and 28-29 allocs/op;
+  - 100-caller harness: 96.90-100.89 us/op.
+
+Ubuntu benchmark ranges:
+  - artifact ID: 389.2-431.8 ns/op;
+  - twenty IDs: 8.301-8.522 us/op;
+  - 16-MiB materialize/verify: 30.96-32.09 ms, 522.80-541.96 MB/s,
+    67,463-67,480 B/op and 28 allocs/op;
+  - 100-caller harness: 107.47-114.52 us/op.
+
+The spike is isolated under backend/internal/experiments/repositoryservice.
+It introduces no production service package, SQL, database adapter, credential,
+listener, API, authentication, UI, queue, worker, AI, remote fetch, or
+repository mutation.
+
+Detailed evidence:
+  docs/Validation/REPOSITORY_SERVICE_DESIGN_SPIKE_REPORT.md

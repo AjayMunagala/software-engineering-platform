@@ -6,8 +6,9 @@
 - Contract version: `0.1.0`
 - Status: Design-approved candidate on 2026-07-27
 - Transport: none
-- Phase 4.0.1 spike implementation: authorized
-- Production implementation: not authorized
+- Phase 4.0.1 spike: accepted on 2026-07-27
+- Phase 4.0.2 neutral contract implementation: authorized
+- Repository lifecycle and scan orchestration: not authorized
 
 This document defines Go service semantics. It is not an HTTP, gRPC, CLI, or
 authorization contract.
@@ -320,8 +321,38 @@ GoSemanticInventory:
 ```
 
 Artifact IDs are explicit and deterministic within a scan using a versioned
-scheme proposed as `repository-service-artifact-id/v1`. The exact algorithm
-must be frozen by the implementation design spike before `1.0.0`.
+scheme named `repository-service-artifact-id/v1`.
+
+Phase 4.0.1 freezes the candidate preimage as:
+
+```text
+ASCII "repository-service-artifact-id/v1" followed by one NUL byte
+uint32-be length + exact UTF-8 repository ID
+uint32-be length + exact UTF-8 scan ID
+uint32-be length + exact UTF-8 artifact name
+uint32-be length + exact UTF-8 artifact version
+uint32-be length + exact UTF-8 stable-ID scheme
+```
+
+Fields are non-empty, already trimmed, valid UTF-8, at most 1,024 bytes, and
+contain no ASCII control characters. The output is `rsaid1_` followed by the
+lowercase hexadecimal SHA-256 digest of the preimage.
+
+The frozen spike golden vector is:
+
+```text
+repository ID: repo-001
+scan ID: scan-01
+artifact: go-semantic-inventory
+artifact version: 1.0.0
+stable-ID scheme: go-semantic-id/v1
+artifact ID: rsaid1_3c55ac33a130d92a42bd4f782ad7868d9310b94e3fbb91cc3ba9abb85df8fce8
+```
+
+Changing the prefix, field order, field encoding, validation, or digest
+requires a new identity-scheme version. Engineering accepted this candidate
+representation with the Phase 4.0.1 spike on 2026-07-27. It remains at contract
+version `0.1.0` until later conformance and integration gates are accepted.
 
 ## Stable error contract
 
