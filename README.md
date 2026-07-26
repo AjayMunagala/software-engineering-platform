@@ -38,7 +38,9 @@ Phase 3.5.2 PostgreSQL runtime implementation and validation are accepted.
 Phase 3.5.3 Runtime Lifecycle & Health was accepted on 2026-07-26.
 Phase 3.5.4 Runtime Integration & Release Freeze was accepted on 2026-07-27.
 Runtime Infrastructure and its five component contracts are frozen at
-**1.0.0**. Phase 4.0 Repository Service Layer is authorized.
+**1.0.0**. Phase 4.0 Repository Service Layer is authorized. Its design
+package and ADR 0016 were accepted on 2026-07-27. The bounded Phase 4.0.1
+design spike is authorized; production implementation has not started.
 Intelligence engines remain database-independent.
 
 ## Run RIE
@@ -90,6 +92,11 @@ The command emits the versioned JSON schema `1.0.0`.
 - [Runtime 1.0 release-candidate package](docs/Releases/RuntimeInfrastructure-1.0.0/README.md)
 - [Runtime deployment runbook](docs/Operations/RUNTIME_DEPLOYMENT_RUNBOOK.md)
 - [Runtime operator release checklist](docs/Operations/RUNTIME_RELEASE_CHECKLIST.md)
+- [Repository Service Layer architecture](docs/Architecture/REPOSITORY_SERVICE_LAYER.md)
+- [Repository Service candidate API](docs/API/REPOSITORY_SERVICE_CANDIDATE_API.md)
+- [ADR 0016 — Repository Service Layer](docs/Decisions/0016-repository-service-layer.md)
+- [Phase 4 Repository Service roadmap](docs/Roadmap/PHASE_4_REPOSITORY_SERVICE_ROADMAP.md)
+- [Repository Service validation plan](docs/Validation/REPOSITORY_SERVICE_LAYER_VALIDATION_PLAN.md)
 - [Complete project tests, metrics, and remaining work](PROJECT_TESTS_METRICS_AND_REMAINING_WORK.txt)
 
 ## Next milestone
@@ -98,5 +105,7 @@ Phases 3.4.1 through 3.4.4 are accepted. Persistence Port and PostgreSQL
 Adapter **1.0.0** are frozen. Phases 3.5.1 through 3.5.3 are accepted.
 Phase 3.5.4 Runtime Integration & Release Freeze is accepted and Runtime
 Infrastructure **1.0.0** is frozen. Phase 4.0 Repository Service Layer is the
-only authorized next milestone. HTTP health endpoints, REST/gRPC, UI, LLM,
-patch generation, and repository mutation remain unauthorized.
+only authorized next milestone. The Phase 4.0 design package is accepted, but
+production implementation remains gated. Only the Phase 4.0.1 design spike is
+authorized. HTTP health endpoints, REST/gRPC, UI, LLM, patch generation, and
+repository mutation remain unauthorized.

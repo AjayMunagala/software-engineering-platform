@@ -44,7 +44,7 @@
 
 - Add TypeScript, SQL, Python, Java, and other languages one at a time after Go stabilizes.
 
-## Phase 3 — Durable Artifact Persistence (current implementation phase)
+## Phase 3 — Durable Artifact Persistence and Runtime ✅
 
 - Phase 3.1: persistence architecture and ADR accepted.
 - Phase 3.2: accepted and frozen with four-MiB chunks and a four-GiB
@@ -63,7 +63,10 @@
 - Phase 3.5.3: Runtime Lifecycle & Health accepted on 2026-07-26.
 - Phase 3.5.4: Runtime Integration & Release Freeze accepted and frozen at
   `1.0.0` on 2026-07-27.
-- Phase 4.0: Repository Service Layer authorized on 2026-07-27.
+- Phase 4.0.0: Repository Service Layer design package and ADR 0016 accepted on
+  2026-07-27.
+- Phase 4.0.1: bounded design spike authorized; production implementation
+  remains gated.
 - Phase 4.1: REST/gRPC query APIs remain gated.
 
 PostgreSQL remains downstream from immutable artifacts and is not an engine
@@ -71,7 +74,7 @@ dependency.
 
 ## Phase 4 — Repository Services and Query Access
 
-### Phase 4.0 — Repository Service Layer (Authorized)
+### Phase 4.0 — Repository Service Layer (Design accepted; spike authorized)
 
 - Define storage-neutral repository service interfaces.
 - Coordinate repository and scan lifecycle through application services.
@@ -80,6 +83,13 @@ dependency.
 - Validate service behavior, failure isolation, idempotency, and concurrency.
 - Do not introduce REST/gRPC endpoints, UI, authentication, AI orchestration,
   IDE integration, or new intelligence-engine behavior.
+- Architecture, candidate API, ADR 0016, staged implementation roadmap, and
+  validation plan were accepted together on 2026-07-27.
+- Only the bounded Phase 4.0.1 design spike is authorized; production
+  implementation remains separately gated.
+
+Detailed milestones are defined in
+`docs/Roadmap/PHASE_4_REPOSITORY_SERVICE_ROADMAP.md`.
 
 ### Phase 4.1 — Query APIs (Gated)
 

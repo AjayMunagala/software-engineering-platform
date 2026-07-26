@@ -1,0 +1,197 @@
+# Phase 4 — Repository Service Layer Roadmap
+
+## Status
+
+- Phase 4.0 design: accepted on 2026-07-27
+- Phase 4.0.1 design spike: authorized
+- Production implementation: not started
+- Phase 4.1 transports: unauthorized
+- Date: 2026-07-27
+
+## Goal
+
+Provide one transport-neutral application service that coordinates authorized
+local repository analysis and exact, atomic artifact publication using the
+released platform foundation.
+
+## Frozen prerequisites
+
+- Repository Intelligence Engine `1.0.0`
+- Go Language Intelligence contracts `1.0.0`
+- Persistence Port `1.0.0`
+- PostgreSQL Adapter `1.0.0`
+- Runtime Infrastructure `1.0.0`
+- accepted migrations and PostgreSQL physical persistence contract
+
+No Phase 4 milestone may change these contracts without a separate compatible
+release and explicit governance decision.
+
+## Phase 4.0.0 — Architecture and candidate contract ✅
+
+Deliverables:
+
+- Repository Service Layer architecture;
+- candidate Go service API;
+- ADR 0016;
+- this staged roadmap;
+- validation plan.
+
+Exit gate:
+
+- all five documents reviewed together;
+- responsibilities and exclusions approved;
+- artifact profile and dependency order approved;
+- source, idempotency, cancellation, transaction, and failure policies approved;
+- authorization granted only for Phase 4.0.1.
+
+## Phase 4.0.1 — Design spike (current, authorized)
+
+Purpose: validate the risky integration assumptions without creating the
+production service implementation.
+
+Required evidence:
+
+- execute the released RIE and Go LIE sequence through a spike-only adapter;
+- prove deterministic `repository-service-artifact-id/v1` IDs;
+- serialize representative small and large immutable artifacts once;
+- verify digest and exact bytes through a fake storage-neutral sink;
+- prove path redaction in durable artifact views and error output;
+- exercise 100 identical concurrent requests through keyed single-flight;
+- model cancellation and bounded spool cleanup;
+- model committed-but-response-lost publication reconciliation;
+- measure service overhead and peak materializer memory;
+- document every assumption changed by evidence.
+
+Exit gate:
+
+- spike report accepted;
+- ADR 0016 promoted from Proposed to Accepted;
+- candidate API updated where evidence requires it;
+- explicit authorization for Phase 4.0.2.
+
+Spike code is experimental and must not become a production dependency by
+accident.
+
+## Phase 4.0.2 — Neutral service contract and conformance harness
+
+Implement only:
+
+- immutable service requests and results;
+- capability interfaces;
+- stable service errors;
+- configuration and profile registry;
+- fake adapters;
+- adapter-independent conformance harness;
+- defensive-copy, validation, fuzz, benchmark, and race tests.
+
+Do not implement released engines, PostgreSQL, pgx, SQL, HTTP, or runtime pool
+wiring in this package.
+
+Exit gate: public candidate behavior passes conformance and is accepted before
+repository lifecycle implementation begins.
+
+## Phase 4.0.3 — Repository lifecycle
+
+Implement:
+
+- register, get, list, and archive coordination;
+- opaque source proof handling;
+- idempotent mutation behavior;
+- repository scope isolation;
+- persistence model translation behind the internal service store.
+
+Exit gate: neutral conformance, disposable PostgreSQL integration, regression,
+race, coverage, and benchmark evidence accepted.
+
+## Phase 4.0.4 — Scan execution core
+
+Implement:
+
+- synchronous scan state machine;
+- admission lease ownership;
+- keyed in-process single-flight;
+- cancellation and cleanup coordination;
+- terminal failure finalization;
+- publication ambiguity reconciliation;
+- artifact metadata/list/export orchestration using fake analysis inputs.
+
+Exit gate: concurrency, cancellation, orphan, exact-once publication, and
+failure-injection suites accepted.
+
+## Phase 4.0.5 — Intelligence and materialization adapters
+
+Implement:
+
+- the frozen `repository-go/v1` profile;
+- fresh RIE and Go LIE orchestration;
+- versioned durable artifact codecs;
+- deterministic manifest/dependency construction;
+- sealed streaming materialization;
+- source/path redaction proof.
+
+Exit gate: identical input produces identical artifact bytes, IDs, dependency
+order, and terminal result on Windows and Ubuntu.
+
+## Phase 4.0.6 — Persistence and runtime integration
+
+Implement:
+
+- adapters to Persistence Port `1.0.0`;
+- Runtime Infrastructure admission integration;
+- end-to-end stage and atomic publication;
+- exact artifact export and integrity verification;
+- disposable PostgreSQL lifecycle validation.
+
+No migrations run at service startup. Pool construction remains runtime-owned.
+
+Exit gate: conformance runs before adapter-specific tests; all integration,
+race, rollback, scope-isolation, and leak tests pass.
+
+## Phase 4.0.7 — Real repository validation
+
+Validate representative inputs:
+
+- small non-Go repository;
+- small Go CLI;
+- medium Go service;
+- generics-heavy Go library;
+- multi-module Go repository;
+- malformed and stale source fixtures;
+- large released validation repository.
+
+Record files, engine timings, artifact names/versions/sizes/digests, stage and
+publication timing, service overhead, peak memory, diagnostics, failures,
+cancellation, and deterministic hashes.
+
+Exit gate: no crashes, scope escapes, path leaks, partial publication, digest
+mismatch, or unexplained nondeterminism; critical defects resolved.
+
+## Phase 4.0.8 — Stabilization and Service Contract 1.0.0
+
+Perform:
+
+- API and compatibility review;
+- identifier and codec freeze;
+- memory/CPU profiling;
+- dependency, security, and documentation audits;
+- Windows and Ubuntu race validation;
+- full backend regression;
+- release notes, changelog, known limitations, and operator guidance;
+- annotated namespaced release tags after acceptance.
+
+Only compatible defect fixes are allowed on the future `1.0.x` line.
+
+## Phase 4.1 — Transport APIs (gated)
+
+REST/gRPC design may begin only after Repository Service `1.0.0` is frozen.
+Transport work must not change service semantics.
+
+## Explicitly deferred
+
+- authentication and authorization policy;
+- HTTP health endpoints;
+- UI and IDE integrations;
+- queues, distributed workers, leases, retries, and schedulers;
+- Git clone or remote repository acquisition;
+- dependency and architecture intelligence;
+- AI reasoning, patch generation, and validation execution.

@@ -886,3 +886,48 @@ orchestration, runtime migration, engine change, committed credential, or
 exporter-specific protocol was introduced. Phase 3.5.4 was accepted on
 2026-07-27. Runtime Infrastructure 1.0.0 is frozen and Phase 4.0 Repository
 Service Layer is authorized.
+
+======================================================================
+15. PHASE 4.0 REPOSITORY SERVICE LAYER DESIGN GATE
+======================================================================
+
+Status on 2026-07-27:
+  - platform foundation releases remain frozen and unchanged;
+  - Phase 4.0 design package: ACCEPTED;
+  - ADR 0016: ACCEPTED;
+  - Phase 4.0.1 design spike: AUTHORIZED;
+  - production Repository Service implementation: NOT STARTED;
+  - Phase 4.1 transports and all later capabilities: UNAUTHORIZED.
+
+Design deliverables:
+  - docs/Architecture/REPOSITORY_SERVICE_LAYER.md;
+  - docs/API/REPOSITORY_SERVICE_CANDIDATE_API.md;
+  - docs/Decisions/0016-repository-service-layer.md;
+  - docs/Roadmap/PHASE_4_REPOSITORY_SERVICE_ROADMAP.md;
+  - docs/Validation/REPOSITORY_SERVICE_LAYER_VALIDATION_PLAN.md.
+
+Proposed Phase 4.0 responsibility:
+  Resolve one authorized local repository source, run the frozen analysis
+  profile, materialize exact immutable artifacts, and atomically publish one
+  complete scan or one explicit terminal failure.
+
+Key proposed decisions:
+  - future transports call a storage-neutral Repository Service contract;
+  - opaque source handles are resolved outside the service core;
+  - absolute local repository paths are never durable or observable;
+  - repository-go/v1 runs fresh RIE and required Go LIE stages;
+  - exact bytes are serialized once into a sealed bounded spool;
+  - persistence continues to own every transaction boundary;
+  - ExecuteScan is synchronous and success means durably published;
+  - identical in-process requests join one keyed execution;
+  - orphaned scans and ambiguous publication outcomes are explicit;
+  - REST/gRPC, authentication, UI, queues, AI, engine changes, cloning,
+    network access, and repository mutation remain excluded.
+
+Acceptance sequence:
+  1. All five Phase 4.0 design documents were reviewed and accepted together.
+  2. ADR 0016 was promoted to Accepted.
+  3. Only Phase 4.0.1 design spike is authorized.
+  4. The spike must validate artifact identity, materialization, single-flight, scope
+     isolation, path redaction, cancellation, and publication reconciliation.
+  5. Authorize production milestones one at a time only after their exit gates.
