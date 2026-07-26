@@ -3,8 +3,9 @@
 ## Status
 
 - Phase: 3.5.1 — Accepted on 2026-07-26
-- Contract: candidate `0.1.0`
+- Contract: `1.0.0` (frozen)
 - Scope: accepted configuration and secret-boundary baseline
+- Phase 3.5.4: accepted on 2026-07-27
 - PostgreSQL pools, TLS construction, lifecycle, health, and observability: not
   implemented here
 

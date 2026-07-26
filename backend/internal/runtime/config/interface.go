@@ -5,8 +5,8 @@ package config
 
 import "context"
 
-// ContractVersion identifies the candidate Phase 3.5.1 configuration API.
-const ContractVersion = "0.1.0"
+// ContractVersion identifies the frozen Runtime Configuration API.
+const ContractVersion = "1.0.0"
 
 // Loader resolves ordinary configuration sources and selects exactly one
 // secret provider without creating any runtime resource.

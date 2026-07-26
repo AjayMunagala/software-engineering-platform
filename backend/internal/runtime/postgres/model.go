@@ -7,6 +7,7 @@ import (
 	"time"
 
 	storagepostgres "github.com/AjayMunagala/software-engineering-platform/backend/internal/storage/postgres"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 // CompatibilityProof is the immutable migration-maintained contract accepted
@@ -30,6 +31,40 @@ func (proof CompatibilityProof) PublishedAt() time.Time    { return proof.publis
 type ownedPool struct {
 	capability Capability
 	pool       databasePool
+}
+
+// PoolStatistics is a detached, bounded operational view. It exposes no host,
+// database, user, SQL, credentials, or driver object.
+type PoolStatistics struct {
+	capability                   Capability
+	acquired                     int32
+	idle                         int32
+	constructing                 int32
+	total                        int32
+	maximum                      int32
+	acquireCount                 int64
+	acquireDuration              time.Duration
+	emptyAcquireCount            int64
+	emptyAcquireWait             time.Duration
+	connectionsCreated           int64
+	connectionsDestroyedIdle     int64
+	connectionsDestroyedLifetime int64
+}
+
+func (value PoolStatistics) Capability() Capability          { return value.capability }
+func (value PoolStatistics) Acquired() int32                 { return value.acquired }
+func (value PoolStatistics) Idle() int32                     { return value.idle }
+func (value PoolStatistics) Constructing() int32             { return value.constructing }
+func (value PoolStatistics) Total() int32                    { return value.total }
+func (value PoolStatistics) Maximum() int32                  { return value.maximum }
+func (value PoolStatistics) AcquireCount() int64             { return value.acquireCount }
+func (value PoolStatistics) AcquireDuration() time.Duration  { return value.acquireDuration }
+func (value PoolStatistics) EmptyAcquireCount() int64        { return value.emptyAcquireCount }
+func (value PoolStatistics) EmptyAcquireWait() time.Duration { return value.emptyAcquireWait }
+func (value PoolStatistics) ConnectionsCreated() int64       { return value.connectionsCreated }
+func (value PoolStatistics) ConnectionsDestroyedIdle() int64 { return value.connectionsDestroyedIdle }
+func (value PoolStatistics) ConnectionsDestroyedLifetime() int64 {
+	return value.connectionsDestroyedLifetime
 }
 
 // Runtime owns all created pools and exposes only narrow persistence
@@ -86,6 +121,35 @@ func (runtime *Runtime) PoolCount() int {
 		return 0
 	}
 	return len(runtime.pools)
+}
+
+// Statistics returns detached pool counters for runtime observability. Pools
+// without a statistics capability are omitted, which keeps test adapters and
+// future database implementations independent from pgx.
+func (runtime *Runtime) Statistics() []PoolStatistics {
+	if runtime == nil {
+		return nil
+	}
+	result := make([]PoolStatistics, 0, len(runtime.pools))
+	for _, owned := range runtime.pools {
+		provider, ok := owned.pool.(interface{ Stat() *pgxpool.Stat })
+		if !ok {
+			continue
+		}
+		statistics := provider.Stat()
+		if statistics == nil {
+			continue
+		}
+		result = append(result, PoolStatistics{
+			capability: owned.capability, acquired: statistics.AcquiredConns(), idle: statistics.IdleConns(),
+			constructing: statistics.ConstructingConns(), total: statistics.TotalConns(), maximum: statistics.MaxConns(),
+			acquireCount: statistics.AcquireCount(), acquireDuration: statistics.AcquireDuration(),
+			emptyAcquireCount: statistics.EmptyAcquireCount(), emptyAcquireWait: statistics.EmptyAcquireWaitTime(),
+			connectionsCreated: statistics.NewConnsCount(), connectionsDestroyedIdle: statistics.MaxIdleDestroyCount(),
+			connectionsDestroyedLifetime: statistics.MaxLifetimeDestroyCount(),
+		})
+	}
+	return result
 }
 
 // Check verifies every required PostgreSQL capability through the same

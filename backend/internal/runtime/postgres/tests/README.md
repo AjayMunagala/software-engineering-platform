@@ -3,8 +3,8 @@
 `validate.sh` creates a fresh PostgreSQL 18 cluster under `/tmp`, applies the
 accepted checksum-verified migrations, creates temporary combined and
 capability-specific logins, generates a disposable certificate authority, and
-runs disabled-TLS, verify-full-TLS, and application lifecycle tests from
-Windows. The cluster,
+runs disabled-TLS, verify-full-TLS, observability, and 25 independent
+application lifecycle cycles from Windows. The cluster,
 database, roles, certificates, and data are destroyed when the script exits.
 
 Run from PowerShell:
@@ -15,4 +15,5 @@ wsl.exe -d Ubuntu-24.04 -u postgres -- bash -lc `
 ```
 
 The harness uses no persistent database, personal credentials, committed
-passwords, APIs, health subsystem, or application startup coordinator.
+passwords, API, listener, or UI. It exercises the transport-neutral health,
+observability, and application runtime packages against disposable resources.

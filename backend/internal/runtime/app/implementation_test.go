@@ -13,6 +13,7 @@ import (
 
 	runtimeconfig "github.com/AjayMunagala/software-engineering-platform/backend/internal/runtime/config"
 	runtimehealth "github.com/AjayMunagala/software-engineering-platform/backend/internal/runtime/health"
+	runtimeobservability "github.com/AjayMunagala/software-engineering-platform/backend/internal/runtime/observability"
 	runtimepostgres "github.com/AjayMunagala/software-engineering-platform/backend/internal/runtime/postgres"
 )
 
@@ -59,6 +60,56 @@ type fakeOpener struct {
 	wait    bool
 }
 
+type fakeObservabilityFactory struct {
+	service runtimeobservability.Service
+	err     error
+}
+
+func (factory fakeObservabilityFactory) Open(runtimeconfig.RuntimeConfig) (runtimeobservability.Service, error) {
+	return factory.service, factory.err
+}
+
+type fakeObservability struct {
+	mutex      sync.Mutex
+	events     []runtimeobservability.EventParams
+	starts     int
+	stops      int
+	closes     int
+	source     runtimeobservability.Source
+	startError error
+}
+
+func (value *fakeObservability) Event(_ context.Context, event runtimeobservability.EventParams) error {
+	value.mutex.Lock()
+	value.events = append(value.events, event)
+	value.mutex.Unlock()
+	return nil
+}
+
+func (value *fakeObservability) Start(_ context.Context, source runtimeobservability.Source) error {
+	value.mutex.Lock()
+	defer value.mutex.Unlock()
+	value.starts++
+	value.source = source
+	return value.startError
+}
+
+func (value *fakeObservability) StopCollection(context.Context) error {
+	value.mutex.Lock()
+	value.stops++
+	value.mutex.Unlock()
+	return nil
+}
+func (value *fakeObservability) Close(context.Context) error {
+	value.mutex.Lock()
+	value.closes++
+	value.mutex.Unlock()
+	return nil
+}
+func (*fakeObservability) Statistics() runtimeobservability.Statistics {
+	return runtimeobservability.Statistics{}
+}
+
 func (opener fakeOpener) Open(ctx context.Context, _ runtimeconfig.LoadedConfiguration) (PostgreSQLRuntime, error) {
 	if opener.wait {
 		<-ctx.Done()
@@ -88,6 +139,99 @@ func TestStartupPublishesReadyAndZeroWorkShutdown(t *testing.T) {
 	}
 	if runtime.State() != runtimehealth.StateStopped || runtime.Liveness(context.Background()).Liveness().Status() != runtimehealth.StatusUnhealthy {
 		t.Fatal("stopped runtime remained live")
+	}
+}
+
+func TestObservedLifecyclePublishesBoundedEventsAndStopsCollection(t *testing.T) {
+	observer := &fakeObservability{}
+	postgres := &fakePostgreSQL{}
+	starter, err := NewObservedStarter(runtimeconfig.NewLoader(), fakeOpener{runtime: postgres}, fakeObservabilityFactory{service: observer})
+	if err != nil {
+		t.Fatal(err)
+	}
+	runtime, err := starter.Start(context.Background(), testLoadRequest())
+	if err != nil {
+		t.Fatal(err)
+	}
+	snapshot := observer.source.ObservabilitySnapshot(context.Background())
+	if snapshot.State() != runtimehealth.StateReady || snapshot.Liveness() != runtimehealth.StatusHealthy || snapshot.Readiness() != runtimehealth.StatusHealthy || !snapshot.SchemaCompatible() {
+		t.Fatalf("observability snapshot = state:%s live:%s ready:%s", snapshot.State(), snapshot.Liveness(), snapshot.Readiness())
+	}
+	postgres.checkErr.Store(errors.New("private database detail"))
+	for range 3 {
+		_ = runtime.Readiness(context.Background())
+	}
+	if runtime.Readiness(context.Background()).Readiness().Status() != runtimehealth.StatusUnhealthy {
+		t.Fatal("readiness loss was not observed")
+	}
+	result, err := runtime.Shutdown(context.Background())
+	if err != nil || !result.ResourcesClosed() {
+		t.Fatalf("shutdown = (%#v, %v)", result, err)
+	}
+	observer.mutex.Lock()
+	defer observer.mutex.Unlock()
+	if observer.starts != 1 || observer.stops != 1 || observer.closes != 1 {
+		t.Fatalf("observer lifecycle starts=%d stops=%d closes=%d", observer.starts, observer.stops, observer.closes)
+	}
+	want := []runtimeobservability.EventName{runtimeobservability.EventStartup, runtimeobservability.EventReady, runtimeobservability.EventHealthLost, runtimeobservability.EventDraining, runtimeobservability.EventStopping, runtimeobservability.EventStopped}
+	if len(observer.events) != len(want) {
+		t.Fatalf("events = %#v", observer.events)
+	}
+	for index, event := range observer.events {
+		if event.Event != want[index] {
+			t.Fatalf("event[%d] = %s", index, event.Event)
+		}
+	}
+}
+
+func TestObservabilityStartupFailuresCleanResources(t *testing.T) {
+	postgres := &fakePostgreSQL{}
+	factoryFailure, err := NewObservedStarter(runtimeconfig.NewLoader(), fakeOpener{runtime: postgres}, fakeObservabilityFactory{err: errors.New("private observer detail")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if runtime, err := factoryFailure.Start(context.Background(), testLoadRequest()); runtime != nil || CodeOf(err) != ErrorStartup || postgres.closes.Load() != 0 {
+		t.Fatalf("factory failure = (%v, %v), postgres closes=%d", runtime, err, postgres.closes.Load())
+	}
+	observer := &fakeObservability{startError: errors.New("private start detail")}
+	startFailure, err := NewObservedStarter(runtimeconfig.NewLoader(), fakeOpener{runtime: postgres}, fakeObservabilityFactory{service: observer})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if runtime, err := startFailure.Start(context.Background(), testLoadRequest()); runtime != nil || CodeOf(err) != ErrorStartup || postgres.closes.Load() != 1 || observer.closes != 1 {
+		t.Fatalf("start failure = (%v, %v), postgres closes=%d observer closes=%d", runtime, err, postgres.closes.Load(), observer.closes)
+	}
+}
+
+func TestIndependentRuntimeCyclesResetLifecycleState(t *testing.T) {
+	const cycles = 100
+	for index := 0; index < cycles; index++ {
+		postgres := &fakePostgreSQL{}
+		runtime := startTestRuntime(t, postgres)
+		work, err := runtime.Admit(context.Background())
+		if err != nil {
+			t.Fatalf("cycle %d admit: %v", index, err)
+		}
+		work.Done()
+		result, err := runtime.Shutdown(context.Background())
+		if err != nil || result.Outcome() != ShutdownGraceful || runtime.State() != runtimehealth.StateStopped || runtime.InFlight() != 0 || postgres.closes.Load() != 1 {
+			t.Fatalf("cycle %d = result:%#v error:%v state:%s inflight:%d closes:%d", index, result, err, runtime.State(), runtime.InFlight(), postgres.closes.Load())
+		}
+	}
+}
+
+func TestRuntimeContractVersionsAreFrozenAtOne(t *testing.T) {
+	versions := map[string]string{
+		"application-runtime":   ContractVersion,
+		"runtime-configuration": runtimeconfig.ContractVersion,
+		"runtime-health":        runtimehealth.ContractVersion,
+		"runtime-observability": runtimeobservability.ContractVersion,
+		"postgresql-runtime":    runtimepostgres.ContractVersion,
+	}
+	for name, version := range versions {
+		if version != "1.0.0" {
+			t.Fatalf("%s contract version = %q", name, version)
+		}
 	}
 }
 

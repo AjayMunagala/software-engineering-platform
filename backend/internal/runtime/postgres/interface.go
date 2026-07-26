@@ -10,8 +10,8 @@ import (
 	"github.com/AjayMunagala/software-engineering-platform/backend/persistence"
 )
 
-// ContractVersion identifies the candidate Phase 3.5.2 runtime contract.
-const ContractVersion = "0.1.0"
+// ContractVersion identifies the frozen PostgreSQL Runtime contract.
+const ContractVersion = "1.0.0"
 
 // Factory creates and proves a complete PostgreSQL runtime resource set.
 type Factory interface {

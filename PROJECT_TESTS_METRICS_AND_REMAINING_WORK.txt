@@ -84,7 +84,9 @@ Persistence
   Phase 3.5.1 runtime configuration: ACCEPTED
   Phase 3.5.2 PostgreSQL runtime: ACCEPTED
   Phase 3.5.3 Runtime Lifecycle & Health: ACCEPTED
-  Phase 3.5.4 Runtime Integration & Release Freeze: AUTHORIZED
+  Phase 3.5.4 Runtime Integration & Release Freeze: ACCEPTED AND FROZEN
+  Runtime Infrastructure: 1.0.0
+  Phase 4.0 Repository Service Layer: AUTHORIZED
 
 ======================================================================
 3. RIE REAL-REPOSITORY VALIDATION
@@ -667,8 +669,7 @@ lifecycle, health/observability implementation, API listener, UI, or engine
 change. Persistence Port and PostgreSQL Adapter 1.0.0 remain unchanged.
 
 Remaining governance and implementation work:
-  - implement and validate Phase 3.5.4 observability, integrated validation,
-    and runtime release freeze;
+  - design and implement only Phase 4.0 Repository Service Layer;
   - production credentials, APIs, UI, authentication, business logic, AI
     orchestration, engine changes, and new persistence capabilities remain out
     of scope.
@@ -751,9 +752,8 @@ PostgreSQL Adapter 1.0.0 are accepted and frozen.
 Phase 3.5.0 runtime infrastructure design and ADR 0015 are accepted.
 
 NEXT ACTION:
-  Implement Phase 3.5.4 Runtime Integration & Release Freeze, including
-  structured logging, metrics, Linux race validation, deployment validation,
-  documentation, and release-candidate stabilization. HTTP endpoints and later
+  Complete the accepted Runtime Infrastructure 1.0.0 release actions, then
+  begin only Phase 4.0 Repository Service Layer. HTTP endpoints and later
   phases remain gated.
 
 ======================================================================
@@ -831,3 +831,58 @@ No HTTP endpoint, listener, observability implementation, API, UI,
 authentication, business logic, AI orchestration, migration, SQL, credential,
 or engine change was introduced. Phase 3.5.3 was accepted on 2026-07-26 and
 authorized Phase 3.5.4 only.
+
+======================================================================
+14. PHASE 3.5.4 RUNTIME INTEGRATION & RELEASE FREEZE
+======================================================================
+
+Stable contracts:
+  - Runtime Configuration: 1.0.0
+  - PostgreSQL Runtime: 1.0.0
+  - Runtime Health: 1.0.0
+  - Application Runtime: 1.0.0
+  - Runtime Observability: 1.0.0
+
+Implemented:
+  - typed structured logging behind a narrow runtime capability;
+  - bounded event fields with no raw error or arbitrary field map;
+  - fixed low-cardinality runtime, health, schema, and pool metrics;
+  - non-overlapping, cancellable collection with bounded export time;
+  - metric-export failure isolation from persistence readiness;
+  - readiness-loss and recovery transition events;
+  - metric collection stops before PostgreSQL pool closure;
+  - detached PostgreSQL statistics with no driver/pool exposure;
+  - 100 unit lifecycle cycles and 25 PostgreSQL-backed lifecycle cycles;
+  - SHA-256-verified disposable Linux Go validation toolchain;
+  - deployment runbook and runtime release-candidate package.
+
+Validation environment:
+  - Windows 11 10.0.26200;
+  - 12th Gen Intel Core i5-12450H, 7.7 GiB RAM;
+  - Go 1.26.2 Windows, MSYS2 UCRT64 GCC 16.1.0;
+  - Ubuntu 24.04 WSL2, native Go 1.26.2, GCC 13.3.0;
+  - disposable PostgreSQL 18.4.
+
+Validation:
+  - full backend regression and go vet: PASS;
+  - three shuffled full-backend repetitions: PASS;
+  - Windows full race: PASS, zero races;
+  - Linux runtime regression, shuffle, vet, and race: PASS, zero races;
+  - disposable PostgreSQL/TLS integration: PASS;
+  - 25 independent database-backed runtime cycles: PASS;
+  - runtime/config coverage: 86.6%;
+  - runtime/postgres coverage: 86.0%;
+  - runtime/health coverage: 88.2%;
+  - runtime/app coverage: 89.9%;
+  - runtime/observability coverage: 97.4%;
+  - three-pool metric snapshot: 2.70-2.94 us/op, 5,824 B/op,
+    50 allocs/op;
+  - zero-work shutdown: 3.00-3.31 us/op, 656 B/op, 9 allocs/op;
+  - readiness: 0.371-0.452 us/op, 272 B/op, 4 allocs/op;
+  - candidate diff secret scan and runtime listener/dependency audit: PASS.
+
+No HTTP endpoint, API, UI, authentication, authorization, business logic, AI
+orchestration, runtime migration, engine change, committed credential, or
+exporter-specific protocol was introduced. Phase 3.5.4 was accepted on
+2026-07-27. Runtime Infrastructure 1.0.0 is frozen and Phase 4.0 Repository
+Service Layer is authorized.

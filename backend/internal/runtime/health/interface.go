@@ -5,8 +5,8 @@ package health
 
 import "context"
 
-// ContractVersion identifies the candidate Phase 3.5.3 health contract.
-const ContractVersion = "0.1.0"
+// ContractVersion identifies the frozen Runtime Health contract.
+const ContractVersion = "1.0.0"
 
 // DatabaseChecker is the opaque read-only capability supplied by the
 // PostgreSQL runtime. Implementations expose no pool internals.

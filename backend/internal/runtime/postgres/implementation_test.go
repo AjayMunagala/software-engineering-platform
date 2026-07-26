@@ -59,6 +59,10 @@ type fakePool struct {
 	mu           *sync.Mutex
 }
 
+type nilStatisticsPool struct{ *fakePool }
+
+func (*nilStatisticsPool) Stat() *pgxpool.Stat { return nil }
+
 func (pool *fakePool) BeginTx(context.Context, pgx.TxOptions) (pgx.Tx, error) {
 	return nil, errors.New("not used")
 }
@@ -387,6 +391,32 @@ func TestOpenClassifiesPingTimeoutAndClosesPool(t *testing.T) {
 	runtime, err := value.Open(context.Background(), loaded)
 	if runtime != nil || CodeOf(err) != ErrorTimeout || !errors.Is(err, context.DeadlineExceeded) || !pool.closed {
 		t.Fatalf("Open() = (%v, %v), closed=%v", runtime, err, pool.closed)
+	}
+}
+
+func TestDetachedPoolStatisticsAndUnsupportedProviders(t *testing.T) {
+	if (*Runtime)(nil).Statistics() != nil {
+		t.Fatal("nil runtime returned statistics")
+	}
+	runtime := &Runtime{pools: []ownedPool{
+		{capability: CapabilityRead, pool: &fakePool{}},
+		{capability: CapabilityIngest, pool: &nilStatisticsPool{fakePool: &fakePool{}}},
+	}}
+	if values := runtime.Statistics(); len(values) != 0 {
+		t.Fatalf("unsupported statistics = %#v", values)
+	}
+	statistics := PoolStatistics{
+		capability: CapabilityRetention, acquired: 1, idle: 2, constructing: 3, total: 6, maximum: 9,
+		acquireCount: 10, acquireDuration: time.Second, emptyAcquireCount: 11, emptyAcquireWait: 2 * time.Second,
+		connectionsCreated: 12, connectionsDestroyedIdle: 13, connectionsDestroyedLifetime: 14,
+	}
+	if statistics.Capability() != CapabilityRetention || statistics.Acquired() != 1 || statistics.Idle() != 2 ||
+		statistics.Constructing() != 3 || statistics.Total() != 6 || statistics.Maximum() != 9 ||
+		statistics.AcquireCount() != 10 || statistics.AcquireDuration() != time.Second ||
+		statistics.EmptyAcquireCount() != 11 || statistics.EmptyAcquireWait() != 2*time.Second ||
+		statistics.ConnectionsCreated() != 12 || statistics.ConnectionsDestroyedIdle() != 13 ||
+		statistics.ConnectionsDestroyedLifetime() != 14 {
+		t.Fatalf("statistics accessors changed: %#v", statistics)
 	}
 }
 

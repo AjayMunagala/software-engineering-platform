@@ -1,9 +1,10 @@
 # Application Runtime Lifecycle
 
 - Phase: 3.5.3
+- Contract: `1.0.0` (frozen)
 - Local exit gate: complete
 - Engineering acceptance: accepted on 2026-07-26
-- Phase 3.5.4: authorized
+- Phase 3.5.4: accepted on 2026-07-27
 
 Phase 3.5.3 owns non-networked startup, narrow persistence-capability routing,
 work admission, callable health, drain, cancellation, graceful shutdown, and

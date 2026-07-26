@@ -61,13 +61,31 @@
 - Phase 3.5.1: runtime configuration accepted on 2026-07-26.
 - Phase 3.5.2: PostgreSQL runtime accepted on 2026-07-26.
 - Phase 3.5.3: Runtime Lifecycle & Health accepted on 2026-07-26.
-- Phase 3.5.4: Runtime Integration & Release Freeze authorized on 2026-07-26.
-- Phase 3.6: REST/gRPC query APIs.
+- Phase 3.5.4: Runtime Integration & Release Freeze accepted and frozen at
+  `1.0.0` on 2026-07-27.
+- Phase 4.0: Repository Service Layer authorized on 2026-07-27.
+- Phase 4.1: REST/gRPC query APIs remain gated.
 
 PostgreSQL remains downstream from immutable artifacts and is not an engine
 dependency.
 
-## Phase 4 — Query UI and Engineering Context
+## Phase 4 — Repository Services and Query Access
+
+### Phase 4.0 — Repository Service Layer (Authorized)
+
+- Define storage-neutral repository service interfaces.
+- Coordinate repository and scan lifecycle through application services.
+- Wire immutable intelligence artifacts, runtime capabilities, and persistence
+  through dependency injection.
+- Validate service behavior, failure isolation, idempotency, and concurrency.
+- Do not introduce REST/gRPC endpoints, UI, authentication, AI orchestration,
+  IDE integration, or new intelligence-engine behavior.
+
+### Phase 4.1 — Query APIs (Gated)
+
+- Design REST/gRPC only after the service-layer contract is accepted.
+
+### Later Phase 4 Work
 
 - React UI only after API stabilization.
 - Add separately approved Git, logs, database-schema, configuration,

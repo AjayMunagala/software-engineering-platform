@@ -2,8 +2,8 @@
 
 ## Status
 
-- Current milestone: Phase 3.5.4 — Runtime Integration & Release Freeze
-- Current authorization: Phase 3.5.4 only
+- Current milestone: Phase 4.0 — Repository Service Layer
+- Current authorization: Phase 4.0 only
 - PostgreSQL connection: disposable local migration/test databases only
 - Credentials: not required and must not be uploaded
 - Transient benchmark DDL/harness: accepted evidence
@@ -17,7 +17,9 @@
 - Phase 3.5.1 engineering acceptance: accepted on 2026-07-26
 - Phase 3.5.2 PostgreSQL runtime: accepted on 2026-07-26
 - Phase 3.5.3 Runtime Lifecycle & Health: accepted on 2026-07-26
-- Phase 3.5.4 Runtime Integration & Release Freeze: authorized on 2026-07-26
+- Phase 3.5.4 Runtime Integration & Release Freeze: accepted and frozen at
+  `1.0.0` on 2026-07-27
+- Phase 4.0 Repository Service Layer: authorized on 2026-07-27
 - APIs and UI: unauthorized
 
 ## Goal
@@ -358,12 +360,12 @@ Implementation, validation, and engineering acceptance completed on 2026-07-26. 
 [`RUNTIME_LIFECYCLE_HEALTH_VALIDATION_REPORT.md`](../Validation/RUNTIME_LIFECYCLE_HEALTH_VALIDATION_REPORT.md).
 Acceptance authorized Phase 3.5.4 only.
 
-### Phase 3.5.4 — Runtime Integration & Release Freeze (Authorized)
+### Phase 3.5.4 — Runtime Integration & Release Freeze (Accepted and Frozen)
 
 Run local/CI/profile, TLS, compatibility, regression, shuffle, vet, race,
 coverage, leak, security, benchmark, recovery, and documentation gates. Create
-the safe example configuration and runbooks. Acceptance authorizes Phase 3.6
-API design only.
+the safe example configuration and runbooks. Acceptance authorizes Phase 4.0
+Repository Service Layer only.
 
 Required secret-handling rules remain:
 
@@ -376,7 +378,19 @@ Required secret-handling rules remain:
 These files must be ignored. Commit only names/placeholders in an example.
 Production credentials are never used locally or accepted in review evidence.
 
-## Phase 3.6 — Query APIs
+Implementation and cross-platform validation completed on 2026-07-26 and were
+accepted on 2026-07-27. Runtime Infrastructure `1.0.0` is frozen. Evidence:
+[`RUNTIME_INTEGRATION_FREEZE_VALIDATION_REPORT.md`](../Validation/RUNTIME_INTEGRATION_FREEZE_VALIDATION_REPORT.md).
+Acceptance authorized Phase 4.0 Repository Service Layer only.
+
+## Phase 4.0 — Repository Service Layer
+
+Define repository service interfaces, scan orchestration, dependency injection,
+runtime wiring, repository lifecycle coordination, and service-level tests.
+REST/gRPC endpoints, UI, authentication, AI orchestration, IDE integration,
+and new intelligence-engine behavior remain gated.
+
+## Phase 4.1 — Query APIs (Gated)
 
 Design and implement REST/gRPC only after the persistence contract is stable.
 Initial candidates include repository listing, scan history, exact artifact

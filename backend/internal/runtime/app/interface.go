@@ -8,11 +8,12 @@ import (
 
 	runtimeconfig "github.com/AjayMunagala/software-engineering-platform/backend/internal/runtime/config"
 	runtimehealth "github.com/AjayMunagala/software-engineering-platform/backend/internal/runtime/health"
+	runtimeobservability "github.com/AjayMunagala/software-engineering-platform/backend/internal/runtime/observability"
 	runtimepostgres "github.com/AjayMunagala/software-engineering-platform/backend/internal/runtime/postgres"
 )
 
-// ContractVersion identifies the candidate Phase 3.5.3 lifecycle contract.
-const ContractVersion = "0.1.0"
+// ContractVersion identifies the frozen Application Runtime contract.
+const ContractVersion = "1.0.0"
 
 // PostgreSQLRuntime is the opaque resource capability required by lifecycle.
 // Pool internals and SQL are intentionally absent.
@@ -27,6 +28,12 @@ type PostgreSQLRuntime interface {
 // PostgreSQLOpener enables deterministic startup failure injection.
 type PostgreSQLOpener interface {
 	Open(context.Context, runtimeconfig.LoadedConfiguration) (PostgreSQLRuntime, error)
+}
+
+// ObservabilityFactory creates deployment-owned logging and metrics after
+// strict runtime configuration has been loaded.
+type ObservabilityFactory interface {
+	Open(runtimeconfig.RuntimeConfig) (runtimeobservability.Service, error)
 }
 
 // Starter constructs a ready runtime or returns after complete cleanup.

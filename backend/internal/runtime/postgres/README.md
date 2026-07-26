@@ -3,10 +3,11 @@
 ## Status
 
 - Phase: 3.5.2
-- Contract: candidate `0.1.0`
+- Contract: `1.0.0` (frozen)
 - Local implementation gate: complete
 - Engineering acceptance: accepted on 2026-07-26
 - Phase 3.5.3 integration: accepted on 2026-07-26
+- Phase 3.5.4: accepted on 2026-07-27
 
 ## Purpose
 

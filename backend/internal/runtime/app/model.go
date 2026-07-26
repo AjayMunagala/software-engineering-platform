@@ -7,6 +7,7 @@ import (
 
 	runtimeconfig "github.com/AjayMunagala/software-engineering-platform/backend/internal/runtime/config"
 	runtimehealth "github.com/AjayMunagala/software-engineering-platform/backend/internal/runtime/health"
+	runtimeobservability "github.com/AjayMunagala/software-engineering-platform/backend/internal/runtime/observability"
 	runtimepostgres "github.com/AjayMunagala/software-engineering-platform/backend/internal/runtime/postgres"
 )
 
@@ -61,6 +62,10 @@ type Runtime struct {
 	configuration runtimeconfig.RuntimeConfig
 	postgres      PostgreSQLRuntime
 	health        runtimehealth.Monitor
+	observability runtimeobservability.Service
+
+	healthObservabilityMutex sync.Mutex
+	lastReadiness            runtimehealth.Status
 
 	mutex        sync.Mutex
 	accepting    bool

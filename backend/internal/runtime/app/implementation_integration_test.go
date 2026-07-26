@@ -24,26 +24,33 @@ func TestDisposablePostgreSQLApplicationRuntime(t *testing.T) {
 		},
 		SecretProvider: disposableSecretProvider{},
 	})
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-	runtime, err := NewDefaultStarter().Start(ctx, request)
-	if err != nil {
-		t.Fatalf("Start() error = %v", err)
-	}
-	if runtime.State() != runtimehealth.StateReady || runtime.Readiness(ctx).Readiness().Status() != runtimehealth.StatusHealthy {
-		runtime.Force()
-		_, _ = runtime.Shutdown(context.Background())
-		t.Fatalf("runtime did not become ready: state=%s", runtime.State())
-	}
-	work, err := runtime.Admit(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	work.Done()
-	result, err := runtime.Shutdown(ctx)
-	if err != nil || result.Outcome() != ShutdownGraceful || !result.ResourcesClosed() ||
-		runtime.State() != runtimehealth.StateStopped {
-		t.Fatalf("Shutdown() = (%#v, %v), state=%s", result, err, runtime.State())
+	// Repeated independent instances prove that no lifecycle, health, pool, or
+	// observability state leaks across start/ready/drain/stop cycles.
+	for cycle := 0; cycle < 25; cycle++ {
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		runtime, err := NewDefaultStarter().Start(ctx, request)
+		if err != nil {
+			cancel()
+			t.Fatalf("cycle %d Start() error = %v", cycle, err)
+		}
+		if runtime.State() != runtimehealth.StateReady || runtime.Readiness(ctx).Readiness().Status() != runtimehealth.StatusHealthy {
+			runtime.Force()
+			_, _ = runtime.Shutdown(context.Background())
+			cancel()
+			t.Fatalf("cycle %d did not become ready: state=%s", cycle, runtime.State())
+		}
+		work, err := runtime.Admit(ctx)
+		if err != nil {
+			cancel()
+			t.Fatalf("cycle %d Admit() error = %v", cycle, err)
+		}
+		work.Done()
+		result, err := runtime.Shutdown(ctx)
+		cancel()
+		if err != nil || result.Outcome() != ShutdownGraceful || !result.ResourcesClosed() ||
+			runtime.State() != runtimehealth.StateStopped || runtime.InFlight() != 0 {
+			t.Fatalf("cycle %d Shutdown() = (%#v, %v), state=%s in_flight=%d", cycle, result, err, runtime.State(), runtime.InFlight())
+		}
 	}
 }
 
