@@ -54,7 +54,7 @@ flowchart TD
     GPI --> APP
     GSI --> APP
     APP --> PB["Persistence Boundary"]
-    PB --> PG["PostgreSQL adapter — future"]
+    PB --> PG["PostgreSQL adapter — Phase 3.4.3 candidate"]
     PG --> QUERY["REST / gRPC query layer — future"]
 ```
 

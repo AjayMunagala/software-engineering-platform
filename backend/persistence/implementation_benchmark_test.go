@@ -28,7 +28,7 @@ func BenchmarkPublishRequestConstruction(b *testing.B) {
 	}
 	params := PublishScanParams{
 		Scope: scope, RequestID: "request-benchmark", RepositoryID: "repository-benchmark",
-		ScanID: "scan-benchmark", PublicationID: "publication-benchmark",
+		ScanID: "scan-benchmark", ManifestScheme: "artifact-manifest-sha256/v1",
 		ManifestDigest: DigestBytes([]byte("manifest")), Artifacts: artifacts,
 		MakeCurrent: true, Actor: actor,
 	}

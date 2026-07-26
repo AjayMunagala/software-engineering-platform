@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"path"
 	"regexp"
-	"sort"
 	"strings"
 	"time"
 )
@@ -74,14 +73,17 @@ func NewCodec(name, version, mediaType string) (Codec, error) {
 	return Codec{name: identity.name, version: identity.version, mediaType: mediaType}, nil
 }
 
-func NewAttribute(key, value string) (Attribute, error) {
-	if err := validateMachine("attribute key", key, 128); err != nil {
-		return Attribute{}, err
+func NewSourceIdentity(kind, fingerprintScheme string, fingerprint Digest) (SourceIdentity, error) {
+	if err := validateMachine("source kind", kind, 64); err != nil {
+		return SourceIdentity{}, err
 	}
-	if err := validateSafeText("attribute value", value, 4096, true); err != nil {
-		return Attribute{}, err
+	if err := validateMachine("source fingerprint scheme", fingerprintScheme, 128); err != nil {
+		return SourceIdentity{}, err
 	}
-	return Attribute{key: key, value: value}, nil
+	if fingerprint.IsZero() {
+		return SourceIdentity{}, invalid("source fingerprint")
+	}
+	return SourceIdentity{kind: kind, fingerprintScheme: fingerprintScheme, fingerprint: fingerprint}, nil
 }
 
 func NewAuditActor(kind, id string) (AuditActor, error) {
@@ -101,8 +103,8 @@ func (contract *Contract) NewRegisterRepositoryRequest(params RegisterRepository
 	if err := validateSafeText("display name", params.DisplayName, 256, false); err != nil {
 		return RegisterRepositoryRequest{}, err
 	}
-	if err := validateOpaque("canonical key", params.CanonicalKey, 1024); err != nil {
-		return RegisterRepositoryRequest{}, err
+	if params.Source.IsZero() {
+		return RegisterRepositoryRequest{}, invalid("source identity")
 	}
 	return RegisterRepositoryRequest{params: params}, nil
 }
@@ -138,8 +140,11 @@ func (contract *Contract) NewBeginScanRequest(params BeginScanParams) (BeginScan
 	if err := validateID("scan ID", string(params.ScanID)); err != nil {
 		return BeginScanRequest{}, err
 	}
-	if params.Producer.IsZero() {
-		return BeginScanRequest{}, invalid("producer")
+	if params.AnalysisProfileDigest.IsZero() {
+		return BeginScanRequest{}, invalid("analysis profile digest")
+	}
+	if err := validateSafeText("source revision", params.SourceRevision, 512, true); err != nil {
+		return BeginScanRequest{}, err
 	}
 	return BeginScanRequest{params: params}, nil
 }
@@ -206,8 +211,10 @@ func (contract *Contract) NewArtifactSubmission(params ArtifactSubmissionParams)
 	if params.Artifact.IsZero() || params.Codec.IsZero() || params.Producer.IsZero() {
 		return ArtifactSubmission{}, invalid("artifact identity, codec, and producer")
 	}
-	if (params.StableIDScheme.name == "") != (params.StableIDScheme.version == "") {
-		return ArtifactSubmission{}, invalid("stable ID scheme")
+	if params.StableIDScheme != "" {
+		if err := validateMachine("stable ID scheme", params.StableIDScheme, 128); err != nil {
+			return ArtifactSubmission{}, err
+		}
 	}
 	if params.PayloadDigest.IsZero() {
 		return ArtifactSubmission{}, invalid("payload digest")
@@ -215,11 +222,6 @@ func (contract *Contract) NewArtifactSubmission(params ArtifactSubmissionParams)
 	if params.PayloadSize > contract.config.MaxPayloadBytes {
 		return ArtifactSubmission{}, NewError(ErrorPayloadTooLarge, "new-artifact-submission", false, nil)
 	}
-	attributes, err := contract.copyAttributes(params.Metadata)
-	if err != nil {
-		return ArtifactSubmission{}, err
-	}
-	params.Metadata = attributes
 	return ArtifactSubmission{params: params}, nil
 }
 
@@ -255,7 +257,8 @@ func (contract *Contract) NewProjectionSubmission(params ProjectionSubmissionPar
 	if len(params.CanonicalJSON) > int(contract.config.MaxProjectionBytes) {
 		return ProjectionSubmission{}, NewError(ErrorPayloadTooLarge, "new-projection-submission", false, nil)
 	}
-	if !json.Valid(params.CanonicalJSON) || DigestBytes(params.CanonicalJSON) != params.ProjectionDigest {
+	var document map[string]json.RawMessage
+	if !json.Valid(params.CanonicalJSON) || json.Unmarshal(params.CanonicalJSON, &document) != nil || document == nil || DigestBytes(params.CanonicalJSON) != params.ProjectionDigest {
 		return ProjectionSubmission{}, NewError(ErrorIntegrityFailure, "new-projection-submission", false, nil)
 	}
 	params.CanonicalJSON = append([]byte(nil), params.CanonicalJSON...)
@@ -334,7 +337,7 @@ func (contract *Contract) NewPublishScanRequest(params PublishScanParams) (Publi
 	if err := validateID("scan ID", string(params.ScanID)); err != nil {
 		return PublishScanRequest{}, err
 	}
-	if err := validateID("publication ID", string(params.PublicationID)); err != nil {
+	if err := validateMachine("manifest scheme", params.ManifestScheme, 128); err != nil {
 		return PublishScanRequest{}, err
 	}
 	if params.ManifestDigest.IsZero() {
@@ -419,7 +422,7 @@ func (contract *Contract) NewGarbageCollectionRequest(scope Scope, requestID Req
 
 // Record constructors are for adapter implementations. They validate durable
 // values without exposing adapter row models.
-func NewRepositoryRecord(scopeID string, repositoryID RepositoryID, displayName, canonicalKey string, state RepositoryState, currentScanID ScanID, createdAt, updatedAt time.Time) (RepositoryRecord, error) {
+func NewRepositoryRecord(scopeID string, repositoryID RepositoryID, displayName string, source SourceIdentity, state RepositoryState, currentScanID ScanID, createdAt, updatedAt time.Time) (RepositoryRecord, error) {
 	if err := validateMachine("scope ID", scopeID, 128); err != nil || !state.valid() || createdAt.IsZero() || updatedAt.Before(createdAt) {
 		return RepositoryRecord{}, invalid("repository record")
 	}
@@ -429,19 +432,19 @@ func NewRepositoryRecord(scopeID string, repositoryID RepositoryID, displayName,
 	if err := validateSafeText("display name", displayName, 256, false); err != nil {
 		return RepositoryRecord{}, err
 	}
-	if err := validateOpaque("canonical key", canonicalKey, 1024); err != nil {
-		return RepositoryRecord{}, err
+	if source.IsZero() {
+		return RepositoryRecord{}, invalid("source identity")
 	}
 	if currentScanID != "" {
 		if err := validateID("current scan ID", string(currentScanID)); err != nil {
 			return RepositoryRecord{}, err
 		}
 	}
-	return RepositoryRecord{scopeID: scopeID, repositoryID: repositoryID, displayName: displayName, canonicalKey: canonicalKey, state: state, currentScanID: currentScanID, createdAt: createdAt, updatedAt: updatedAt}, nil
+	return RepositoryRecord{scopeID: scopeID, repositoryID: repositoryID, displayName: displayName, source: source, state: state, currentScanID: currentScanID, createdAt: createdAt, updatedAt: updatedAt}, nil
 }
 
-func NewScanRecord(scopeID string, repositoryID RepositoryID, scanID ScanID, producer VersionedName, state ScanState, reasonCode, safeMessage string, requestedAt, startedAt, finishedAt time.Time) (ScanRecord, error) {
-	if err := validateMachine("scope ID", scopeID, 128); err != nil || !state.valid() || requestedAt.IsZero() || producer.IsZero() {
+func NewScanRecord(scopeID string, repositoryID RepositoryID, scanID ScanID, analysisProfileDigest Digest, sourceRevision string, state ScanState, reasonCode, safeMessage string, requestedAt, startedAt, finishedAt time.Time) (ScanRecord, error) {
+	if err := validateMachine("scope ID", scopeID, 128); err != nil || !state.valid() || requestedAt.IsZero() || analysisProfileDigest.IsZero() {
 		return ScanRecord{}, invalid("scan record")
 	}
 	if err := validateID("repository ID", string(repositoryID)); err != nil {
@@ -456,6 +459,9 @@ func NewScanRecord(scopeID string, repositoryID RepositoryID, scanID ScanID, pro
 		}
 	}
 	if err := validateSafeText("safe message", safeMessage, 4096, true); err != nil {
+		return ScanRecord{}, err
+	}
+	if err := validateSafeText("source revision", sourceRevision, 512, true); err != nil {
 		return ScanRecord{}, err
 	}
 	if (!startedAt.IsZero() && startedAt.Before(requestedAt)) || (!finishedAt.IsZero() && (startedAt.IsZero() || finishedAt.Before(startedAt))) {
@@ -479,10 +485,10 @@ func NewScanRecord(scopeID string, repositoryID RepositoryID, scanID ScanID, pro
 			return ScanRecord{}, invalid("terminal scan evidence")
 		}
 	}
-	return ScanRecord{scopeID: scopeID, repositoryID: repositoryID, scanID: scanID, producer: producer, state: state, reasonCode: reasonCode, safeMessage: safeMessage, requestedAt: requestedAt, startedAt: startedAt, finishedAt: finishedAt}, nil
+	return ScanRecord{scopeID: scopeID, repositoryID: repositoryID, scanID: scanID, analysisProfileDigest: analysisProfileDigest, sourceRevision: sourceRevision, state: state, reasonCode: reasonCode, safeMessage: safeMessage, requestedAt: requestedAt, startedAt: startedAt, finishedAt: finishedAt}, nil
 }
 
-func NewArtifactRecord(scopeID string, repositoryID RepositoryID, scanID ScanID, artifactID ArtifactID, publicationID PublicationID, artifact, stableIDScheme VersionedName, codec Codec, producer VersionedName, digest Digest, size ByteCount, createdAt time.Time) (ArtifactRecord, error) {
+func NewArtifactRecord(scopeID string, repositoryID RepositoryID, scanID ScanID, artifactID ArtifactID, artifact VersionedName, stableIDScheme string, codec Codec, producer VersionedName, digest Digest, size ByteCount, createdAt time.Time) (ArtifactRecord, error) {
 	if err := validateMachine("scope ID", scopeID, 128); err != nil || artifact.IsZero() || codec.IsZero() || producer.IsZero() || digest.IsZero() || createdAt.IsZero() || size > maximumSchemaPayloadBytes {
 		return ArtifactRecord{}, invalid("artifact record")
 	}
@@ -495,13 +501,12 @@ func NewArtifactRecord(scopeID string, repositoryID RepositoryID, scanID ScanID,
 	if err := validateID("artifact ID", string(artifactID)); err != nil {
 		return ArtifactRecord{}, err
 	}
-	if err := validateID("publication ID", string(publicationID)); err != nil {
-		return ArtifactRecord{}, err
+	if stableIDScheme != "" {
+		if err := validateMachine("stable ID scheme", stableIDScheme, 128); err != nil {
+			return ArtifactRecord{}, err
+		}
 	}
-	if (stableIDScheme.name == "") != (stableIDScheme.version == "") {
-		return ArtifactRecord{}, invalid("stable ID scheme")
-	}
-	return ArtifactRecord{scopeID: scopeID, repositoryID: repositoryID, scanID: scanID, artifactID: artifactID, publicationID: publicationID, artifact: artifact, stableIDScheme: stableIDScheme, codec: codec, producer: producer, payloadDigest: digest, payloadSize: size, createdAt: createdAt}, nil
+	return ArtifactRecord{scopeID: scopeID, repositoryID: repositoryID, scanID: scanID, artifactID: artifactID, artifact: artifact, stableIDScheme: stableIDScheme, codec: codec, producer: producer, payloadDigest: digest, payloadSize: size, createdAt: createdAt}, nil
 }
 
 func NewRepositoryPage(records []RepositoryRecord, next Cursor) RepositoryPage {
@@ -523,17 +528,17 @@ func NewPayloadReceipt(digest Digest, size ByteCount, disposition Disposition) (
 	return PayloadReceipt{digest: digest, size: size, disposition: disposition}, nil
 }
 
-func NewPublicationReceipt(publicationID PublicationID, scanID ScanID, manifestDigest Digest, artifactCount uint32, disposition Disposition) (PublicationReceipt, error) {
-	if err := validateID("publication ID", string(publicationID)); err != nil {
+func NewPublicationReceipt(scanID ScanID, manifestScheme string, manifestDigest Digest, artifactCount uint32, disposition Disposition) (PublicationReceipt, error) {
+	if err := validateID("scan ID", string(scanID)); err != nil {
 		return PublicationReceipt{}, err
 	}
-	if err := validateID("scan ID", string(scanID)); err != nil {
+	if err := validateMachine("manifest scheme", manifestScheme, 128); err != nil {
 		return PublicationReceipt{}, err
 	}
 	if manifestDigest.IsZero() || artifactCount < 1 || artifactCount > defaultMaxArtifactsPerPublication || !disposition.valid() {
 		return PublicationReceipt{}, invalid("publication receipt")
 	}
-	return PublicationReceipt{publicationID: publicationID, scanID: scanID, manifestDigest: manifestDigest, artifactCount: artifactCount, disposition: disposition}, nil
+	return PublicationReceipt{scanID: scanID, manifestScheme: manifestScheme, manifestDigest: manifestDigest, artifactCount: artifactCount, disposition: disposition}, nil
 }
 
 func NewVerificationReceipt(digest Digest, size ByteCount) (VerificationReceipt, error) {
@@ -595,7 +600,8 @@ func (contract *Contract) validatePublicationGraph(params PublishScanParams) err
 	projections := make(map[ProjectionID]struct{}, len(params.Projections))
 	for _, projection := range params.Projections {
 		artifact, exists := artifacts[projection.params.ArtifactID]
-		if !exists || artifact.params.PayloadDigest != projection.params.SourceDigest || !json.Valid(projection.params.CanonicalJSON) || DigestBytes(projection.params.CanonicalJSON) != projection.params.ProjectionDigest {
+		var document map[string]json.RawMessage
+		if !exists || artifact.params.PayloadDigest != projection.params.SourceDigest || !json.Valid(projection.params.CanonicalJSON) || json.Unmarshal(projection.params.CanonicalJSON, &document) != nil || document == nil || DigestBytes(projection.params.CanonicalJSON) != projection.params.ProjectionDigest {
 			return NewError(ErrorIntegrityFailure, "new-publish-scan-request", false, nil)
 		}
 		if _, exists := projections[projection.params.ProjectionID]; exists {
@@ -614,23 +620,6 @@ func (contract *Contract) validatePublicationGraph(params PublishScanParams) err
 		}
 	}
 	return nil
-}
-
-func (contract *Contract) copyAttributes(values []Attribute) ([]Attribute, error) {
-	if len(values) > contract.config.MaxAttributes {
-		return nil, invalid("attribute count")
-	}
-	result := cloneAttributes(values)
-	sort.Slice(result, func(i, j int) bool { return result[i].key < result[j].key })
-	for index, attribute := range result {
-		if err := validateMachine("attribute key", attribute.key, 128); err != nil {
-			return nil, err
-		}
-		if index > 0 && result[index-1].key == attribute.key {
-			return nil, invalid("duplicate attribute")
-		}
-	}
-	return result, nil
 }
 
 func (contract *Contract) validatePage(pageSize int, cursor Cursor) error {

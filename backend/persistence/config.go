@@ -8,7 +8,6 @@ const (
 	defaultMaxArtifactsPerPublication           = 256
 	defaultMaxDependenciesPerArtifact           = 4_096
 	defaultMaxProjectionBytes         ByteCount = 8 << 20
-	defaultMaxAttributes                        = 128
 	defaultMaxDiagnostics                       = 10_000
 	defaultMaxStatistics                        = 10_000
 	defaultMaxPageSize                          = 1_000
@@ -22,7 +21,6 @@ type Config struct {
 	MaxArtifactsPerPublication int
 	MaxDependenciesPerArtifact int
 	MaxProjectionBytes         ByteCount
-	MaxAttributes              int
 	MaxDiagnostics             int
 	MaxStatistics              int
 	MaxPageSize                int
@@ -36,7 +34,6 @@ func DefaultConfig() Config {
 		MaxArtifactsPerPublication: defaultMaxArtifactsPerPublication,
 		MaxDependenciesPerArtifact: defaultMaxDependenciesPerArtifact,
 		MaxProjectionBytes:         defaultMaxProjectionBytes,
-		MaxAttributes:              defaultMaxAttributes,
 		MaxDiagnostics:             defaultMaxDiagnostics,
 		MaxStatistics:              defaultMaxStatistics,
 		MaxPageSize:                defaultMaxPageSize,
@@ -57,9 +54,6 @@ func (config Config) withDefaults() Config {
 	}
 	if config.MaxProjectionBytes == 0 {
 		config.MaxProjectionBytes = defaults.MaxProjectionBytes
-	}
-	if config.MaxAttributes == 0 {
-		config.MaxAttributes = defaults.MaxAttributes
 	}
 	if config.MaxDiagnostics == 0 {
 		config.MaxDiagnostics = defaults.MaxDiagnostics
@@ -89,9 +83,6 @@ func (config Config) Validate() error {
 	}
 	if config.MaxProjectionBytes < 1 || config.MaxProjectionBytes > defaultMaxProjectionBytes {
 		return fmt.Errorf("%w: MaxProjectionBytes must be between 1 and %d", ErrInvalidConfig, defaultMaxProjectionBytes)
-	}
-	if config.MaxAttributes < 1 || config.MaxAttributes > defaultMaxAttributes {
-		return fmt.Errorf("%w: MaxAttributes must be between 1 and %d", ErrInvalidConfig, defaultMaxAttributes)
 	}
 	if config.MaxDiagnostics < 1 || config.MaxDiagnostics > defaultMaxDiagnostics {
 		return fmt.Errorf("%w: MaxDiagnostics must be between 1 and %d", ErrInvalidConfig, defaultMaxDiagnostics)

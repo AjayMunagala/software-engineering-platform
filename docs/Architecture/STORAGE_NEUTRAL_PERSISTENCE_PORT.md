@@ -5,7 +5,7 @@
 - Phase: 3.4.1
 - Contract version: candidate `0.1.0`
 - State: accepted on 2026-07-24
-- Implementation: Phase 3.4.2 neutral port and conformance authorized
+- Implementation: Phase 3.4.2 accepted; Phase 3.4.3 adapter at local exit gate
 - PostgreSQL credentials or connection: not required
 
 ## Exact Responsibility
@@ -32,6 +32,7 @@ Storage-neutral persistence port
         +-------------------+
         v                   v
 PostgreSQL adapter      Future adapter
+(implemented candidate)
 ```
 
 Intelligence engines publish immutable artifacts only. They do not import or
@@ -103,11 +104,11 @@ The detailed candidate Go surface is specified in
 
 All public values are storage-neutral and detached:
 
-- opaque application-generated repository, scan, artifact, publication, and
-  request identifiers;
+- opaque application-generated repository, scan, artifact, and request
+  identifiers;
 - repository authorization scope supplied for every operation;
 - artifact name and semantic version;
-- stable-ID scheme name/version;
+- optional stable-ID scheme identity;
 - codec name/version and media type;
 - exact unsigned byte count;
 - SHA-256 digest as a fixed 32-byte value;

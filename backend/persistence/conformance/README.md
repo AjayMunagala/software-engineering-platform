@@ -13,7 +13,7 @@ An adapter test supplies an isolated pre-seeded `Factory`. `Run` then verifies:
 - published repository, scan, and artifact metadata is visible;
 - exact payload bytes and SHA-256 verification agree.
 
-The PostgreSQL adapter will extend this base suite with publication atomicity,
+The PostgreSQL adapter extends this base suite with publication atomicity,
 rollback, concurrency, failure injection, retention, recovery, and
 large-payload integration tests during Phase 3.4.3.
 

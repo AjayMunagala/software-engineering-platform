@@ -2,14 +2,16 @@
 
 ## Status
 
-- Current milestone: Phase 3.4.3 — PostgreSQL Adapter
-- Current authorization: PostgreSQL adapter and isolated validation only
+- Current milestone: Phase 3.4.4 — Adapter Validation and Freeze
+- Current authorization: Phase 3.4.4 only
 - PostgreSQL connection: disposable local migration/test databases only
 - Credentials: not required and must not be uploaded
 - Transient benchmark DDL/harness: accepted evidence
 - Migration implementation: accepted and frozen
 - Phase 3.3 exit gate: accepted on 2026-07-24
 - Go storage adapter: authorized on 2026-07-25
+- PostgreSQL adapter local exit gate: reached on 2026-07-25
+- PostgreSQL adapter accepted: 2026-07-26
 - Environment configuration, APIs, and UI: unauthorized
 
 ## Goal
@@ -148,8 +150,9 @@ implementation; later phases remain gated.
 - Phase 3.4.1 design and ADR 0013 were accepted on 2026-07-24.
 - Phase 3.4.2 neutral package and conformance implementation is authorized.
 - Phase 3.4.2 implementation and validation were accepted on 2026-07-25.
-- Phase 3.4.3 PostgreSQL adapter implementation is authorized.
-- No Go persistence or PostgreSQL adapter implementation has started.
+- Phase 3.4.3 PostgreSQL adapter implementation and validation were accepted
+  on 2026-07-26.
+- Phase 3.4.4 final contract validation and `1.0.0` freeze are authorized.
 - Runtime migration execution, environment credentials, APIs, and UI remain
   outside this milestone.
 
@@ -216,7 +219,7 @@ frozen for adapter work. Neutral conformance must be the first adapter gate.
 Accepted on 2026-07-25. Engineering froze the neutral contract candidate and
 authorized Phase 3.4.3.
 
-### Phase 3.4.3 — PostgreSQL Adapter (Current)
+### Phase 3.4.3 — PostgreSQL Adapter (Accepted)
 
 Implement the accepted port against the frozen migrated schema. The adapter
 owns parameterized SQL, transaction execution, locking, ordered 4 MiB chunks,
@@ -230,13 +233,23 @@ run migrations.
 The reusable neutral conformance suite runs before adapter-specific integration
 tests. PostgreSQL behavior may not weaken or replace a neutral requirement.
 
+Local evidence on 2026-07-25 records neutral conformance, exact 4 MiB chunking,
+rollback, idempotency/conflict handling, atomic publication, scope isolation,
+corruption detection, concurrent staging, projections, pagination, retention,
+garbage collection, 85.1% statement coverage, race validation, and a
+1,556,379,091-byte streaming round trip. Engineering accepted this evidence
+and ADR 0014 on 2026-07-26.
+
+Evidence: [`POSTGRESQL_ADAPTER_VALIDATION_REPORT.md`](../Validation/POSTGRESQL_ADAPTER_VALIDATION_REPORT.md).
+Driver decision: [`0014-pgx-postgresql-adapter.md`](../Decisions/0014-pgx-postgresql-adapter.md).
+
 #### Exit Gate
 
-The PostgreSQL adapter passes the neutral conformance suite, disposable
-database integration tests, failure and recovery tests, and large-payload
-gates. Acceptance authorizes Phase 3.4.4 only.
+Accepted on 2026-07-26 after the PostgreSQL adapter passed the neutral
+conformance suite, disposable database integration tests, failure and recovery
+tests, and large-payload gates. Phase 3.4.4 only is authorized.
 
-### Phase 3.4.4 — Adapter Validation and Freeze
+### Phase 3.4.4 — Adapter Validation and Freeze (Current)
 
 Complete regression, shuffled, vet, targeted/full race, dependency, security,
 memory, performance, documentation, and API reviews. Record the execution

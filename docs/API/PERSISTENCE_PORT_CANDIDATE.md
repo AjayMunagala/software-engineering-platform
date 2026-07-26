@@ -4,11 +4,12 @@
 
 - Candidate package: `backend/persistence`
 - Candidate contract version: `0.1.0`
-- State: Phase 3.4.2 accepted; frozen for PostgreSQL adapter conformance
+- State: Phase 3.4.2 accepted; Phase 3.4.3 candidate reached its local exit gate
 - Freeze target: `1.0.0` after adapter conformance and engineering acceptance
 
-This document gives the neutral contract a concrete Go shape for review. It is
-not authorization to create the package or PostgreSQL adapter.
+This document records the implemented neutral Go contract. Phase 3.4.3
+evidence may refine its `0.x` physical compatibility details before the
+`1.0.0` freeze; later phases remain separately gated.
 
 ## Design Rules
 
@@ -84,7 +85,6 @@ of a generic transaction API are architectural decisions.
 type RepositoryID string
 type ScanID string
 type ArtifactID string
-type PublicationID string
 type RequestID string
 type Cursor string
 
@@ -106,11 +106,20 @@ type Codec struct {
     Version   string
     MediaType string
 }
+
+type SourceIdentity struct {
+    Kind              string
+    FingerprintScheme string
+    Fingerprint       Digest
+}
 ```
 
-Opaque IDs are application-generated and validated by constructors. Their
-eventual concrete representation may become a neutral UUID value, but the port
-will not expose a database-driver UUID type. `ScopeID` is an application-owned
+Opaque IDs are application-generated and validated by constructors. The
+PostgreSQL adapter requires UUID-form repository, scan, artifact, projection,
+and scope IDs because those are frozen physical keys, but the neutral port does
+not expose a database-driver UUID type. Request IDs remain neutral machine
+identities and are deterministically mapped to audit correlation UUIDs by the
+adapter. `ScopeID` is an application-owned
 authorization namespace; it is not a PostgreSQL role or a premature tenancy
 model. `PrincipalID` is an already authenticated opaque actor reference. The
 persistence port enforces supplied scope/target coherence but does not perform
@@ -124,16 +133,18 @@ type RegisterRepositoryRequest struct {
     RequestID     RequestID
     RepositoryID RepositoryID
     DisplayName  string
-    CanonicalKey string
+    Source       SourceIdentity
     Actor         AuditActor
 }
 
 type BeginScanRequest struct {
-    Scope     Scope
-    RequestID RequestID
-    ScanID    ScanID
-    Producer  VersionedName
-    Actor     AuditActor
+    Scope                 Scope
+    RequestID             RequestID
+    RepositoryID          RepositoryID
+    ScanID                ScanID
+    AnalysisProfileDigest Digest
+    SourceRevision        string
+    Actor                 AuditActor
 }
 
 type StagePayloadRequest struct {
@@ -148,8 +159,9 @@ type StagePayloadRequest struct {
 type PublishScanRequest struct {
     Scope          Scope
     RequestID      RequestID
+    RepositoryID   RepositoryID
     ScanID         ScanID
-    PublicationID PublicationID
+    ManifestScheme string
     ManifestDigest Digest
     Artifacts      []ArtifactSubmission
     Dependencies   []DependencySubmission
@@ -163,17 +175,11 @@ type PublishScanRequest struct {
 type ArtifactSubmission struct {
     ArtifactID     ArtifactID
     Artifact       VersionedName
-    StableIDScheme VersionedName
+    StableIDScheme string
     Codec           Codec
     PayloadDigest   Digest
     PayloadSize     ByteCount
     Producer        VersionedName
-    Metadata        []Attribute
-}
-
-type Attribute struct {
-    Key   string
-    Value string
 }
 
 type DependencySubmission struct {
@@ -215,8 +221,9 @@ type StatisticSubmission struct {
 }
 ```
 
-Attribute collections are bounded, sorted by key, unique by key, and copied by
-constructors. The port never accepts arbitrary unbounded metadata.
+Artifact envelopes contain only fields represented by the accepted physical
+schema. Arbitrary key/value metadata is intentionally excluded; query-oriented
+data belongs in bounded, digest-verified projections.
 
 Each request has a constructor that validates required fields, limits,
 semantic versions, safe strings, scope coherence, and duplicate keys, then
@@ -244,10 +251,10 @@ Records are detached immutable views with these conceptual fields:
 
 | Record | Required fields |
 |---|---|
-| `RepositoryRecord` | scope, repository ID, canonical key, display name, lifecycle state, optional current scan ID, durable timestamps |
-| `ScanRecord` | scope, repository ID, scan ID, producer, lifecycle state, requested/started/finished timestamps, safe terminal reason |
-| `ArtifactRecord` | repository/scan/artifact/publication IDs, artifact and stable-ID versions, codec, producer, payload digest/size, immutable timestamp |
-| `PublicationRecord` | repository/scan/publication IDs, manifest digest, artifact count, publication timestamp, current-pointer disposition |
+| `RepositoryRecord` | scope, repository ID, source identity, display name, lifecycle state, optional current scan ID, durable timestamps |
+| `ScanRecord` | scope, repository ID, scan ID, analysis-profile digest, optional source revision, lifecycle state, requested/started/finished timestamps, safe terminal reason |
+| `ArtifactRecord` | repository/scan/artifact IDs, artifact version, optional stable-ID scheme, codec, producer, payload digest/size, immutable timestamp |
+| `PublicationReceipt` | scan ID, manifest scheme/digest, artifact count, disposition |
 
 Repository lifecycle is `active`, `archived`, or `purge_pending`. Scan
 lifecycle is `requested`, `running`, `succeeded`, `failed`, or `cancelled`.
@@ -258,8 +265,8 @@ Every `Get`, `List`, archive, scan, payload, artifact, publication, and
 retention request carries `Scope` plus the relevant repository ID. List methods
 are bounded and return a record slice plus an opaque continuation cursor.
 Returned ordering is stable: repositories and scans use descending durable
-creation/request time with ID as the tie-breaker; artifacts use their declared
-publication order.
+creation/request time with ID as the tie-breaker; artifacts use artifact name
+and artifact ID.
 
 ## Candidate Receipts
 
@@ -278,8 +285,8 @@ type PayloadReceipt struct {
 }
 
 type PublicationReceipt struct {
-    PublicationID PublicationID
     ScanID         ScanID
+    ManifestScheme string
     ManifestDigest Digest
     ArtifactCount  uint32
     Disposition    Disposition

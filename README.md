@@ -29,8 +29,10 @@ freezes ordered four-MiB chunks, a four-GiB operational artifact limit, and an
 eight-GiB schema ceiling. Phase 3.3 Migration Framework is accepted and frozen
 after disposable PostgreSQL 18 validation. Phase 3.4.1 Storage-Neutral
 Persistence Port Design, ADR 0013, and Phase 3.4.2 Neutral Go Port and
-Conformance Harness are accepted. Phase 3.4.3 PostgreSQL Adapter is the current
-authorized milestone; the intelligence runtime remains database-independent.
+Conformance Harness are accepted. The Phase 3.4.3 PostgreSQL Adapter and ADR
+0014 were accepted on 2026-07-26. Phase 3.4.4 final contract validation and the
+`1.0.0` freeze are authorized; the intelligence runtime remains
+database-independent.
 
 ## Run RIE
 
@@ -65,12 +67,13 @@ The command emits the versioned JSON schema `1.0.0`.
 - [Storage-neutral persistence port design](docs/Architecture/STORAGE_NEUTRAL_PERSISTENCE_PORT.md)
 - [Persistence port candidate API](docs/API/PERSISTENCE_PORT_CANDIDATE.md)
 - [Phase 3.4.2 persistence port validation](docs/Validation/PERSISTENCE_PORT_CONFORMANCE_VALIDATION_REPORT.md)
+- [Phase 3.4.3 PostgreSQL adapter validation](docs/Validation/POSTGRESQL_ADAPTER_VALIDATION_REPORT.md)
 - [Complete project tests, metrics, and remaining work](PROJECT_TESTS_METRICS_AND_REMAINING_WORK.txt)
 
 ## Next milestone
 
-Phases 3.4.1 and 3.4.2 are accepted. Phase 3.4.3 may implement the PostgreSQL
-adapter, with neutral conformance running before adapter-specific integration
-tests. Runtime environment configuration, production connection-pool strategy,
+Phases 3.4.1 through 3.4.3 are accepted. Phase 3.4.4 final API, conformance,
+performance, security, dependency, and documentation review is authorized.
+Runtime environment configuration, production connection-pool strategy,
 credentials, APIs, UI, LLM, patch generation, and repository mutation remain
 unauthorized.

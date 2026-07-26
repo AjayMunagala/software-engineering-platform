@@ -99,12 +99,12 @@ func (suite *Suite) publishedMetadata(t *testing.T, fixture Fixture) {
 	}
 	scanQuery, _ := fixture.Contract.NewScanQuery(scenario.PrimaryScope, scenario.RepositoryID, scenario.ScanID)
 	scan, err := fixture.Port.GetScan(fixture.context, scanQuery)
-	if err != nil || scan.State() != persistence.ScanSucceeded {
+	if err != nil || scan.State() != persistence.ScanSucceeded || scan.AnalysisProfileDigest() != scenario.AnalysisProfileDigest {
 		t.Fatalf("published scan metadata: %v", err)
 	}
 	artifactQuery, _ := fixture.Contract.NewArtifactQuery(scenario.PrimaryScope, scenario.RepositoryID, scenario.ScanID, scenario.ArtifactID)
 	artifact, err := fixture.Port.GetArtifact(fixture.context, artifactQuery)
-	if err != nil || artifact.PayloadDigest() != scenario.Digest || artifact.PublicationID() != scenario.PublicationID {
+	if err != nil || artifact.PayloadDigest() != scenario.Digest {
 		t.Fatalf("published artifact metadata: %v", err)
 	}
 }
@@ -116,7 +116,7 @@ func (suite *Suite) scopeIsolation(t *testing.T, fixture Fixture) {
 	other := scenario.OtherScope
 	ctx := fixture.context
 
-	register, _ := contract.NewRegisterRepositoryRequest(persistence.RegisterRepositoryParams{Scope: other, RequestID: "scope-register", RepositoryID: scenario.RepositoryID, DisplayName: "Hidden", CanonicalKey: "hidden:key", Actor: scenario.Actor})
+	register, _ := contract.NewRegisterRepositoryRequest(persistence.RegisterRepositoryParams{Scope: other, RequestID: "scope-register", RepositoryID: scenario.RepositoryID, DisplayName: "Hidden", Source: scenario.Source, Actor: scenario.Actor})
 	_, err := fixture.Port.RegisterRepository(ctx, register)
 	expectHidden(t, OperationRegisterRepository, err)
 
@@ -130,7 +130,7 @@ func (suite *Suite) scopeIsolation(t *testing.T, fixture Fixture) {
 	_, err = fixture.Port.ArchiveRepository(ctx, archive)
 	expectHidden(t, OperationArchiveRepository, err)
 
-	begin, _ := contract.NewBeginScanRequest(persistence.BeginScanParams{Scope: other, RequestID: "scope-begin", RepositoryID: scenario.RepositoryID, ScanID: "scope-new-scan", Producer: scenario.Producer, Actor: scenario.Actor})
+	begin, _ := contract.NewBeginScanRequest(persistence.BeginScanParams{Scope: other, RequestID: "scope-begin", RepositoryID: scenario.RepositoryID, ScanID: "00000000-0000-4000-8000-000000000001", AnalysisProfileDigest: scenario.AnalysisProfileDigest, SourceRevision: "scope-revision", Actor: scenario.Actor})
 	_, err = fixture.Port.BeginScan(ctx, begin)
 	expectHidden(t, OperationBeginScan, err)
 	scanQuery, _ := contract.NewScanQuery(other, scenario.RepositoryID, scenario.ScanID)
@@ -150,7 +150,7 @@ func (suite *Suite) scopeIsolation(t *testing.T, fixture Fixture) {
 	expectHidden(t, OperationStagePayload, err)
 
 	artifactSubmission, _ := contract.NewArtifactSubmission(persistence.ArtifactSubmissionParams{ArtifactID: scenario.ArtifactID, Artifact: scenario.Artifact, Codec: scenario.Codec, PayloadDigest: scenario.Digest, PayloadSize: persistence.ByteCount(len(scenario.Payload)), Producer: scenario.Producer})
-	publish, _ := contract.NewPublishScanRequest(persistence.PublishScanParams{Scope: other, RequestID: "scope-publish", RepositoryID: scenario.RepositoryID, ScanID: scenario.ScanID, PublicationID: "scope-publication", ManifestDigest: persistence.DigestBytes([]byte("scope-manifest")), Artifacts: []persistence.ArtifactSubmission{artifactSubmission}, Actor: scenario.Actor})
+	publish, _ := contract.NewPublishScanRequest(persistence.PublishScanParams{Scope: other, RequestID: "scope-publish", RepositoryID: scenario.RepositoryID, ScanID: scenario.ScanID, ManifestScheme: scenario.ManifestScheme, ManifestDigest: persistence.DigestBytes([]byte("scope-manifest")), Artifacts: []persistence.ArtifactSubmission{artifactSubmission}, Actor: scenario.Actor})
 	_, err = fixture.Port.PublishScan(ctx, publish)
 	expectHidden(t, OperationPublishScan, err)
 
@@ -192,8 +192,8 @@ func validateFixture(fixture Fixture) error {
 	}
 	scenario := fixture.Scenario
 	if scenario.PrimaryScope.IsZero() || scenario.OtherScope.IsZero() || scenario.PrimaryScope.ScopeID() == scenario.OtherScope.ScopeID() ||
-		scenario.RepositoryID == "" || scenario.ScanID == "" || scenario.ArtifactID == "" || scenario.PublicationID == "" ||
-		scenario.Artifact.IsZero() || scenario.Producer.IsZero() || scenario.Codec.IsZero() || scenario.Digest.IsZero() ||
+		scenario.RepositoryID == "" || scenario.ScanID == "" || scenario.ArtifactID == "" || scenario.ManifestScheme == "" ||
+		scenario.Artifact.IsZero() || scenario.Producer.IsZero() || scenario.Codec.IsZero() || scenario.Source.IsZero() || scenario.AnalysisProfileDigest.IsZero() || scenario.Digest.IsZero() ||
 		len(scenario.Payload) == 0 || persistence.DigestBytes(scenario.Payload) != scenario.Digest || scenario.Actor.IsZero() {
 		return ErrFixtureInvalid
 	}

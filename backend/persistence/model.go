@@ -9,7 +9,6 @@ import (
 type RepositoryID string
 type ScanID string
 type ArtifactID string
-type PublicationID string
 type ProjectionID string
 type RequestID string
 type Cursor string
@@ -71,14 +70,19 @@ func (codec Codec) IsZero() bool {
 	return codec.name == "" || codec.version == "" || codec.mediaType == ""
 }
 
-// Attribute is one deterministic bounded metadata value.
-type Attribute struct {
-	key   string
-	value string
+// SourceIdentity is a normalized non-secret repository source proof.
+type SourceIdentity struct {
+	kind              string
+	fingerprintScheme string
+	fingerprint       Digest
 }
 
-func (attribute Attribute) Key() string   { return attribute.key }
-func (attribute Attribute) Value() string { return attribute.value }
+func (source SourceIdentity) Kind() string              { return source.kind }
+func (source SourceIdentity) FingerprintScheme() string { return source.fingerprintScheme }
+func (source SourceIdentity) Fingerprint() Digest       { return source.fingerprint }
+func (source SourceIdentity) IsZero() bool {
+	return source.kind == "" || source.fingerprintScheme == "" || source.fingerprint.IsZero()
+}
 
 // AuditActor is a safe opaque identity for an already-authorized operation.
 type AuditActor struct {
@@ -125,7 +129,7 @@ type RegisterRepositoryParams struct {
 	RequestID    RequestID
 	RepositoryID RepositoryID
 	DisplayName  string
-	CanonicalKey string
+	Source       SourceIdentity
 	Actor        AuditActor
 }
 
@@ -136,9 +140,9 @@ func (request RegisterRepositoryRequest) RequestID() RequestID { return request.
 func (request RegisterRepositoryRequest) RepositoryID() RepositoryID {
 	return request.params.RepositoryID
 }
-func (request RegisterRepositoryRequest) DisplayName() string  { return request.params.DisplayName }
-func (request RegisterRepositoryRequest) CanonicalKey() string { return request.params.CanonicalKey }
-func (request RegisterRepositoryRequest) Actor() AuditActor    { return request.params.Actor }
+func (request RegisterRepositoryRequest) DisplayName() string    { return request.params.DisplayName }
+func (request RegisterRepositoryRequest) Source() SourceIdentity { return request.params.Source }
+func (request RegisterRepositoryRequest) Actor() AuditActor      { return request.params.Actor }
 
 type RepositoryQuery struct {
 	scope        Scope
@@ -171,12 +175,13 @@ func (request ArchiveRepositoryRequest) RepositoryID() RepositoryID { return req
 func (request ArchiveRepositoryRequest) Actor() AuditActor          { return request.actor }
 
 type BeginScanParams struct {
-	Scope        Scope
-	RequestID    RequestID
-	RepositoryID RepositoryID
-	ScanID       ScanID
-	Producer     VersionedName
-	Actor        AuditActor
+	Scope                 Scope
+	RequestID             RequestID
+	RepositoryID          RepositoryID
+	ScanID                ScanID
+	AnalysisProfileDigest Digest
+	SourceRevision        string
+	Actor                 AuditActor
 }
 
 type BeginScanRequest struct{ params BeginScanParams }
@@ -185,8 +190,11 @@ func (request BeginScanRequest) Scope() Scope               { return request.par
 func (request BeginScanRequest) RequestID() RequestID       { return request.params.RequestID }
 func (request BeginScanRequest) RepositoryID() RepositoryID { return request.params.RepositoryID }
 func (request BeginScanRequest) ScanID() ScanID             { return request.params.ScanID }
-func (request BeginScanRequest) Producer() VersionedName    { return request.params.Producer }
-func (request BeginScanRequest) Actor() AuditActor          { return request.params.Actor }
+func (request BeginScanRequest) AnalysisProfileDigest() Digest {
+	return request.params.AnalysisProfileDigest
+}
+func (request BeginScanRequest) SourceRevision() string { return request.params.SourceRevision }
+func (request BeginScanRequest) Actor() AuditActor      { return request.params.Actor }
 
 type ScanQuery struct {
 	scope        Scope
@@ -251,28 +259,24 @@ func (request StagePayloadRequest) ExpectedSize() ByteCount    { return request.
 type ArtifactSubmissionParams struct {
 	ArtifactID     ArtifactID
 	Artifact       VersionedName
-	StableIDScheme VersionedName
+	StableIDScheme string
 	Codec          Codec
 	PayloadDigest  Digest
 	PayloadSize    ByteCount
 	Producer       VersionedName
-	Metadata       []Attribute
 }
 
 type ArtifactSubmission struct{ params ArtifactSubmissionParams }
 
 func (submission ArtifactSubmission) ArtifactID() ArtifactID  { return submission.params.ArtifactID }
 func (submission ArtifactSubmission) Artifact() VersionedName { return submission.params.Artifact }
-func (submission ArtifactSubmission) StableIDScheme() VersionedName {
+func (submission ArtifactSubmission) StableIDScheme() string {
 	return submission.params.StableIDScheme
 }
 func (submission ArtifactSubmission) Codec() Codec            { return submission.params.Codec }
 func (submission ArtifactSubmission) PayloadDigest() Digest   { return submission.params.PayloadDigest }
 func (submission ArtifactSubmission) PayloadSize() ByteCount  { return submission.params.PayloadSize }
 func (submission ArtifactSubmission) Producer() VersionedName { return submission.params.Producer }
-func (submission ArtifactSubmission) Metadata() []Attribute {
-	return cloneAttributes(submission.params.Metadata)
-}
 
 type DependencySubmission struct {
 	consumerArtifactID ArtifactID
@@ -384,7 +388,7 @@ type PublishScanParams struct {
 	RequestID      RequestID
 	RepositoryID   RepositoryID
 	ScanID         ScanID
-	PublicationID  PublicationID
+	ManifestScheme string
 	ManifestDigest Digest
 	Artifacts      []ArtifactSubmission
 	Dependencies   []DependencySubmission
@@ -397,12 +401,12 @@ type PublishScanParams struct {
 
 type PublishScanRequest struct{ params PublishScanParams }
 
-func (request PublishScanRequest) Scope() Scope                 { return request.params.Scope }
-func (request PublishScanRequest) RequestID() RequestID         { return request.params.RequestID }
-func (request PublishScanRequest) RepositoryID() RepositoryID   { return request.params.RepositoryID }
-func (request PublishScanRequest) ScanID() ScanID               { return request.params.ScanID }
-func (request PublishScanRequest) PublicationID() PublicationID { return request.params.PublicationID }
-func (request PublishScanRequest) ManifestDigest() Digest       { return request.params.ManifestDigest }
+func (request PublishScanRequest) Scope() Scope               { return request.params.Scope }
+func (request PublishScanRequest) RequestID() RequestID       { return request.params.RequestID }
+func (request PublishScanRequest) RepositoryID() RepositoryID { return request.params.RepositoryID }
+func (request PublishScanRequest) ScanID() ScanID             { return request.params.ScanID }
+func (request PublishScanRequest) ManifestScheme() string     { return request.params.ManifestScheme }
+func (request PublishScanRequest) ManifestDigest() Digest     { return request.params.ManifestDigest }
 func (request PublishScanRequest) Artifacts() []ArtifactSubmission {
 	return cloneArtifacts(request.params.Artifacts)
 }
@@ -504,7 +508,7 @@ type RepositoryRecord struct {
 	scopeID       string
 	repositoryID  RepositoryID
 	displayName   string
-	canonicalKey  string
+	source        SourceIdentity
 	state         RepositoryState
 	currentScanID ScanID
 	createdAt     time.Time
@@ -514,44 +518,45 @@ type RepositoryRecord struct {
 func (record RepositoryRecord) ScopeID() string            { return record.scopeID }
 func (record RepositoryRecord) RepositoryID() RepositoryID { return record.repositoryID }
 func (record RepositoryRecord) DisplayName() string        { return record.displayName }
-func (record RepositoryRecord) CanonicalKey() string       { return record.canonicalKey }
+func (record RepositoryRecord) Source() SourceIdentity     { return record.source }
 func (record RepositoryRecord) State() RepositoryState     { return record.state }
 func (record RepositoryRecord) CurrentScanID() ScanID      { return record.currentScanID }
 func (record RepositoryRecord) CreatedAt() time.Time       { return record.createdAt }
 func (record RepositoryRecord) UpdatedAt() time.Time       { return record.updatedAt }
 
 type ScanRecord struct {
-	scopeID      string
-	repositoryID RepositoryID
-	scanID       ScanID
-	producer     VersionedName
-	state        ScanState
-	reasonCode   string
-	safeMessage  string
-	requestedAt  time.Time
-	startedAt    time.Time
-	finishedAt   time.Time
+	scopeID               string
+	repositoryID          RepositoryID
+	scanID                ScanID
+	analysisProfileDigest Digest
+	sourceRevision        string
+	state                 ScanState
+	reasonCode            string
+	safeMessage           string
+	requestedAt           time.Time
+	startedAt             time.Time
+	finishedAt            time.Time
 }
 
-func (record ScanRecord) ScopeID() string            { return record.scopeID }
-func (record ScanRecord) RepositoryID() RepositoryID { return record.repositoryID }
-func (record ScanRecord) ScanID() ScanID             { return record.scanID }
-func (record ScanRecord) Producer() VersionedName    { return record.producer }
-func (record ScanRecord) State() ScanState           { return record.state }
-func (record ScanRecord) ReasonCode() string         { return record.reasonCode }
-func (record ScanRecord) SafeMessage() string        { return record.safeMessage }
-func (record ScanRecord) RequestedAt() time.Time     { return record.requestedAt }
-func (record ScanRecord) StartedAt() time.Time       { return record.startedAt }
-func (record ScanRecord) FinishedAt() time.Time      { return record.finishedAt }
+func (record ScanRecord) ScopeID() string               { return record.scopeID }
+func (record ScanRecord) RepositoryID() RepositoryID    { return record.repositoryID }
+func (record ScanRecord) ScanID() ScanID                { return record.scanID }
+func (record ScanRecord) AnalysisProfileDigest() Digest { return record.analysisProfileDigest }
+func (record ScanRecord) SourceRevision() string        { return record.sourceRevision }
+func (record ScanRecord) State() ScanState              { return record.state }
+func (record ScanRecord) ReasonCode() string            { return record.reasonCode }
+func (record ScanRecord) SafeMessage() string           { return record.safeMessage }
+func (record ScanRecord) RequestedAt() time.Time        { return record.requestedAt }
+func (record ScanRecord) StartedAt() time.Time          { return record.startedAt }
+func (record ScanRecord) FinishedAt() time.Time         { return record.finishedAt }
 
 type ArtifactRecord struct {
 	scopeID        string
 	repositoryID   RepositoryID
 	scanID         ScanID
 	artifactID     ArtifactID
-	publicationID  PublicationID
 	artifact       VersionedName
-	stableIDScheme VersionedName
+	stableIDScheme string
 	codec          Codec
 	producer       VersionedName
 	payloadDigest  Digest
@@ -559,18 +564,17 @@ type ArtifactRecord struct {
 	createdAt      time.Time
 }
 
-func (record ArtifactRecord) ScopeID() string               { return record.scopeID }
-func (record ArtifactRecord) RepositoryID() RepositoryID    { return record.repositoryID }
-func (record ArtifactRecord) ScanID() ScanID                { return record.scanID }
-func (record ArtifactRecord) ArtifactID() ArtifactID        { return record.artifactID }
-func (record ArtifactRecord) PublicationID() PublicationID  { return record.publicationID }
-func (record ArtifactRecord) Artifact() VersionedName       { return record.artifact }
-func (record ArtifactRecord) StableIDScheme() VersionedName { return record.stableIDScheme }
-func (record ArtifactRecord) Codec() Codec                  { return record.codec }
-func (record ArtifactRecord) Producer() VersionedName       { return record.producer }
-func (record ArtifactRecord) PayloadDigest() Digest         { return record.payloadDigest }
-func (record ArtifactRecord) PayloadSize() ByteCount        { return record.payloadSize }
-func (record ArtifactRecord) CreatedAt() time.Time          { return record.createdAt }
+func (record ArtifactRecord) ScopeID() string            { return record.scopeID }
+func (record ArtifactRecord) RepositoryID() RepositoryID { return record.repositoryID }
+func (record ArtifactRecord) ScanID() ScanID             { return record.scanID }
+func (record ArtifactRecord) ArtifactID() ArtifactID     { return record.artifactID }
+func (record ArtifactRecord) Artifact() VersionedName    { return record.artifact }
+func (record ArtifactRecord) StableIDScheme() string     { return record.stableIDScheme }
+func (record ArtifactRecord) Codec() Codec               { return record.codec }
+func (record ArtifactRecord) Producer() VersionedName    { return record.producer }
+func (record ArtifactRecord) PayloadDigest() Digest      { return record.payloadDigest }
+func (record ArtifactRecord) PayloadSize() ByteCount     { return record.payloadSize }
+func (record ArtifactRecord) CreatedAt() time.Time       { return record.createdAt }
 
 type RepositoryPage struct {
 	records []RepositoryRecord
@@ -611,18 +615,18 @@ func (receipt PayloadReceipt) Size() ByteCount          { return receipt.size }
 func (receipt PayloadReceipt) Disposition() Disposition { return receipt.disposition }
 
 type PublicationReceipt struct {
-	publicationID  PublicationID
 	scanID         ScanID
+	manifestScheme string
 	manifestDigest Digest
 	artifactCount  uint32
 	disposition    Disposition
 }
 
-func (receipt PublicationReceipt) PublicationID() PublicationID { return receipt.publicationID }
-func (receipt PublicationReceipt) ScanID() ScanID               { return receipt.scanID }
-func (receipt PublicationReceipt) ManifestDigest() Digest       { return receipt.manifestDigest }
-func (receipt PublicationReceipt) ArtifactCount() uint32        { return receipt.artifactCount }
-func (receipt PublicationReceipt) Disposition() Disposition     { return receipt.disposition }
+func (receipt PublicationReceipt) ScanID() ScanID           { return receipt.scanID }
+func (receipt PublicationReceipt) ManifestScheme() string   { return receipt.manifestScheme }
+func (receipt PublicationReceipt) ManifestDigest() Digest   { return receipt.manifestDigest }
+func (receipt PublicationReceipt) ArtifactCount() uint32    { return receipt.artifactCount }
+func (receipt PublicationReceipt) Disposition() Disposition { return receipt.disposition }
 
 type VerificationReceipt struct {
 	digest Digest
@@ -650,14 +654,8 @@ type GarbageCollectionReceipt struct {
 func (receipt GarbageCollectionReceipt) RemovedPayloads() uint64 { return receipt.removedPayloads }
 func (receipt GarbageCollectionReceipt) RemovedBytes() ByteCount { return receipt.removedBytes }
 
-func cloneAttributes(values []Attribute) []Attribute { return append([]Attribute(nil), values...) }
-
 func cloneArtifacts(values []ArtifactSubmission) []ArtifactSubmission {
-	result := append([]ArtifactSubmission(nil), values...)
-	for index := range result {
-		result[index].params.Metadata = cloneAttributes(result[index].params.Metadata)
-	}
-	return result
+	return append([]ArtifactSubmission(nil), values...)
 }
 
 func cloneProjections(values []ProjectionSubmission) []ProjectionSubmission {

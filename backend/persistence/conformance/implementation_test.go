@@ -86,13 +86,15 @@ func newTestFixture(t *testing.T) Fixture {
 	producer, _ := persistence.NewVersionedName("go-semantic", "1.0.0")
 	codec, _ := persistence.NewCodec("json", "1.0.0", "application/json")
 	actor, _ := persistence.NewAuditActor("test", "conformance")
+	source, _ := persistence.NewSourceIdentity("local", "sha256-v1", persistence.DigestBytes([]byte("primary-source")))
+	profile := persistence.DigestBytes([]byte("analysis-profile"))
 	payload := []byte(`{"artifact":"semantic"}`)
 	digest := persistence.DigestBytes(payload)
 	now := time.Now().UTC()
-	repository, _ := persistence.NewRepositoryRecord(primary.ScopeID(), "repository-primary", "Primary", "local:primary", persistence.RepositoryActive, "scan-primary", now, now)
-	scan, _ := persistence.NewScanRecord(primary.ScopeID(), "repository-primary", "scan-primary", producer, persistence.ScanSucceeded, "", "", now, now, now)
-	artifact, _ := persistence.NewArtifactRecord(primary.ScopeID(), "repository-primary", "scan-primary", "artifact-primary", "publication-primary", artifactName, persistence.VersionedName{}, codec, producer, digest, persistence.ByteCount(len(payload)), now)
-	scenario := Scenario{PrimaryScope: primary, OtherScope: other, RepositoryID: "repository-primary", ScanID: "scan-primary", ArtifactID: "artifact-primary", PublicationID: "publication-primary", Artifact: artifactName, Producer: producer, Codec: codec, Digest: digest, Payload: payload, Actor: actor}
+	repository, _ := persistence.NewRepositoryRecord(primary.ScopeID(), "repository-primary", "Primary", source, persistence.RepositoryActive, "scan-primary", now, now)
+	scan, _ := persistence.NewScanRecord(primary.ScopeID(), "repository-primary", "scan-primary", profile, "revision-primary", persistence.ScanSucceeded, "", "", now, now, now)
+	artifact, _ := persistence.NewArtifactRecord(primary.ScopeID(), "repository-primary", "scan-primary", "artifact-primary", artifactName, "go-semantic-id/v1", codec, producer, digest, persistence.ByteCount(len(payload)), now)
+	scenario := Scenario{PrimaryScope: primary, OtherScope: other, RepositoryID: "repository-primary", ScanID: "scan-primary", ArtifactID: "artifact-primary", Artifact: artifactName, Producer: producer, Codec: codec, Source: source, AnalysisProfileDigest: profile, ManifestScheme: "artifact-manifest-sha256/v1", Digest: digest, Payload: payload, Actor: actor}
 	port := &scopedTestPort{scenario: scenario, records: testRecords{repository: repository, scan: scan, artifact: artifact}}
 	return Fixture{Port: port, Contract: contract, Scenario: scenario}
 }

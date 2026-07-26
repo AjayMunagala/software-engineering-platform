@@ -9,18 +9,20 @@ import (
 // Scenario identifies the pre-seeded publication used by all adapter-neutral
 // checks. Exact payload bytes must match Digest and PayloadSize.
 type Scenario struct {
-	PrimaryScope  persistence.Scope
-	OtherScope    persistence.Scope
-	RepositoryID  persistence.RepositoryID
-	ScanID        persistence.ScanID
-	ArtifactID    persistence.ArtifactID
-	PublicationID persistence.PublicationID
-	Artifact      persistence.VersionedName
-	Producer      persistence.VersionedName
-	Codec         persistence.Codec
-	Digest        persistence.Digest
-	Payload       []byte
-	Actor         persistence.AuditActor
+	PrimaryScope          persistence.Scope
+	OtherScope            persistence.Scope
+	RepositoryID          persistence.RepositoryID
+	ScanID                persistence.ScanID
+	ArtifactID            persistence.ArtifactID
+	Artifact              persistence.VersionedName
+	Producer              persistence.VersionedName
+	Codec                 persistence.Codec
+	Source                persistence.SourceIdentity
+	AnalysisProfileDigest persistence.Digest
+	ManifestScheme        string
+	Digest                persistence.Digest
+	Payload               []byte
+	Actor                 persistence.AuditActor
 }
 
 // Fixture contains an isolated adapter and stable seeded scenario.

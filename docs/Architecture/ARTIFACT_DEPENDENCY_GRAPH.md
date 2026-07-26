@@ -89,7 +89,7 @@ bytes and envelopes for any released artifact to the persistence boundary.
 Released immutable artifacts
         └── application orchestration
                 └── persistence port
-                        └── PostgreSQL adapter (future)
+                        └── PostgreSQL adapter (Phase 3.4.3 candidate)
 ```
 
 Removing persistence must not change the artifact graph or engine output.
