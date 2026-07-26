@@ -9,17 +9,19 @@ Authorized repository
   -> Go Package Identity Inventory 1.0.0
   -> Go Semantic Inventory 1.0.0
   -> Application orchestration
-  -> Persistence Boundary (Phase 3 design)
-  -> PostgreSQL adapter (Phase 3.4.3 accepted; 1.0 release candidate)
+  -> Persistence Port 1.0.0
+  -> PostgreSQL Adapter 1.0.0
+  -> Runtime infrastructure (Phase 3.5 design)
   -> REST / gRPC (future)
   -> React UI (future)
 ```
 
 ## Delivered boundary
 
-Repository Intelligence and the frozen Go syntax, package-identity, and semantic
-artifacts are released. Persistence is design-only and is not yet a runtime
-dependency.
+Repository Intelligence, frozen Go syntax/package-identity/semantic artifacts,
+Persistence Port, and PostgreSQL Adapter are released. Phase 3.5 designs the
+application-owned configuration, pool/TLS, compatibility, lifecycle, health,
+and observability boundary without making an engine database-dependent.
 
 ## Future component responsibilities
 

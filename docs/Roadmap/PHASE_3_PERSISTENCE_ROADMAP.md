@@ -2,8 +2,8 @@
 
 ## Status
 
-- Current milestone: Phase 3.5 — Development Environment and Runtime Wiring
-- Current authorization: Phase 3.5 only
+- Current milestone: Phase 3.5.1 — Runtime Configuration
+- Current authorization: Phase 3.5.1 implementation only
 - PostgreSQL connection: disposable local migration/test databases only
 - Credentials: not required and must not be uploaded
 - Transient benchmark DDL/harness: accepted evidence
@@ -12,7 +12,8 @@
 - Go storage adapter: authorized on 2026-07-25
 - PostgreSQL adapter local exit gate: reached on 2026-07-25
 - PostgreSQL adapter accepted: 2026-07-26
-- Environment configuration and runtime adapter wiring: authorized
+- Phase 3.5.0 design and ADR 0015: accepted on 2026-07-26
+- Phase 3.5.1 runtime configuration implementation: authorized
 - APIs and UI: unauthorized
 
 ## Goal
@@ -155,7 +156,8 @@ implementation; later phases remain gated.
   on 2026-07-26.
 - Phase 3.4.4 final contract validation was accepted on 2026-07-26.
 - Persistence Port and PostgreSQL Adapter `1.0.0` are frozen.
-- Phase 3.5 runtime infrastructure is authorized.
+- Phase 3.5.0 runtime infrastructure design and ADR 0015 were accepted on
+  2026-07-26; Phase 3.5.1 only is authorized.
 - Runtime migration execution, environment credentials, APIs, and UI remain
   outside this milestone.
 
@@ -269,7 +271,8 @@ Evidence:
 [`PERSISTENCE_CONTRACT_STABILIZATION_REPORT.md`](../Validation/PERSISTENCE_CONTRACT_STABILIZATION_REPORT.md).
 
 Accepted on 2026-07-26. Persistence Port and PostgreSQL Adapter `1.0.0` are
-frozen. Phase 3.5 only is authorized.
+frozen. Phase 3.5.0 design was subsequently accepted and Phase 3.5.1 only is
+authorized.
 
 ### Planned Package Direction
 
@@ -283,16 +286,69 @@ backend/internal/storage/postgres/   PostgreSQL adapter
 The final layout must follow the project package standard. The adapter owns SQL
 and driver translation; engine packages remain unchanged.
 
-The final Phase 3.4 gate still requires conformance, exact round trips, digest
+The completed Phase 3.4 gate required conformance, exact round trips, digest
 checks, atomic publication/rollback, concurrency/idempotency, large-payload
 validation, full regression/race tests, and proof that no engine imports
-storage. Passing an earlier subphase does not authorize Phase 3.5.
+storage. Its acceptance authorized Phase 3.5.0 design only.
 
-## Phase 3.5 — Development Environment
+## Phase 3.5 — Runtime Infrastructure
 
-Only here are local connection settings introduced.
+### Phase 3.5.0 — Architecture and Design (Accepted)
 
-Required secret-handling rules:
+Design only:
+
+- configuration ownership, strict sources, precedence, validation, redaction,
+  and startup immutability;
+- capability-specific PostgreSQL pool ownership and lifecycle;
+- local/CI TLS-disabled boundary and staging/production `verify-full` policy;
+- startup, schema compatibility, health, graceful shutdown, and failure model;
+- structured safe logging and bounded metric semantics;
+- local, CI, staging, and production profiles;
+- ADR 0015 and the implementation validation plan.
+
+Documents:
+
+- `docs/Architecture/RUNTIME_INFRASTRUCTURE.md`;
+- `docs/Architecture/RUNTIME_CONFIGURATION_SPECIFICATION.md`;
+- `docs/Architecture/RUNTIME_LIFECYCLE_SPECIFICATION.md`;
+- `docs/Architecture/HEALTH_OBSERVABILITY_SPECIFICATION.md`;
+- `docs/Decisions/0015-runtime-infrastructure.md`;
+- `docs/Validation/RUNTIME_INFRASTRUCTURE_VALIDATION_PLAN.md`.
+
+No Go runtime code, compatibility migration, database connection, credential,
+`.env` file, listener, API, UI, or engine change is authorized by this design.
+
+#### Design Exit Gate
+
+Engineering accepted all six documents and ADR 0015 together on 2026-07-26.
+That acceptance authorized Phase 3.5.1 only.
+
+### Phase 3.5.1 — Configuration and Secret Boundaries (Current, Authorized)
+
+Implement strict immutable configuration, source precedence, safe views,
+profile validation, secret-provider interfaces, redaction tests, fuzzing, and
+benchmarks. No live database or pool construction.
+
+### Phase 3.5.2 — PostgreSQL Runtime (Gated)
+
+Implement TLS loading, capability pool set, additive compatibility-record
+migration, deployment/runtime compatibility verification, adapter construction,
+and disposable TLS/PostgreSQL integration tests.
+
+### Phase 3.5.3 — Lifecycle, Health, and Observability (Gated)
+
+Implement startup resource ownership, narrow capability routing, admission and
+drain, graceful/forced shutdown, callable health, structured logging, bounded
+metrics, and failure injection.
+
+### Phase 3.5.4 — Integrated Validation and Freeze (Gated)
+
+Run local/CI/profile, TLS, compatibility, regression, shuffle, vet, race,
+coverage, leak, security, benchmark, recovery, and documentation gates. Create
+the safe example configuration and runbooks. Acceptance authorizes Phase 3.6
+API design only.
+
+Required secret-handling rules remain:
 
 ```text
 .env
@@ -300,19 +356,8 @@ Required secret-handling rules:
 *.local.env
 ```
 
-must be ignored. Commit only a placeholder such as `.env.example` containing
-names, never values. Prefer a dedicated disposable development role and
-database. Production credentials are never used locally.
-
-### Exit Gate
-
-- one-command disposable environment;
-- health check and migration status;
-- least-privilege roles;
-- documented reset and recovery path;
-- no secrets in Git history, logs, reports, or tests.
-
-Acceptance authorizes Phase 3.6 only.
+These files must be ignored. Commit only names/placeholders in an example.
+Production credentials are never used locally or accepted in review evidence.
 
 ## Phase 3.6 — Query APIs
 

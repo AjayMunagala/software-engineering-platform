@@ -32,8 +32,9 @@ Persistence Port Design, ADR 0013, and Phase 3.4.2 Neutral Go Port and
 Conformance Harness are accepted. The Phase 3.4.3 PostgreSQL Adapter and ADR
 0014 were accepted on 2026-07-26. Phase 3.4.4 is accepted, and the
 storage-neutral Persistence Port and PostgreSQL reference adapter are frozen at
-**1.0.0**. Phase 3.5 runtime infrastructure is authorized; the intelligence
-runtime remains database-independent.
+**1.0.0**. Phase 3.5.0 runtime infrastructure design and ADR 0015 are accepted.
+Phase 3.5.1 runtime configuration implementation is authorized. Intelligence
+engines remain database-independent.
 
 ## Run RIE
 
@@ -71,11 +72,18 @@ The command emits the versioned JSON schema `1.0.0`.
 - [Phase 3.4.3 PostgreSQL adapter validation](docs/Validation/POSTGRESQL_ADAPTER_VALIDATION_REPORT.md)
 - [Phase 3.4.4 persistence stabilization](docs/Validation/PERSISTENCE_CONTRACT_STABILIZATION_REPORT.md)
 - [Persistence Port 1.0 release package](docs/Releases/PersistencePort-1.0.0/README.md)
+- [Phase 3.5 runtime architecture](docs/Architecture/RUNTIME_INFRASTRUCTURE.md)
+- [Runtime configuration specification](docs/Architecture/RUNTIME_CONFIGURATION_SPECIFICATION.md)
+- [Runtime lifecycle specification](docs/Architecture/RUNTIME_LIFECYCLE_SPECIFICATION.md)
+- [Health and observability specification](docs/Architecture/HEALTH_OBSERVABILITY_SPECIFICATION.md)
+- [ADR 0015 — Runtime infrastructure](docs/Decisions/0015-runtime-infrastructure.md)
+- [Runtime infrastructure validation plan](docs/Validation/RUNTIME_INFRASTRUCTURE_VALIDATION_PLAN.md)
 - [Complete project tests, metrics, and remaining work](PROJECT_TESTS_METRICS_AND_REMAINING_WORK.txt)
 
 ## Next milestone
 
 Phases 3.4.1 through 3.4.4 are accepted. Persistence Port and PostgreSQL
-Adapter **1.0.0** are frozen. Phase 3.5 runtime connection configuration, TLS,
-pool policy, health checks, and adapter startup wiring is authorized. APIs, UI,
-LLM, patch generation, and repository mutation remain unauthorized.
+Adapter **1.0.0** are frozen. Phase 3.5.0 design is accepted and Phase 3.5.1
+runtime configuration is authorized. PostgreSQL pools, lifecycle, health,
+observability, APIs, UI, LLM, patch generation, and repository mutation remain
+unauthorized.

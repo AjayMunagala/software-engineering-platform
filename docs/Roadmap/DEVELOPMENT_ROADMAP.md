@@ -56,7 +56,9 @@
 - Phase 3.4.3: PostgreSQL adapter — accepted on 2026-07-26.
 - Phase 3.4.4: Persistence Port and PostgreSQL Adapter `1.0.0` — accepted and
   frozen on 2026-07-26.
-- Phase 3.5: disposable development environment and secret handling.
+- Phase 3.5.0: runtime infrastructure design and ADR 0015 accepted on
+  2026-07-26.
+- Phase 3.5.1: runtime configuration implementation authorized.
 - Phase 3.6: REST/gRPC query APIs.
 
 PostgreSQL remains downstream from immutable artifacts and is not an engine

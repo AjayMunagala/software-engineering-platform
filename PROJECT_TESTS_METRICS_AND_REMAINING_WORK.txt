@@ -79,6 +79,9 @@ Persistence
   Phase 3.4.4 persistence contract stabilization: ACCEPTED AND FROZEN
   Persistence Port: 1.0.0
   PostgreSQL Adapter: 1.0.0
+  Phase 3.5.0 runtime infrastructure design: ACCEPTED
+  ADR 0015 runtime infrastructure: ACCEPTED
+  Phase 3.5.1 runtime configuration implementation: AUTHORIZED
 
 ======================================================================
 3. RIE REAL-REPOSITORY VALIDATION
@@ -596,15 +599,46 @@ Phase 3.4.4 Windows benchmark ranges (five repetitions):
     32 B/op, 1 alloc/op;
   - 4-GiB chunk count: 0.134-0.192 ns/op, zero allocations.
 
-PHASE 3.5 — DEVELOPMENT DATABASE ENVIRONMENT
+PHASE 3.5 — RUNTIME INFRASTRUCTURE
 
-Remaining tasks:
-  - create a dedicated development database;
-  - create restricted migrator, ingestor, reader, retention, audit, and backup
-    roles as approved;
-  - keep credentials in ignored local configuration;
-  - never use the PostgreSQL administrator account in the application;
-  - document start, stop, reset, backup, and restore commands.
+Design package completed locally for engineering review:
+  - Runtime Infrastructure Architecture;
+  - Runtime Configuration Specification;
+  - Runtime Lifecycle Specification;
+  - Health and Observability Specification;
+  - ADR 0015 — Runtime Infrastructure (Accepted);
+  - Runtime Infrastructure Validation Plan.
+
+Accepted design direction:
+  - configuration is loaded once, validated strictly, and immutable after startup;
+  - precedence is defaults, optional strict JSON file, environment, then an
+    allowlisted set of non-secret command-line overrides;
+  - exactly one external SecretProvider resolves secrets outside persistence;
+  - staging and production use separate capability-specific PostgreSQL pools
+    and credentials for ingestion, reads, and retention;
+  - local and CI may use a combined disposable role, but not staging or
+    production;
+  - PostgreSQL pools are runtime-owned and injected into adapter instances;
+  - TLS is disabled only for explicit local/CI loopback or local-socket use;
+  - staging and production require certificate and hostname verification;
+  - startup proves configuration, database reachability, schema compatibility,
+    privileges, adapter construction, and health before becoming ready;
+  - graceful shutdown closes admission, drains bounded work, and closes pools;
+  - liveness and readiness are separate callable health capabilities;
+  - logs and metrics prohibit credentials, SQL text, and artifact payload data;
+  - the Persistence Port and PostgreSQL Adapter 1.0.0 APIs do not change.
+
+No runtime code, SQL migration, database mutation, credentials, .env file,
+connection attempt, API listener, or UI work was created during Phase 3.5.0.
+
+Remaining governance and implementation work:
+  - implement and validate Phase 3.5.1 configuration and secret boundaries;
+  - later gates separately control Phase 3.5.2 PostgreSQL pool/TLS/schema
+    compatibility, Phase 3.5.3 lifecycle/health/observability, and Phase 3.5.4
+    integrated validation and runtime freeze;
+  - production credentials, APIs, UI, authentication, business logic, AI
+    orchestration, engine changes, and new persistence capabilities remain out
+    of scope.
 
 PHASE 3.6 — APIs
 
@@ -657,6 +691,11 @@ Accepted and pushed Phase 3.2 milestone:
 Released tags:
   go-package-identity-inventory/v1.0.0
   go-semantic-inventory/v1.0.0
+  persistence-port/v1.0.0
+  postgresql-adapter/v1.0.0
+
+Persistence subsystem release commit:
+  6eb20db Release persistence subsystem 1.0.0
 
 Accepted for the Phase 3.2 milestone commit and push:
   PostgreSQL benchmark harness
@@ -673,10 +712,11 @@ inside this same commit.
 ======================================================================
 
 The repository and Go intelligence foundation is released and stable. The
-PostgreSQL schema, benchmark, and migration framework are accepted and frozen.
-Phases 3.4.1 through 3.4.4 are accepted. Persistence Port and PostgreSQL
-Adapter 1.0.0 are frozen.
+PostgreSQL schema, benchmark, migration framework, Persistence Port 1.0.0, and
+PostgreSQL Adapter 1.0.0 are accepted and frozen.
+
+Phase 3.5.0 runtime infrastructure design and ADR 0015 are accepted.
 
 NEXT ACTION:
-  Complete the approved release-management actions, then begin only Phase 3.5
-  runtime infrastructure. Phase 3.6 and later remain unauthorized.
+  Implement and validate only Phase 3.5.1 runtime configuration. Phase 3.5.2
+  and later remain separately gated and unauthorized.
