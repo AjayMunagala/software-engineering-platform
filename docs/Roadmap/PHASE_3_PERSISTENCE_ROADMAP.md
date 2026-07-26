@@ -2,8 +2,8 @@
 
 ## Status
 
-- Current milestone: Phase 3.5.1 — Runtime Configuration
-- Current authorization: Phase 3.5.1 implementation only
+- Current milestone: Phase 3.5.2 — PostgreSQL Runtime
+- Current authorization: Phase 3.5.2 implementation only
 - PostgreSQL connection: disposable local migration/test databases only
 - Credentials: not required and must not be uploaded
 - Transient benchmark DDL/harness: accepted evidence
@@ -13,7 +13,9 @@
 - PostgreSQL adapter local exit gate: reached on 2026-07-25
 - PostgreSQL adapter accepted: 2026-07-26
 - Phase 3.5.0 design and ADR 0015: accepted on 2026-07-26
-- Phase 3.5.1 runtime configuration implementation: authorized
+- Phase 3.5.1 runtime configuration local exit gate: reached on 2026-07-26
+- Phase 3.5.1 engineering acceptance: accepted on 2026-07-26
+- Phase 3.5.2 PostgreSQL runtime implementation: authorized
 - APIs and UI: unauthorized
 
 ## Goal
@@ -323,13 +325,18 @@ No Go runtime code, compatibility migration, database connection, credential,
 Engineering accepted all six documents and ADR 0015 together on 2026-07-26.
 That acceptance authorized Phase 3.5.1 only.
 
-### Phase 3.5.1 — Configuration and Secret Boundaries (Current, Authorized)
+### Phase 3.5.1 — Configuration and Secret Boundaries (Accepted)
 
 Implement strict immutable configuration, source precedence, safe views,
 profile validation, secret-provider interfaces, redaction tests, fuzzing, and
 benchmarks. No live database or pool construction.
 
-### Phase 3.5.2 — PostgreSQL Runtime (Gated)
+Local implementation and validation completed on 2026-07-26. Evidence:
+[`RUNTIME_CONFIGURATION_VALIDATION_REPORT.md`](../Validation/RUNTIME_CONFIGURATION_VALIDATION_REPORT.md).
+Engineering accepted the implementation and evidence on 2026-07-26 and
+authorized Phase 3.5.2 only.
+
+### Phase 3.5.2 — PostgreSQL Runtime (Current, Authorized)
 
 Implement TLS loading, capability pool set, additive compatibility-record
 migration, deployment/runtime compatibility verification, adapter construction,

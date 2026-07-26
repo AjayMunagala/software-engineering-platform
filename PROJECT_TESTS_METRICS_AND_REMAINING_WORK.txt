@@ -81,7 +81,8 @@ Persistence
   PostgreSQL Adapter: 1.0.0
   Phase 3.5.0 runtime infrastructure design: ACCEPTED
   ADR 0015 runtime infrastructure: ACCEPTED
-  Phase 3.5.1 runtime configuration implementation: AUTHORIZED
+  Phase 3.5.1 runtime configuration: ACCEPTED
+  Phase 3.5.2 PostgreSQL runtime: AUTHORIZED
 
 ======================================================================
 3. RIE REAL-REPOSITORY VALIDATION
@@ -601,7 +602,7 @@ Phase 3.4.4 Windows benchmark ranges (five repetitions):
 
 PHASE 3.5 — RUNTIME INFRASTRUCTURE
 
-Design package completed locally for engineering review:
+Design package accepted on 2026-07-26:
   - Runtime Infrastructure Architecture;
   - Runtime Configuration Specification;
   - Runtime Lifecycle Specification;
@@ -631,8 +632,40 @@ Accepted design direction:
 No runtime code, SQL migration, database mutation, credentials, .env file,
 connection attempt, API listener, or UI work was created during Phase 3.5.0.
 
+Phase 3.5.1 runtime configuration local validation:
+  - strict defaults/file/environment/CLI precedence: PASS;
+  - unknown and duplicate field/key/flag rejection: PASS;
+  - immutable secret-free model and detached getters: PASS;
+  - local/CI combined and staging/production separate identities: PASS;
+  - TLS policy, duration, connection, pool, host, and path validation: PASS;
+  - single SecretProvider, missing/ambiguous provider, and redaction: PASS;
+  - focused and full backend tests: PASS;
+  - three shuffled full-backend repetitions: PASS;
+  - go vet: PASS;
+  - Windows targeted/full race: PASS, zero races;
+  - Ubuntu WSL targeted/full race: PASS, zero races;
+  - strict JSON and environment/validation fuzz: PASS, approximately 759,294
+    combined executions;
+  - statement coverage: 86.6%.
+
+Phase 3.5.1 Windows benchmark ranges (five repetitions):
+  - local environment load: 6.107-14.973 us/op, 8,088 B/op,
+    34 allocs/op;
+  - production environment load: 17.598-21.887 us/op, 9,064 B/op,
+    46 allocs/op;
+  - strict representative JSON decode: 29.295-37.703 us/op, 8,888 B/op,
+    315 allocs/op;
+  - 64-KiB file compose/validate: 493.861-837.859 us/op,
+    408,639-408,665 B/op, 121 allocs/op;
+  - safe redacted view: 4.339-5.736 us/op, 2,776 B/op,
+    18 allocs/op.
+
+Phase 3.5.1 introduced no PostgreSQL connection, SQL, pool, migration, runtime
+lifecycle, health/observability implementation, API listener, UI, or engine
+change. Persistence Port and PostgreSQL Adapter 1.0.0 remain unchanged.
+
 Remaining governance and implementation work:
-  - implement and validate Phase 3.5.1 configuration and secret boundaries;
+  - implement and validate only Phase 3.5.2 PostgreSQL runtime;
   - later gates separately control Phase 3.5.2 PostgreSQL pool/TLS/schema
     compatibility, Phase 3.5.3 lifecycle/health/observability, and Phase 3.5.4
     integrated validation and runtime freeze;
@@ -718,5 +751,5 @@ PostgreSQL Adapter 1.0.0 are accepted and frozen.
 Phase 3.5.0 runtime infrastructure design and ADR 0015 are accepted.
 
 NEXT ACTION:
-  Implement and validate only Phase 3.5.1 runtime configuration. Phase 3.5.2
-  and later remain separately gated and unauthorized.
+  Implement and validate only Phase 3.5.2 PostgreSQL runtime. Phase 3.5.3 and
+  later remain separately gated and unauthorized.

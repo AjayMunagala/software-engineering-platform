@@ -58,7 +58,8 @@
   frozen on 2026-07-26.
 - Phase 3.5.0: runtime infrastructure design and ADR 0015 accepted on
   2026-07-26.
-- Phase 3.5.1: runtime configuration implementation authorized.
+- Phase 3.5.1: runtime configuration accepted on 2026-07-26.
+- Phase 3.5.2: PostgreSQL runtime implementation authorized.
 - Phase 3.6: REST/gRPC query APIs.
 
 PostgreSQL remains downstream from immutable artifacts and is not an engine

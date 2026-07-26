@@ -83,14 +83,14 @@ RuntimeConfig
     Host
     Port
     Name
-    User
+    User (local/CI combined role only)
     ApplicationName
     ConnectTimeout
     ConnectionBudget
     Pools
-      Ingest { MaxConns, MinIdleConns, SecretReference }
-      Read { MaxConns, MinIdleConns, SecretReference }
-      Retention { MaxConns, MinIdleConns, SecretReference }
+      Ingest { User, MaxConns, MinIdleConns, SecretReference }
+      Read { User, MaxConns, MinIdleConns, SecretReference }
+      Retention { User, MaxConns, MinIdleConns, SecretReference }
       MaxConnLifetime
       MaxConnLifetimeJitter
       MaxConnIdleTime
@@ -122,6 +122,7 @@ RuntimeConfig
 | host | DNS name, IP literal, absolute Unix-socket directory, or loopback |
 | port | 1–65535; ignored for Unix socket |
 | database/user | safe non-empty identifiers; never logged together as a DSN |
+| capability users | staging/production require distinct ingest, read, and retention users; local/CI require only the combined user |
 | application name | fixed safe prefix plus deployment identifier, max 64 octets |
 | connection budget | local/CI fixed default 4; staging/production explicit 3–64 |
 | per-pool maximum | 1–budget; sum cannot exceed budget |
@@ -165,12 +166,15 @@ AEGIS_DATABASE_PASSWORD
 AEGIS_DATABASE_CONNECTION_BUDGET
 AEGIS_DATABASE_INGEST_MAX_CONNS
 AEGIS_DATABASE_INGEST_MIN_IDLE_CONNS
+AEGIS_DATABASE_INGEST_USER
 AEGIS_DATABASE_INGEST_PASSWORD
 AEGIS_DATABASE_READ_MAX_CONNS
 AEGIS_DATABASE_READ_MIN_IDLE_CONNS
+AEGIS_DATABASE_READ_USER
 AEGIS_DATABASE_READ_PASSWORD
 AEGIS_DATABASE_RETENTION_MAX_CONNS
 AEGIS_DATABASE_RETENTION_MIN_IDLE_CONNS
+AEGIS_DATABASE_RETENTION_USER
 AEGIS_DATABASE_RETENTION_PASSWORD
 AEGIS_DATABASE_CONNECT_TIMEOUT
 AEGIS_DATABASE_TLS_MODE
@@ -182,9 +186,10 @@ AEGIS_STARTUP_TIMEOUT
 AEGIS_DRAIN_TIMEOUT
 ```
 
-`AEGIS_DATABASE_PASSWORD` is a local/CI combined-role convenience only.
-Staging/production require separate ingest, read, and retention secrets. Every
-password is consumed only by the environment secret provider and is never
+`AEGIS_DATABASE_USER` and `AEGIS_DATABASE_PASSWORD` are local/CI combined-role
+conveniences only. Staging/production require separate ingest, read, and
+retention users and secrets; their three users must be distinct. Every password
+is consumed only by the environment secret provider and is never
 included in `RuntimeConfig.String`, structured config output, or diagnostics. A
 single `DATABASE_URL` variable is not part of the v1 contract because it mixes
 secrets and non-secrets and is difficult to redact safely.
