@@ -5,7 +5,9 @@
 - Phase: 4.0
 - Version: `0.1.0`
 - Status: Accepted design-spike baseline on 2026-07-27
-- Phase 4.0.1 design spike: authorized
+- Phase 4.0.1 design spike: accepted
+- Phase 4.0.2 neutral contract: accepted
+- Phase 4.0.3 repository lifecycle: authorized
 - Production implementation: not started
 - Date: 2026-07-27
 
@@ -85,6 +87,11 @@ query durable state and return success for a published scan. It must never
 finalize that scan as failed.
 
 ## Neutral contract and conformance gates
+
+Local Phase 4.0.2 evidence is recorded in
+`REPOSITORY_SERVICE_CONTRACT_VALIDATION_REPORT.md`. Both coverage gates pass;
+Windows and Ubuntu regression, vet, shuffle, race, benchmark, fuzz, scope, and
+dependency evidence pass. Phase 4.0.3 is authorized; Phase 4.0.4 remains gated.
 
 - constructor validation for every ID, enum, profile, timestamp, and limit;
 - deep-copy and detached-view validation;

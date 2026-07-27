@@ -6,7 +6,9 @@
 - Design version: `0.1.0`
 - Status: Accepted on 2026-07-27
 - Date: 2026-07-27
-- Phase 4.0.1 design spike: authorized
+- Phase 4.0.1 design spike: accepted
+- Phase 4.0.2 neutral contract: accepted
+- Phase 4.0.3 repository lifecycle: authorized
 - Production implementation: not started
 
 ## Purpose

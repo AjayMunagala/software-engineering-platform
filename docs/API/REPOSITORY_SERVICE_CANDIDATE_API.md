@@ -4,11 +4,12 @@
 
 - Phase: 4.0 design
 - Contract version: `0.1.0`
-- Status: Design-approved candidate on 2026-07-27
+- Status: Phase 4.0.2 accepted on 2026-07-27
 - Transport: none
 - Phase 4.0.1 spike: accepted on 2026-07-27
-- Phase 4.0.2 neutral contract implementation: authorized
-- Repository lifecycle and scan orchestration: not authorized
+- Phase 4.0.2 neutral contract implementation: accepted
+- Phase 4.0.3 repository lifecycle: authorized
+- Scan orchestration: not authorized
 
 This document defines Go service semantics. It is not an HTTP, gRPC, CLI, or
 authorization contract.
@@ -65,7 +66,10 @@ type RepositoryID string
 type ScanID string
 type ArtifactID string
 type Cursor string
-type SourceHandle string
+
+type Digest [32]byte
+
+type SourceHandle struct { /* private sensitive value */ }
 ```
 
 IDs are bounded validated machine values. They are not paths, database keys,
@@ -73,12 +77,9 @@ credentials, authorization tokens, or metric labels.
 
 ## Already-authorized scope
 
-```go
-type OperationScope interface {
-    ScopeID() ScopeID
-    PrincipalID() PrincipalID
-}
-```
+`Scope` is a constructor-validated immutable value exposing `ScopeID()` and
+`PrincipalID()`. Request values store this concrete detached value instead of
+an implementation supplied by a caller.
 
 The service validates shape but makes no authorization decision. A future host
 must authorize the operation before constructing the scope.
@@ -87,40 +88,50 @@ must authorize the operation before constructing the scope.
 
 ```go
 type RegisterRepositoryParams struct {
-    Scope        OperationScope
+    Scope        Scope
     RequestID    RequestID
     RepositoryID RepositoryID
     DisplayName  string
-    Source       SourceHandle
+    SourceHandle string
 }
 
-type RegisterRepositoryRequest interface {
-    Scope() OperationScope
+type RegisterRepositoryRequest struct { /* private fields */ }
+
+// Accessors:
+/*
+    Scope() Scope
     RequestID() RequestID
     RepositoryID() RepositoryID
     DisplayName() string
     // SourceHandle is sensitive process-local routing data. It is never
     // returned, persisted, logged, or used as a metric label.
     SourceHandle() SourceHandle
-}
+*/
 ```
+
+`SourceHandle.String`, `SourceHandle.GoString`, and the containing request
+formatters are redacted. `Reveal` is reserved for the later authorized source
+resolver. It must never be persisted, returned, logged, or used as a label.
 
 Registration resolves the source, computes the normalized source proof, and
 persists only that proof. A retry with the same request ID and normalized
 values is idempotent.
 
 ```go
-type Repository interface {
+type Repository struct { /* private fields */ }
+
+// Accessors:
+/*
     RepositoryID() RepositoryID
     DisplayName() string
     SourceKind() string
-    SourceFingerprintScheme() string
-    SourceFingerprint() string
+    FingerprintScheme() string
+    Fingerprint() Digest
     State() RepositoryState
     CurrentScanID() ScanID
     CreatedAt() time.Time
     UpdatedAt() time.Time
-}
+*/
 
 type RepositoryState string // active | archived | purge_pending
 ```
@@ -134,53 +145,63 @@ No repository response contains an absolute path or source handle.
 
 ```go
 type ExecuteScanParams struct {
-    Scope        OperationScope
+    Scope        Scope
     RequestID    RequestID
     RepositoryID RepositoryID
     ScanID       ScanID
-    Source       SourceHandle
+    SourceHandle string
     Profile      AnalysisProfile
 }
 
-type ExecuteScanRequest interface {
-    Scope() OperationScope
+type ExecuteScanRequest struct { /* private fields */ }
+
+// Accessors:
+/*
+    Scope() Scope
     RequestID() RequestID
     RepositoryID() RepositoryID
     ScanID() ScanID
     SourceHandle() SourceHandle
     Profile() AnalysisProfile
-}
+*/
 
-type AnalysisProfile interface {
+type AnalysisProfile struct { /* private fields */ }
+
+// Accessors:
+/*
     Name() string       // repository-go
     Version() string    // 1
-    Digest() string     // lowercase SHA-256 of canonical profile bytes
-}
+    Digest() Digest     // exact SHA-256 of canonical profile bytes
+*/
 ```
 
 Phase 4.0 accepts only `repository-go/v1` and its frozen digest. Unknown
 profiles fail with `invalid_input`; the service never substitutes a profile.
 
 ```go
-type ScanResult interface {
+type ScanResult struct { /* private fields */ }
+
+// Accessors:
+/*
     Scan() Scan
     Artifacts() []Artifact
     Disposition() Disposition
-}
+*/
 
-type Scan interface {
+type Scan struct { /* private fields */ }
+
+// Accessors:
+/*
     RepositoryID() RepositoryID
     ScanID() ScanID
-    ProfileName() string
-    ProfileVersion() string
-    ProfileDigest() string
+    Profile() AnalysisProfile
     SourceRevision() string
     State() ScanState
     ReasonCode() string
     RequestedAt() time.Time
     StartedAt() time.Time
     FinishedAt() time.Time
-}
+*/
 
 type ScanState string // requested | running | succeeded | failed | canceled
 type Disposition string // created | already_present | joined
@@ -197,7 +218,10 @@ leader execution.
 ## Artifact query and export
 
 ```go
-type Artifact interface {
+type Artifact struct { /* private fields */ }
+
+// Accessors:
+/*
     ArtifactID() ArtifactID
     ScanID() ScanID
     Name() string
@@ -206,17 +230,20 @@ type Artifact interface {
     CodecName() string
     CodecVersion() string
     MediaType() string
-    PayloadDigest() string
+    PayloadDigest() Digest
     PayloadSize() uint64
     ProducerName() string
     ProducerVersion() string
     CreatedAt() time.Time
-}
+*/
 
-type ExportReceipt interface {
-    PayloadDigest() string
+type ExportReceipt struct { /* private fields */ }
+
+// Accessors:
+/*
+    PayloadDigest() Digest
     PayloadSize() uint64
-}
+*/
 ```
 
 Artifact payload export is streaming. The service does not return `[]byte` and
@@ -235,9 +262,11 @@ Mutable `*Params` values are accepted only by constructors. Constructors:
 
 Zero values are invalid unless explicitly documented as an optional field.
 
-## Required dependency interfaces
+## Future implementation dependency interfaces
 
-These are application-side capabilities, not public transport APIs.
+The following design remains reserved for later authorized implementation
+milestones. These interfaces are not part of the Phase 4.0.2 package and are
+shown only to preserve the accepted dependency direction.
 
 ```go
 type AdmissionController interface {
@@ -385,13 +414,16 @@ private.
 ## Configuration candidate
 
 ```go
-type ConfigParams struct {
-    FinalizationTimeout       time.Duration
-    MaximumArtifactsPerScan  int
-    MaximumArtifactBytes     uint64
-    MaterializerMemoryBytes  uint64
-    MaximumDiagnostics       int
-    MaximumConcurrentScans   int
+type Config struct {
+    FinalizationTimeout     time.Duration
+    MaxArtifactsPerScan     int
+    MaxArtifactBytes        uint64
+    MaterializerMemoryBytes uint64
+    MaxDiagnostics          int
+    MaxConcurrentScans      int
+    MaxPageSize             int
+    MaxDisplayNameBytes     int
+    MaxSourceHandleBytes    int
 }
 ```
 
@@ -400,13 +432,36 @@ Candidate defaults:
 - finalization timeout: 5 seconds;
 - maximum artifacts per scan: 64;
 - maximum artifact bytes: 4 GiB;
-- in-memory materializer threshold: 8 MiB;
 - materializer working-memory budget: 64 MiB;
-- maximum diagnostics: inherited from the frozen profile;
-- maximum concurrent scans: bounded by runtime admission and configuration.
+- maximum diagnostics: 10,000;
+- maximum concurrent scans: 64;
+- maximum page size: 1,000;
+- maximum display name: 256 bytes;
+- maximum opaque source handle: 1,024 bytes.
 
 Configuration is immutable after construction. Limits may become stricter in
 staging/production but may not exceed released persistence limits.
+
+## Analysis profile registry
+
+`ProfileRegistry` is immutable and returns detached definitions. The initial
+`repository-go` version `1` definition contains the seven released RIE
+artifacts plus Go language, package-identity, and semantic inventories. Its
+digest is calculated from versioned canonical profile bytes. Exact
+name/version/digest matching is required; the contract never substitutes an
+unknown profile.
+
+## Phase 4.0.2 evidence
+
+- neutral contract statement coverage: 95.3%;
+- reusable conformance harness statement coverage: 85.4%;
+- target and full-backend regression, vet, shuffle, and race: pass;
+- Windows and Ubuntu race validation: pass, zero races;
+- two final five-second fuzz campaigns: 1,176,977 executions, no panic;
+- dependency audit: no RIE, LIE, persistence, PostgreSQL, pgx, runtime, SQL,
+  filesystem, command, network, or transport dependency;
+- conformance first validates scope isolation on reads, lists, export, and
+  mutations using a thread-safe fake adapter.
 
 ## API freeze gate
 

@@ -4,7 +4,8 @@
 
 - Phase 4.0 design: accepted on 2026-07-27
 - Phase 4.0.1 design spike: accepted on 2026-07-27
-- Phase 4.0.2 neutral service contract and conformance harness: authorized
+- Phase 4.0.2 neutral service contract and conformance harness: accepted on 2026-07-27
+- Phase 4.0.3 repository lifecycle: authorized
 - Production implementation: not started
 - Phase 4.1 transports: unauthorized
 - Date: 2026-07-27
@@ -77,7 +78,7 @@ Local evidence is recorded in
 `docs/Validation/REPOSITORY_SERVICE_DESIGN_SPIKE_REPORT.md` and was accepted on
 2026-07-27.
 
-## Phase 4.0.2 — Neutral service contract and conformance harness (current, authorized)
+## Phase 4.0.2 — Neutral service contract and conformance harness ✅
 
 Implement only:
 
@@ -95,7 +96,11 @@ wiring in this package.
 Exit gate: public candidate behavior passes conformance and is accepted before
 repository lifecycle implementation begins.
 
-## Phase 4.0.3 — Repository lifecycle
+Local evidence is recorded in
+`docs/Validation/REPOSITORY_SERVICE_CONTRACT_VALIDATION_REPORT.md`. The evidence
+was accepted on 2026-07-27 and authorized Phase 4.0.3 only.
+
+## Phase 4.0.3 — Repository lifecycle (current, authorized)
 
 Implement:
 

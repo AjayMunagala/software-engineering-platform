@@ -979,3 +979,71 @@ repository mutation.
 
 Detailed evidence:
   docs/Validation/REPOSITORY_SERVICE_DESIGN_SPIKE_REPORT.md
+
+======================================================================
+17. PHASE 4.0.2 NEUTRAL SERVICE CONTRACT & CONFORMANCE
+======================================================================
+
+Status on 2026-07-27:
+  - implementation and local validation: COMPLETE;
+  - engineering acceptance: ACCEPTED;
+  - Phase 4.0.3 Repository Lifecycle: AUTHORIZED;
+  - commit and push: APPROVED.
+
+Implemented:
+  - RepositoryLifecycleService, ScanExecutionService, and
+    ArtifactQueryService capability interfaces;
+  - constructor-validated immutable requests, queries, results, pages, and
+    receipts;
+  - stable neutral error kinds with safe cancellation/timeout unwrapping;
+  - bounded neutral configuration and immutable analysis-profile registry;
+  - frozen repository-service-artifact-id/v1 canonical representation;
+  - request-level and source-handle-level formatting redaction;
+  - reusable adapter-independent conformance harness;
+  - thread-safe fake adapter used only for validation;
+  - checksum-verified disposable Ubuntu Go 1.26.2 validation scripts.
+
+Validation:
+  - target tests, vet, five shuffled repetitions: PASS;
+  - full backend regression, vet, three shuffled repetitions: PASS;
+  - Windows targeted/full race: PASS, zero races;
+  - Ubuntu targeted/full regression and race: PASS, zero races;
+  - neutral contract coverage: 95.3%;
+  - conformance harness coverage: 85.4%;
+  - artifact identity fuzz: 91,944 executions after 98 cached corpus cases,
+    PASS;
+  - source handle fuzz: 1,085,033 executions after 102 cached corpus cases,
+    PASS;
+  - combined final fuzz executions: 1,176,977, no panic;
+  - forbidden dependency and source audit: PASS.
+
+Windows benchmark ranges:
+  - artifact identity: 446.3-491.9 ns/op, 544 B/op, 6 allocs/op;
+  - request validation: 130.6-141.3 ns/op, 0 B/op, 0 allocs/op;
+  - profile resolution: 159.5-173.6 ns/op, 480 B/op, 1 alloc/op;
+  - fake repository read: 54.42-60.11 ns/op, 0 B/op, 0 allocs/op;
+  - fake exact export: 334.1-654.6 ns/op, 368 B/op, 5 allocs/op.
+
+Ubuntu benchmark ranges:
+  - artifact identity: 537.8-590.5 ns/op, 544 B/op, 6 allocs/op;
+  - request validation: 141.2-147.0 ns/op, 0 B/op, 0 allocs/op;
+  - profile resolution: 201.3-208.4 ns/op, 480 B/op, 1 alloc/op;
+  - fake repository read: 57.32-59.93 ns/op, 0 B/op, 0 allocs/op;
+  - fake exact export: 330.8-367.5 ns/op, 368 B/op, 5 allocs/op.
+
+Defect found and corrected:
+  - formatting a complete source-bearing request could bypass the redacted
+    SourceHandle formatter and reveal its private value;
+  - both source-bearing request types now provide redacted String/GoString
+    methods with regression coverage.
+  - fake payload bytes were initially keyed by artifact ID without repository
+    scope; payload keys now include scope/repository/scan/artifact and a
+    same-ID cross-scope export test proves isolation.
+
+No production repository lifecycle, scan orchestration, engine execution,
+materialization, persistence, PostgreSQL, SQL, pgx, runtime wiring, filesystem,
+network, command execution, API, listener, authentication, UI, queue, worker,
+AI, credential, or repository mutation was introduced.
+
+Detailed evidence:
+  docs/Validation/REPOSITORY_SERVICE_CONTRACT_VALIDATION_REPORT.md

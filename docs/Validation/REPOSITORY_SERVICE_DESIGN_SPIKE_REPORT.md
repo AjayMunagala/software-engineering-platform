@@ -7,7 +7,8 @@
 - Date: 2026-07-27
 - ADR: 0016 Accepted
 - Production service implementation: not started
-- Phase 4.0.2: authorized
+- Phase 4.0.2: accepted
+- Phase 4.0.3 repository lifecycle: authorized
 
 ## Executive result
 
@@ -261,7 +262,8 @@ independent of payload size in the measured fixtures.
 
 Engineering accepted Phase 4.0.1 evidence on 2026-07-27. The spike package
 remains explicitly experimental, and the candidate contract incorporates the
-frozen ID algorithm while remaining at `0.1.0`. Only Phase 4.0.2 — Neutral
-Service Contract and Conformance Harness is authorized. Phase 4.0.3 and later,
-REST/gRPC, UI, authentication, AI, queues, workers, cloning, and remote fetch
-remain unauthorized.
+frozen ID algorithm while remaining at `0.1.0`. Phase 4.0.2 — Neutral Service
+Contract and Conformance Harness was accepted on 2026-07-27. Only Phase 4.0.3
+Repository Lifecycle is authorized. Phase 4.0.4 and later, REST/gRPC, UI,
+authentication, AI, queues, workers, cloning, and remote fetch remain
+unauthorized.

@@ -1,0 +1,132 @@
+package conformance
+
+import (
+	"bytes"
+	"context"
+	"errors"
+	"io"
+	"sync"
+	"testing"
+
+	"github.com/AjayMunagala/software-engineering-platform/backend/service/repository"
+)
+
+func TestMemoryAdapterPassesConformance(t *testing.T) { Run(t, NewMemoryFactory()) }
+
+func TestConfigurationAndFactoryValidation(t *testing.T) {
+	if _, err := New(DefaultConfig(), DefaultConfig()); !errors.Is(err, ErrInvalidConfig) {
+		t.Fatalf("multiple configs: %v", err)
+	}
+	if _, err := New(Config{MaxExportBytes: defaultMaxExportBytes + 1}); !errors.Is(err, ErrInvalidConfig) {
+		t.Fatalf("invalid limit: %v", err)
+	}
+	if _, err := New(Config{MaxExportBytes: 1}); err != nil {
+		t.Fatalf("partial config: %v", err)
+	}
+	if _, _, err := NewMemoryFactory().Open(nil); repository.KindOf(err) != repository.ErrorInvalidInput {
+		t.Fatalf("nil context: %v", err)
+	}
+}
+
+func TestMemoryAdapterConcurrentReadsAndCleanup(t *testing.T) {
+	fixture, cleanup, err := NewMemoryFactory().Open(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	query, _ := repository.NewRepositoryQuery(fixture.Scenario.PrimaryScope, fixture.Scenario.Repository.RepositoryID())
+	var wait sync.WaitGroup
+	for range 100 {
+		wait.Add(1)
+		go func() {
+			defer wait.Done()
+			value, readErr := fixture.Service.GetRepository(context.Background(), query)
+			if readErr != nil || value.RepositoryID() == "" {
+				t.Errorf("read=%+v err=%v", value, readErr)
+			}
+		}()
+	}
+	wait.Wait()
+	if err := cleanup(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if err := cleanup(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestMemoryAdapterAdditionalContractEdges(t *testing.T) {
+	fixture, cleanup, err := NewMemoryFactory().Open(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = cleanup(context.Background()) }()
+
+	other := fixture.Scenario.OtherScope
+	repositoryID := fixture.Scenario.Repository.RepositoryID()
+	scanID := fixture.Scenario.SucceededScan.ScanID()
+	artifactID := fixture.Scenario.Artifact.ArtifactID()
+	repositoryQuery, _ := repository.NewRepositoryQuery(other, repositoryID)
+	if _, err = fixture.Service.GetRepository(context.Background(), repositoryQuery); repository.KindOf(err) != repository.ErrorNotFound {
+		t.Fatalf("cross-scope repository read: %v", err)
+	}
+	scanQuery, _ := repository.NewScanQuery(other, repositoryID, scanID)
+	if _, err = fixture.Service.GetScan(context.Background(), scanQuery); repository.KindOf(err) != repository.ErrorNotFound {
+		t.Fatalf("cross-scope scan read: %v", err)
+	}
+	artifactQuery, _ := repository.NewArtifactQuery(other, repositoryID, scanID, artifactID)
+	if _, err = fixture.Service.GetArtifact(context.Background(), artifactQuery); repository.KindOf(err) != repository.ErrorNotFound {
+		t.Fatalf("cross-scope artifact read: %v", err)
+	}
+
+	primary := fixture.Scenario.PrimaryScope
+	listRepositories, _ := fixture.Contract.NewRepositoryListRequest(repository.RepositoryListParams{Scope: primary, PageSize: 1, Cursor: "invalid"})
+	page, err := fixture.Service.ListRepositories(context.Background(), listRepositories)
+	if err != nil || len(page.Items()) != 0 {
+		t.Fatalf("invalid cursor page=%+v err=%v", page, err)
+	}
+	listScans, _ := fixture.Contract.NewScanListRequest(repository.ScanListParams{Scope: primary, RepositoryID: repositoryID, PageSize: 1})
+	firstScans, err := fixture.Service.ListScans(context.Background(), listScans)
+	if err != nil || len(firstScans.Items()) != 1 || firstScans.NextCursor() == "" {
+		t.Fatalf("first scan page=%+v err=%v", firstScans, err)
+	}
+	listArtifacts, _ := fixture.Contract.NewArtifactListRequest(repository.ArtifactListParams{Scope: other, RepositoryID: repositoryID, ScanID: scanID, PageSize: 10})
+	artifacts, err := fixture.Service.ListArtifacts(context.Background(), listArtifacts)
+	if err != nil || len(artifacts.Items()) != 0 {
+		t.Fatalf("cross-scope artifacts=%+v err=%v", artifacts, err)
+	}
+
+	export, _ := repository.NewExportArtifactRequest(mustArtifactQuery(t, primary, repositoryID, scanID, artifactID))
+	if _, err = fixture.Service.ExportArtifact(context.Background(), export, nil); repository.KindOf(err) != repository.ErrorInvalidInput {
+		t.Fatalf("nil writer: %v", err)
+	}
+	if _, err = fixture.Service.ExportArtifact(context.Background(), export, failingWriter{}); repository.KindOf(err) != repository.ErrorInternal {
+		t.Fatalf("writer failure: %v", err)
+	}
+	var output bytes.Buffer
+	receipt, err := fixture.Service.ExportArtifact(context.Background(), export, &output)
+	if err != nil || !bytes.Equal(output.Bytes(), fixture.Scenario.Payload) || receipt.PayloadDigest() != fixture.Scenario.Artifact.PayloadDigest() {
+		t.Fatalf("export receipt=%+v err=%v", receipt, err)
+	}
+
+	cancelSucceeded, _ := repository.NewCancelScanRequest(repository.CancelScanParams{Scope: primary, RequestID: "cancel-succeeded", RepositoryID: repositoryID, ScanID: scanID})
+	if _, err = fixture.Service.CancelScan(context.Background(), cancelSucceeded); repository.KindOf(err) != repository.ErrorConflict {
+		t.Fatalf("cancel succeeded scan: %v", err)
+	}
+	missingExecute, _ := fixture.Contract.NewExecuteScanRequest(repository.ExecuteScanParams{Scope: primary, RequestID: "execute-missing", RepositoryID: "missing-repository", ScanID: "missing-scan", SourceHandle: fixture.Scenario.SourceHandle, Profile: fixture.Scenario.Profile})
+	if _, err = fixture.Service.ExecuteScan(context.Background(), missingExecute); repository.KindOf(err) != repository.ErrorNotFound {
+		t.Fatalf("execute missing repository: %v", err)
+	}
+}
+
+type failingWriter struct{}
+
+func (failingWriter) Write([]byte) (int, error) { return 0, io.ErrClosedPipe }
+
+func mustArtifactQuery(t *testing.T, scope repository.Scope, repositoryID repository.RepositoryID, scanID repository.ScanID, artifactID repository.ArtifactID) repository.ArtifactQuery {
+	t.Helper()
+	query, err := repository.NewArtifactQuery(scope, repositoryID, scanID, artifactID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return query
+}
