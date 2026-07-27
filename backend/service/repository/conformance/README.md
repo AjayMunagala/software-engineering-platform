@@ -19,3 +19,8 @@ checks:
 `NewMemoryFactory` is the Phase 4.0.2 thread-safe fake adapter. It is validation
 infrastructure, not production repository lifecycle or scan orchestration.
 
+`RunLifecycle` is the additive Phase 4.0.3 lifecycle-only suite. It accepts a
+`RepositoryLifecycleService` without requiring scan or artifact capabilities,
+so production lifecycle behavior can pass neutral conformance before any
+store-specific integration. `NewMemoryLifecycleFactory` exercises that suite
+against the existing fake.

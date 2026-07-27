@@ -17,6 +17,21 @@ type Scenario struct {
 	Profile       repository.AnalysisProfile
 }
 
+type LifecycleFixture struct {
+	Service  repository.RepositoryLifecycleService
+	Contract *repository.Contract
+	Scenario LifecycleScenario
+}
+
+type LifecycleScenario struct {
+	PrimaryScope repository.Scope
+	OtherScope   repository.Scope
+	Repository   repository.Repository
+	SourceHandle string
+}
+
+func (scenario LifecycleScenario) clone() LifecycleScenario { return scenario }
+
 func (scenario Scenario) clone() Scenario {
 	result := scenario
 	result.Payload = append([]byte(nil), scenario.Payload...)

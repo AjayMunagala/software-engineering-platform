@@ -5,8 +5,8 @@
 - Phase 4.0 design: accepted on 2026-07-27
 - Phase 4.0.1 design spike: accepted on 2026-07-27
 - Phase 4.0.2 neutral service contract and conformance harness: accepted on 2026-07-27
-- Phase 4.0.3 repository lifecycle: authorized
-- Production implementation: not started
+- Phase 4.0.3 repository lifecycle: accepted on 2026-07-27
+- Phase 4.0.4 scan execution core: authorized
 - Phase 4.1 transports: unauthorized
 - Date: 2026-07-27
 
@@ -100,7 +100,7 @@ Local evidence is recorded in
 `docs/Validation/REPOSITORY_SERVICE_CONTRACT_VALIDATION_REPORT.md`. The evidence
 was accepted on 2026-07-27 and authorized Phase 4.0.3 only.
 
-## Phase 4.0.3 — Repository lifecycle (current, authorized)
+## Phase 4.0.3 — Repository lifecycle ✅
 
 Implement:
 
@@ -110,10 +110,16 @@ Implement:
 - repository scope isolation;
 - persistence model translation behind the internal service store.
 
-Exit gate: neutral conformance, disposable PostgreSQL integration, regression,
-race, coverage, and benchmark evidence accepted.
+Exit gate: neutral lifecycle conformance, scope isolation, idempotency,
+regression, Windows and Ubuntu race, coverage, benchmark, source privacy, and
+dependency evidence accepted. PostgreSQL-specific implementation remains
+deferred to Phase 4.0.6 by the accepted Phase 4.0.3 authorization.
 
-## Phase 4.0.4 — Scan execution core
+Local evidence is recorded in
+`docs/Validation/REPOSITORY_LIFECYCLE_VALIDATION_REPORT.md`. Engineering
+accepted the evidence on 2026-07-27 and authorized Phase 4.0.4 only.
+
+## Phase 4.0.4 — Scan execution core (current, authorized)
 
 Implement:
 

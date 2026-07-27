@@ -13,6 +13,59 @@ import (
 
 func TestMemoryAdapterPassesConformance(t *testing.T) { Run(t, NewMemoryFactory()) }
 
+func TestMemoryAdapterPassesLifecycleConformance(t *testing.T) {
+	RunLifecycle(t, NewMemoryLifecycleFactory())
+}
+
+func TestMemoryLifecycleCancellationEdges(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	if _, _, err := NewMemoryLifecycleFactory().OpenLifecycle(ctx); repository.KindOf(err) != repository.ErrorCanceled {
+		t.Fatalf("canceled lifecycle factory: %v", err)
+	}
+	fixture, cleanup, err := NewMemoryLifecycleFactory().OpenLifecycle(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = cleanup(context.Background()) }()
+	scenario := fixture.Scenario
+	register, _ := fixture.Contract.NewRegisterRepositoryRequest(repository.RegisterRepositoryParams{Scope: scenario.PrimaryScope, RequestID: "canceled-register", RepositoryID: "canceled-repository", DisplayName: "Canceled", SourceHandle: scenario.SourceHandle})
+	if _, err = fixture.Service.RegisterRepository(ctx, register); repository.KindOf(err) != repository.ErrorCanceled {
+		t.Fatalf("canceled register: %v", err)
+	}
+	list, _ := fixture.Contract.NewRepositoryListRequest(repository.RepositoryListParams{Scope: scenario.PrimaryScope, PageSize: 10})
+	if _, err = fixture.Service.ListRepositories(ctx, list); repository.KindOf(err) != repository.ErrorCanceled {
+		t.Fatalf("canceled list: %v", err)
+	}
+	archive, _ := repository.NewArchiveRepositoryRequest(repository.ArchiveRepositoryParams{Scope: scenario.PrimaryScope, RequestID: "canceled-archive", RepositoryID: scenario.Repository.RepositoryID()})
+	if _, err = fixture.Service.ArchiveRepository(ctx, archive); repository.KindOf(err) != repository.ErrorCanceled {
+		t.Fatalf("canceled archive: %v", err)
+	}
+}
+
+func TestMemoryScanAndArtifactCancellationEdges(t *testing.T) {
+	fixture, cleanup, err := NewMemoryFactory().Open(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = cleanup(context.Background()) }()
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	scenario := fixture.Scenario
+	scanQuery, _ := repository.NewScanQuery(scenario.PrimaryScope, scenario.Repository.RepositoryID(), scenario.SucceededScan.ScanID())
+	if _, err = fixture.Service.GetScan(ctx, scanQuery); repository.KindOf(err) != repository.ErrorCanceled {
+		t.Fatalf("canceled get scan: %v", err)
+	}
+	artifactQuery, _ := repository.NewArtifactQuery(scenario.PrimaryScope, scenario.Repository.RepositoryID(), scenario.SucceededScan.ScanID(), scenario.Artifact.ArtifactID())
+	if _, err = fixture.Service.GetArtifact(ctx, artifactQuery); repository.KindOf(err) != repository.ErrorCanceled {
+		t.Fatalf("canceled get artifact: %v", err)
+	}
+	list, _ := fixture.Contract.NewArtifactListRequest(repository.ArtifactListParams{Scope: scenario.PrimaryScope, RepositoryID: scenario.Repository.RepositoryID(), ScanID: scenario.SucceededScan.ScanID(), PageSize: 10})
+	if _, err = fixture.Service.ListArtifacts(ctx, list); repository.KindOf(err) != repository.ErrorCanceled {
+		t.Fatalf("canceled list artifacts: %v", err)
+	}
+}
+
 func TestConfigurationAndFactoryValidation(t *testing.T) {
 	if _, err := New(DefaultConfig(), DefaultConfig()); !errors.Is(err, ErrInvalidConfig) {
 		t.Fatalf("multiple configs: %v", err)

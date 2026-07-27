@@ -8,8 +8,8 @@
 - Date: 2026-07-27
 - Phase 4.0.1 design spike: accepted
 - Phase 4.0.2 neutral contract: accepted
-- Phase 4.0.3 repository lifecycle: authorized
-- Production implementation: not started
+- Phase 4.0.3 repository lifecycle: accepted on 2026-07-27
+- Phase 4.0.4 scan execution core: authorized
 
 ## Purpose
 

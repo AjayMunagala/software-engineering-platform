@@ -1047,3 +1047,53 @@ AI, credential, or repository mutation was introduced.
 
 Detailed evidence:
   docs/Validation/REPOSITORY_SERVICE_CONTRACT_VALIDATION_REPORT.md
+
+======================================================================
+18. PHASE 4.0.3 REPOSITORY LIFECYCLE
+======================================================================
+
+Status on 2026-07-27:
+  - implementation and local validation: COMPLETE;
+  - engineering acceptance: ACCEPTED;
+  - commit and push: APPROVED;
+  - Phase 4.0.4 Scan Execution Core: AUTHORIZED.
+
+Implemented:
+  - production register, get, list, and archive coordination;
+  - storage-neutral atomic Store abstraction;
+  - path-free SourceProof and bounded source cleanup;
+  - deterministic versioned mutation fingerprints;
+  - repository scope isolation and idempotent mutation behavior;
+  - stable redacted dependency error translation;
+  - additive reusable lifecycle conformance suite.
+
+Validation:
+  - lifecycle and conformance tests: PASS;
+  - full backend regression, vet, and three shuffled repetitions: PASS;
+  - Windows targeted/full race: PASS, zero races;
+  - Ubuntu targeted/full regression, vet, and race: PASS, zero races;
+  - lifecycle coverage: 85.4%;
+  - conformance coverage: 85.3%;
+  - source-proof fuzz: 1,063,068 executions, no panic;
+  - forbidden dependency audit: PASS;
+  - production SourceHandle.Reveal audit: PASS.
+
+Windows benchmark ranges:
+  - lifecycle get: 120.8-138.1 ns/op, 48 B/op, 1 alloc/op;
+  - registration fingerprint: 605.5-693.2 ns/op, 608 B/op, 6 allocs/op;
+  - independent registration: 2.965-3.704 us/op,
+    2,467-2,469 B/op, 27 allocs/op.
+
+Ubuntu benchmark ranges:
+  - lifecycle get: 98.12-111.0 ns/op, 48 B/op, 1 alloc/op;
+  - registration fingerprint: 547.0-701.8 ns/op, 608 B/op, 6 allocs/op;
+  - independent registration: 2.576-3.468 us/op,
+    2,468-2,469 B/op, 27-28 allocs/op.
+
+No scan execution, engine orchestration, persistence adapter, PostgreSQL, SQL,
+pgx, runtime wiring, filesystem, network, API, UI, authentication, AI, secret,
+credential, or repository mutation was introduced. PostgreSQL integration is
+reserved for Phase 4.0.6 by the accepted milestone boundary.
+
+Detailed evidence:
+  docs/Validation/REPOSITORY_LIFECYCLE_VALIDATION_REPORT.md

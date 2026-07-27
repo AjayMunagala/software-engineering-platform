@@ -43,6 +43,119 @@ func (suite *Suite) Run(t *testing.T, factory Factory) {
 	suite.run(t, factory, "context-cancellation", suite.contextCancellation)
 }
 
+func (suite *Suite) RunLifecycle(t *testing.T, factory LifecycleFactory) {
+	t.Helper()
+	if factory == nil {
+		t.Fatal(ErrFactoryRequired)
+	}
+	suite.runLifecycle(t, factory, "lifecycle-seeded-reads", suite.lifecycleSeededReads)
+	suite.runLifecycle(t, factory, "lifecycle-scope-isolation", suite.lifecycleScopeIsolation)
+	suite.runLifecycle(t, factory, "lifecycle-idempotency-and-archive", suite.lifecycleMutations)
+	suite.runLifecycle(t, factory, "lifecycle-context-cancellation", suite.lifecycleCancellation)
+}
+
+func (suite *Suite) runLifecycle(t *testing.T, factory LifecycleFactory, name string, check func(*testing.T, LifecycleFixture)) {
+	t.Helper()
+	t.Run(name, func(t *testing.T) {
+		fixture, cleanup, err := factory.OpenLifecycle(context.Background())
+		if err != nil {
+			t.Fatalf("open lifecycle fixture: %v", err)
+		}
+		if fixture.Service == nil || fixture.Contract == nil || fixture.Scenario.Repository.RepositoryID() == "" || cleanup == nil {
+			t.Fatal(ErrInvalidFixture)
+		}
+		t.Cleanup(func() {
+			if err := cleanup(context.Background()); err != nil {
+				t.Errorf("cleanup lifecycle fixture: %v", err)
+			}
+			if err := cleanup(context.Background()); err != nil {
+				t.Errorf("idempotent lifecycle cleanup fixture: %v", err)
+			}
+		})
+		check(t, LifecycleFixture{Service: fixture.Service, Contract: fixture.Contract, Scenario: fixture.Scenario.clone()})
+	})
+}
+
+func (suite *Suite) lifecycleSeededReads(t *testing.T, fixture LifecycleFixture) {
+	scenario := fixture.Scenario
+	query, _ := repository.NewRepositoryQuery(scenario.PrimaryScope, scenario.Repository.RepositoryID())
+	value, err := fixture.Service.GetRepository(context.Background(), query)
+	if err != nil || value.RepositoryID() != scenario.Repository.RepositoryID() {
+		t.Fatalf("get repository: %+v, %v", value, err)
+	}
+	request, _ := fixture.Contract.NewRepositoryListRequest(repository.RepositoryListParams{Scope: scenario.PrimaryScope, PageSize: 1})
+	page, err := fixture.Service.ListRepositories(context.Background(), request)
+	if err != nil || len(page.Items()) != 1 || page.Items()[0].RepositoryID() != scenario.Repository.RepositoryID() {
+		t.Fatalf("list repositories: %+v, %v", page, err)
+	}
+}
+
+func (suite *Suite) lifecycleScopeIsolation(t *testing.T, fixture LifecycleFixture) {
+	scenario := fixture.Scenario
+	query, _ := repository.NewRepositoryQuery(scenario.OtherScope, scenario.Repository.RepositoryID())
+	if _, err := fixture.Service.GetRepository(context.Background(), query); repository.KindOf(err) != repository.ErrorNotFound {
+		t.Fatalf("get scope escape: %v", err)
+	}
+	list, _ := fixture.Contract.NewRepositoryListRequest(repository.RepositoryListParams{Scope: scenario.OtherScope, PageSize: 10})
+	page, err := fixture.Service.ListRepositories(context.Background(), list)
+	if err != nil || len(page.Items()) != 0 {
+		t.Fatalf("list scope escape: %+v, %v", page, err)
+	}
+	archive, _ := repository.NewArchiveRepositoryRequest(repository.ArchiveRepositoryParams{Scope: scenario.OtherScope, RequestID: "lifecycle-scope-archive", RepositoryID: scenario.Repository.RepositoryID()})
+	if _, err = fixture.Service.ArchiveRepository(context.Background(), archive); repository.KindOf(err) != repository.ErrorNotFound {
+		t.Fatalf("archive scope escape: %v", err)
+	}
+	register, _ := fixture.Contract.NewRegisterRepositoryRequest(repository.RegisterRepositoryParams{Scope: scenario.OtherScope, RequestID: "lifecycle-scope-register", RepositoryID: scenario.Repository.RepositoryID(), DisplayName: "Other Scope", SourceHandle: scenario.SourceHandle})
+	other, err := fixture.Service.RegisterRepository(context.Background(), register)
+	if err != nil || other.DisplayName() != "Other Scope" {
+		t.Fatalf("independent scope registration: %+v, %v", other, err)
+	}
+	primaryQuery, _ := repository.NewRepositoryQuery(scenario.PrimaryScope, scenario.Repository.RepositoryID())
+	primary, err := fixture.Service.GetRepository(context.Background(), primaryQuery)
+	if err != nil || primary.DisplayName() != scenario.Repository.DisplayName() {
+		t.Fatalf("cross-scope mutation: %+v, %v", primary, err)
+	}
+}
+
+func (suite *Suite) lifecycleMutations(t *testing.T, fixture LifecycleFixture) {
+	scenario := fixture.Scenario
+	request, _ := fixture.Contract.NewRegisterRepositoryRequest(repository.RegisterRepositoryParams{Scope: scenario.PrimaryScope, RequestID: "lifecycle-register", RepositoryID: "lifecycle-created", DisplayName: "Lifecycle Created", SourceHandle: scenario.SourceHandle})
+	created, err := fixture.Service.RegisterRepository(context.Background(), request)
+	if err != nil || created.State() != repository.RepositoryActive {
+		t.Fatalf("register: %+v, %v", created, err)
+	}
+	retried, err := fixture.Service.RegisterRepository(context.Background(), request)
+	if err != nil || retried.RepositoryID() != created.RepositoryID() || retried.CreatedAt() != created.CreatedAt() {
+		t.Fatalf("register retry: %+v, %v", retried, err)
+	}
+	conflict, _ := fixture.Contract.NewRegisterRepositoryRequest(repository.RegisterRepositoryParams{Scope: scenario.PrimaryScope, RequestID: "lifecycle-register", RepositoryID: "lifecycle-conflict", DisplayName: "Conflict", SourceHandle: scenario.SourceHandle})
+	if _, err = fixture.Service.RegisterRepository(context.Background(), conflict); repository.KindOf(err) != repository.ErrorIdempotencyConflict {
+		t.Fatalf("register conflict: %v", err)
+	}
+	archive, _ := repository.NewArchiveRepositoryRequest(repository.ArchiveRepositoryParams{Scope: scenario.PrimaryScope, RequestID: "lifecycle-archive", RepositoryID: created.RepositoryID()})
+	archived, err := fixture.Service.ArchiveRepository(context.Background(), archive)
+	if err != nil || archived.State() != repository.RepositoryArchived {
+		t.Fatalf("archive: %+v, %v", archived, err)
+	}
+	retryArchive, err := fixture.Service.ArchiveRepository(context.Background(), archive)
+	if err != nil || retryArchive.UpdatedAt() != archived.UpdatedAt() {
+		t.Fatalf("archive retry: %+v, %v", retryArchive, err)
+	}
+	archiveConflict, _ := repository.NewArchiveRepositoryRequest(repository.ArchiveRepositoryParams{Scope: scenario.PrimaryScope, RequestID: "lifecycle-archive", RepositoryID: scenario.Repository.RepositoryID()})
+	if _, err = fixture.Service.ArchiveRepository(context.Background(), archiveConflict); repository.KindOf(err) != repository.ErrorIdempotencyConflict {
+		t.Fatalf("archive conflict: %v", err)
+	}
+}
+
+func (suite *Suite) lifecycleCancellation(t *testing.T, fixture LifecycleFixture) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	query, _ := repository.NewRepositoryQuery(fixture.Scenario.PrimaryScope, fixture.Scenario.Repository.RepositoryID())
+	if _, err := fixture.Service.GetRepository(ctx, query); repository.KindOf(err) != repository.ErrorCanceled {
+		t.Fatalf("canceled lifecycle read: %v", err)
+	}
+}
+
 func (suite *Suite) run(t *testing.T, factory Factory, name string, check func(*testing.T, Fixture)) {
 	t.Helper()
 	t.Run(name, func(t *testing.T) {
@@ -237,6 +350,21 @@ func (suite *Suite) contextCancellation(t *testing.T, fixture Fixture) {
 // NewMemoryFactory returns the thread-safe Phase 4.0.2 fake adapter.
 func NewMemoryFactory() Factory { return FactoryFunc(openMemoryFixture) }
 
+// NewMemoryLifecycleFactory returns the lifecycle-only view of the
+// thread-safe Phase 4.0.2 fake adapter.
+func NewMemoryLifecycleFactory() LifecycleFactory {
+	return LifecycleFactoryFunc(func(ctx context.Context) (LifecycleFixture, Cleanup, error) {
+		fixture, cleanup, err := openMemoryFixture(ctx)
+		if err != nil {
+			return LifecycleFixture{}, nil, err
+		}
+		return LifecycleFixture{Service: fixture.Service, Contract: fixture.Contract, Scenario: LifecycleScenario{
+			PrimaryScope: fixture.Scenario.PrimaryScope, OtherScope: fixture.Scenario.OtherScope,
+			Repository: fixture.Scenario.Repository, SourceHandle: fixture.Scenario.SourceHandle,
+		}}, cleanup, nil
+	})
+}
+
 func openMemoryFixture(ctx context.Context) (Fixture, Cleanup, error) {
 	if err := contextError(ctx, "open-fixture"); err != nil {
 		return Fixture{}, nil, err
@@ -351,6 +479,11 @@ func (service *memoryService) ArchiveRepository(ctx context.Context, request rep
 	}
 	service.mu.Lock()
 	defer service.mu.Unlock()
+	fingerprint := "archive|" + string(request.RepositoryID())
+	requestKeyValue := requestKey(request.Scope(), request.RequestID())
+	if previous, exists := service.requests[requestKeyValue]; exists && previous != fingerprint {
+		return repository.Repository{}, repository.NewError(repository.ErrorIdempotencyConflict, "archive-repository", "request-reused", false, nil)
+	}
 	key := repositoryKey(request.Scope(), request.RepositoryID())
 	current, ok := service.repositories[key]
 	if !ok {
@@ -358,6 +491,7 @@ func (service *memoryService) ArchiveRepository(ctx context.Context, request rep
 	}
 	value, _ := repository.NewRepository(repository.RepositoryParams{RepositoryID: current.RepositoryID(), DisplayName: current.DisplayName(), SourceKind: current.SourceKind(), FingerprintScheme: current.FingerprintScheme(), Fingerprint: current.Fingerprint(), State: repository.RepositoryArchived, CurrentScanID: current.CurrentScanID(), CreatedAt: current.CreatedAt(), UpdatedAt: service.now.Add(time.Second)})
 	service.repositories[key] = value
+	service.requests[requestKeyValue] = fingerprint
 	return value, nil
 }
 

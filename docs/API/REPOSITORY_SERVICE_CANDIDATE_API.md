@@ -8,8 +8,8 @@
 - Transport: none
 - Phase 4.0.1 spike: accepted on 2026-07-27
 - Phase 4.0.2 neutral contract implementation: accepted
-- Phase 4.0.3 repository lifecycle: authorized
-- Scan orchestration: not authorized
+- Phase 4.0.3 repository lifecycle: accepted on 2026-07-27
+- Phase 4.0.4 scan execution core: authorized
 
 This document defines Go service semantics. It is not an HTTP, gRPC, CLI, or
 authorization contract.
@@ -462,6 +462,21 @@ unknown profile.
   filesystem, command, network, or transport dependency;
 - conformance first validates scope isolation on reads, lists, export, and
   mutations using a thread-safe fake adapter.
+
+## Phase 4.0.3 candidate implementation evidence
+
+- production lifecycle package implements only register, get, list, and
+  archive coordination;
+- opaque source handles resolve into immutable path-free proof and are never
+  passed to the atomic store;
+- versioned SHA-256 mutation fingerprints support atomic store-owned
+  idempotency and conflict detection;
+- additive lifecycle conformance validates same-ID cross-scope isolation,
+  idempotency, archival, pagination, cancellation, and cleanup;
+- lifecycle/conformance coverage is 85.4%/85.3%;
+- Windows and Ubuntu targeted and full-backend race validation pass with zero
+  races;
+- implementation evidence was accepted on 2026-07-27.
 
 ## API freeze gate
 

@@ -7,8 +7,8 @@
 - Status: Accepted design-spike baseline on 2026-07-27
 - Phase 4.0.1 design spike: accepted
 - Phase 4.0.2 neutral contract: accepted
-- Phase 4.0.3 repository lifecycle: authorized
-- Production implementation: not started
+- Phase 4.0.3 repository lifecycle: accepted on 2026-07-27
+- Phase 4.0.4 scan execution core: authorized
 - Date: 2026-07-27
 
 ## Purpose
@@ -91,7 +91,9 @@ finalize that scan as failed.
 Local Phase 4.0.2 evidence is recorded in
 `REPOSITORY_SERVICE_CONTRACT_VALIDATION_REPORT.md`. Both coverage gates pass;
 Windows and Ubuntu regression, vet, shuffle, race, benchmark, fuzz, scope, and
-dependency evidence pass. Phase 4.0.3 is authorized; Phase 4.0.4 remains gated.
+dependency evidence pass. Phase 4.0.3 local evidence is recorded in
+`REPOSITORY_LIFECYCLE_VALIDATION_REPORT.md`; its evidence was accepted on
+2026-07-27 and Phase 4.0.4 was authorized.
 
 - constructor validation for every ID, enum, profile, timestamp, and limit;
 - deep-copy and detached-view validation;
