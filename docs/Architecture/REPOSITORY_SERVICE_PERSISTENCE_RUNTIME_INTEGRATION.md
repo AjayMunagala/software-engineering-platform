@@ -390,4 +390,3 @@ Production implementation remains unauthorized until engineering approves:
 8. transaction, ambiguity, error, and cleanup behavior;
 9. validation plan and performance gates;
 10. ADR 0017.
-

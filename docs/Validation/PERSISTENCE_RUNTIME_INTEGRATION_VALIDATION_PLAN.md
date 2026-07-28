@@ -229,4 +229,3 @@ The Phase 4.0.6 report must record:
 
 Phase 4.0.6 is complete only when all mandatory gates pass and engineering
 accepts the report. Until then, Phase 4.0.7 remains unauthorized.
-

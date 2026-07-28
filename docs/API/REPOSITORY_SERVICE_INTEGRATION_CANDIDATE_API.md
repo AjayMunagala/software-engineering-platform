@@ -246,4 +246,3 @@ runtime-admission-failed
 This API remains candidate `0.1.0`. Acceptance authorizes implementation, not
 freeze. It may reach `1.0.0` only during Phase 4.0.8 after real-repository and
 cross-platform integration evidence is accepted.
-

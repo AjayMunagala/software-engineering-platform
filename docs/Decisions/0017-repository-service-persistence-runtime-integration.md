@@ -143,4 +143,3 @@ compatibility.
 Promote this ADR to Accepted only after the architecture, candidate API, and
 validation plan are reviewed together. Acceptance authorizes Phase 4.0.6
 implementation only. Phase 4.0.7 remains separately gated.
-
