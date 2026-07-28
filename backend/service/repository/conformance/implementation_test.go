@@ -38,7 +38,7 @@ func TestMemoryScanFactoryCancellationAndEdges(t *testing.T) {
 	if _, err = fixture.Service.CancelScan(context.Background(), cancelSucceeded); repository.KindOf(err) != repository.ErrorConflict {
 		t.Fatalf("cancel succeeded: %v", err)
 	}
-	missingExecution, _ := fixture.Contract.NewExecuteScanRequest(repository.ExecuteScanParams{Scope: scenario.PrimaryScope, RequestID: "missing-execute", RepositoryID: "missing-repository", ScanID: "missing-scan", SourceHandle: scenario.SourceHandle, Profile: scenario.Profile})
+	missingExecution, _ := fixture.Contract.NewExecuteScanRequest(repository.ExecuteScanParams{Scope: scenario.PrimaryScope, RequestID: "missing-execute", RepositoryID: "11111111-1111-4111-8111-111111111199", ScanID: "22222222-2222-4222-8222-222222222299", SourceHandle: scenario.SourceHandle, Profile: scenario.Profile})
 	if _, err = fixture.Service.ExecuteScan(context.Background(), missingExecution); repository.KindOf(err) != repository.ErrorNotFound {
 		t.Fatalf("missing repository execute: %v", err)
 	}
@@ -83,7 +83,7 @@ func TestMemoryLifecycleCancellationEdges(t *testing.T) {
 	}
 	defer func() { _ = cleanup(context.Background()) }()
 	scenario := fixture.Scenario
-	register, _ := fixture.Contract.NewRegisterRepositoryRequest(repository.RegisterRepositoryParams{Scope: scenario.PrimaryScope, RequestID: "canceled-register", RepositoryID: "canceled-repository", DisplayName: "Canceled", SourceHandle: scenario.SourceHandle})
+	register, _ := fixture.Contract.NewRegisterRepositoryRequest(repository.RegisterRepositoryParams{Scope: scenario.PrimaryScope, RequestID: "canceled-register", RepositoryID: "11111111-1111-4111-8111-111111111198", DisplayName: "Canceled", SourceHandle: scenario.SourceHandle})
 	if _, err = fixture.Service.RegisterRepository(ctx, register); repository.KindOf(err) != repository.ErrorCanceled {
 		t.Fatalf("canceled register: %v", err)
 	}
@@ -145,7 +145,7 @@ func TestMemoryAdapterMissingIdempotentResult(t *testing.T) {
 	}
 	defer func() { _ = cleanup(context.Background()) }()
 	service := fixture.Service.(*memoryService)
-	request, _ := fixture.Contract.NewRegisterRepositoryRequest(repository.RegisterRepositoryParams{Scope: fixture.Scenario.PrimaryScope, RequestID: "missing-result-request", RepositoryID: "missing-result-repository", DisplayName: "Missing Result", SourceHandle: fixture.Scenario.SourceHandle})
+	request, _ := fixture.Contract.NewRegisterRepositoryRequest(repository.RegisterRepositoryParams{Scope: fixture.Scenario.PrimaryScope, RequestID: "missing-result-request", RepositoryID: "11111111-1111-4111-8111-111111111197", DisplayName: "Missing Result", SourceHandle: fixture.Scenario.SourceHandle})
 	if _, err = service.RegisterRepository(context.Background(), request); err != nil {
 		t.Fatal(err)
 	}
@@ -241,7 +241,7 @@ func TestMemoryAdapterAdditionalContractEdges(t *testing.T) {
 	if _, err = fixture.Service.CancelScan(context.Background(), cancelSucceeded); repository.KindOf(err) != repository.ErrorConflict {
 		t.Fatalf("cancel succeeded scan: %v", err)
 	}
-	missingExecute, _ := fixture.Contract.NewExecuteScanRequest(repository.ExecuteScanParams{Scope: primary, RequestID: "execute-missing", RepositoryID: "missing-repository", ScanID: "missing-scan", SourceHandle: fixture.Scenario.SourceHandle, Profile: fixture.Scenario.Profile})
+	missingExecute, _ := fixture.Contract.NewExecuteScanRequest(repository.ExecuteScanParams{Scope: primary, RequestID: "execute-missing", RepositoryID: "11111111-1111-4111-8111-111111111196", ScanID: "22222222-2222-4222-8222-222222222296", SourceHandle: fixture.Scenario.SourceHandle, Profile: fixture.Scenario.Profile})
 	if _, err = fixture.Service.ExecuteScan(context.Background(), missingExecute); repository.KindOf(err) != repository.ErrorNotFound {
 		t.Fatalf("execute missing repository: %v", err)
 	}

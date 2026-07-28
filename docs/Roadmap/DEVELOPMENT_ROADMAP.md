@@ -74,7 +74,8 @@
   2026-07-28.
 - Phase 4.0.6: persistence and runtime integration design authorized;
   design accepted with recommendations on 2026-07-28; golden-vector contracts
-  frozen and production implementation authorized.
+  frozen; local implementation and validation complete; engineering acceptance
+  and commit/push pending.
 - Phase 4.1: REST/gRPC query APIs remain gated.
 
 PostgreSQL remains downstream from immutable artifacts and is not an engine
@@ -82,7 +83,7 @@ dependency.
 
 ## Phase 4 — Repository Services and Query Access
 
-### Phase 4.0 — Repository Service Layer (Phase 4.0.6 implementation authorized)
+### Phase 4.0 — Repository Service Layer (Phase 4.0.6 awaiting engineering acceptance)
 
 - Define storage-neutral repository service interfaces.
 - Coordinate repository and scan lifecycle through application services.
@@ -97,7 +98,8 @@ dependency.
   accepted. Phase 4.0.3 Repository Lifecycle and Phase 4.0.4 Scan Execution
   Core and Phase 4.0.5 Intelligence & Materialization Adapters are accepted.
   Phase 4.0.6 design is accepted with recommendations, and its production
-  implementation is authorized under the frozen golden-vector contracts.
+  implementation and local validation are complete under the frozen
+  golden-vector contracts. Engineering acceptance and commit/push are pending.
   Phase 4.0.7 and later milestones remain unauthorized pending their
   respective acceptance gates.
 

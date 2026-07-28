@@ -18,6 +18,14 @@ import (
 	"github.com/AjayMunagala/software-engineering-platform/backend/service/repository/conformance"
 )
 
+const (
+	scanTestScopeID      = "00000000-0000-4000-8000-000000000011"
+	scanTestOtherScopeID = "00000000-0000-4000-8000-000000000012"
+	scanTestRepositoryID = "11111111-1111-4111-8111-111111111121"
+	scanTestScanID       = "22222222-2222-4222-8222-222222222221"
+	scanTestRunningID    = "22222222-2222-4222-8222-222222222222"
+)
+
 func TestScanConformance(t *testing.T) {
 	conformance.RunScan(t, conformance.ScanFactoryFunc(func(ctx context.Context) (conformance.ScanFixture, conformance.Cleanup, error) {
 		fixture := newFixture(t)
@@ -25,12 +33,12 @@ func TestScanConformance(t *testing.T) {
 		if err != nil {
 			return conformance.ScanFixture{}, nil, err
 		}
-		runningRequest, _ := fixture.contract.NewExecuteScanRequest(repository.ExecuteScanParams{Scope: fixture.scope, RequestID: "seed-running-request", RepositoryID: fixture.request.RepositoryID(), ScanID: "scan-running", SourceHandle: "source", Profile: fixture.profile})
+		runningRequest, _ := fixture.contract.NewExecuteScanRequest(repository.ExecuteScanParams{Scope: fixture.scope, RequestID: "seed-running-request", RepositoryID: fixture.request.RepositoryID(), ScanID: scanTestRunningID, SourceHandle: "source", Profile: fixture.profile})
 		fixture.store.seedRunning(fixture.scope, runningRequest, fixture.preparer.fingerprint, fixture.preparer.revision, fixture.clock.Now())
 		fixture.store.mu.RLock()
 		running := fixture.store.scans[storeScanKey(fixture.scope, runningRequest.RepositoryID(), runningRequest.ScanID())]
 		fixture.store.mu.RUnlock()
-		otherScope, _ := repository.NewScope("scan-other", "scan-other-principal")
+		otherScope, _ := repository.NewScope(scanTestOtherScopeID, "scan-other-principal")
 		artifact := published.Artifacts()[0]
 		payload := []byte("{\"alpha\":true}\n")
 		var once sync.Once
@@ -272,7 +280,7 @@ func TestFlightConflictsScopeAndIntegrity(t *testing.T) {
 	if _, err := fixture.service.ExecuteScan(context.Background(), sameRequestDifferentSource); repository.KindOf(err) != repository.ErrorIdempotencyConflict {
 		t.Fatalf("idempotency=%v", err)
 	}
-	otherScope, _ := repository.NewScope("other-scope", "other-principal")
+	otherScope, _ := repository.NewScope(scanTestOtherScopeID, "other-principal")
 	query, _ := repository.NewScanQuery(otherScope, fixture.request.RepositoryID(), fixture.request.ScanID())
 	if _, err := fixture.service.GetScan(context.Background(), query); repository.KindOf(err) != repository.ErrorNotFound {
 		t.Fatalf("scope=%v", err)
@@ -584,9 +592,9 @@ type testFixture struct {
 func newFixture(t *testing.T) *testFixture {
 	t.Helper()
 	contract, _ := repository.New()
-	scope, _ := repository.NewScope("scan-scope", "scan-principal")
+	scope, _ := repository.NewScope(scanTestScopeID, "scan-principal")
 	profile := contract.Profiles().Definitions()[0].Profile()
-	request, _ := contract.NewExecuteScanRequest(repository.ExecuteScanParams{Scope: scope, RequestID: "execute-request", RepositoryID: "repository", ScanID: "scan", SourceHandle: "source", Profile: profile})
+	request, _ := contract.NewExecuteScanRequest(repository.ExecuteScanParams{Scope: scope, RequestID: "execute-request", RepositoryID: scanTestRepositoryID, ScanID: scanTestScanID, SourceHandle: "source", Profile: profile})
 	clock := &stepClock{current: time.Date(2026, 7, 27, 15, 0, 0, 0, time.UTC)}
 	store := newMemoryStore()
 	store.addRepository(scope, request.RepositoryID(), repository.RepositoryActive)

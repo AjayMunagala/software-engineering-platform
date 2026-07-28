@@ -7,6 +7,7 @@ go_binary="${AEGIS_GO_BINARY:-go}"
 packages=(
     './service/repository/...'
     './internal/service/repository/adapters'
+    './internal/service/repository/integration'
 )
 
 command -v "$go_binary" >/dev/null || {

@@ -2,7 +2,7 @@ package lifecycle
 
 import (
 	"context"
-	"strconv"
+	"fmt"
 	"testing"
 	"time"
 
@@ -26,8 +26,8 @@ func BenchmarkLifecycleGetRepository(b *testing.B) {
 
 func BenchmarkRegistrationFingerprint(b *testing.B) {
 	contract, _ := repository.New()
-	scope, _ := repository.NewScope("scope", "principal")
-	request, _ := contract.NewRegisterRepositoryRequest(repository.RegisterRepositoryParams{Scope: scope, RequestID: "request", RepositoryID: "repository", DisplayName: "Repository", SourceHandle: "handle"})
+	scope, _ := repository.NewScope("00000000-0000-4000-8000-000000000021", "principal")
+	request, _ := contract.NewRegisterRepositoryRequest(repository.RegisterRepositoryParams{Scope: scope, RequestID: "request", RepositoryID: "11111111-1111-4111-8111-111111111121", DisplayName: "Repository", SourceHandle: "handle"})
 	proof, _ := NewSourceProof("local", "sha256/v1", repository.DigestBytes([]byte("proof")), "revision")
 	b.ReportAllocs()
 	for b.Loop() {
@@ -39,15 +39,15 @@ func BenchmarkRegistrationFingerprint(b *testing.B) {
 
 func BenchmarkLifecycleRegisterIndependent(b *testing.B) {
 	contract, _ := repository.New()
-	scope, _ := repository.NewScope("scope", "principal")
+	scope, _ := repository.NewScope("00000000-0000-4000-8000-000000000021", "principal")
 	proof, _ := NewSourceProof("local", "sha256/v1", repository.DigestBytes([]byte("proof")), "revision")
 	now := time.Date(2026, 7, 27, 12, 0, 0, 0, time.UTC)
 	b.ReportAllocs()
 	for index := 0; b.Loop(); index++ {
 		store := newMemoryStore()
 		service, _ := New(store, &fakeResolver{proof: proof}, ClockFunc(func() time.Time { return now }))
-		id := repository.RepositoryID("repository-" + strconv.Itoa(index))
-		requestID := repository.RequestID("request-" + strconv.Itoa(index))
+		id := repository.RepositoryID(fmt.Sprintf("11111111-1111-4111-8111-%012d", index))
+		requestID := repository.RequestID(fmt.Sprintf("request-%d", index))
 		request, _ := contract.NewRegisterRepositoryRequest(repository.RegisterRepositoryParams{Scope: scope, RequestID: requestID, RepositoryID: id, DisplayName: "Repository", SourceHandle: "handle"})
 		if _, err := service.RegisterRepository(context.Background(), request); err != nil {
 			b.Fatal(err)

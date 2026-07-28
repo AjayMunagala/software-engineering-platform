@@ -179,7 +179,7 @@ func (service *Service) execute(ctx context.Context, request repository.ExecuteS
 		return repository.ScanResult{}, repository.NewError(repository.ErrorInternal, "execute-scan", "invalid-running-scan", false, nil)
 	}
 	fingerprint := executeFingerprint(request, session.SourceFingerprint(), session.SourceRevision())
-	begin, err := service.store.Begin(executionCtx, newBeginCommand(request.Scope(), request.RequestID(), fingerprint, running))
+	begin, err := service.store.Begin(executionCtx, newBeginCommand(request.Scope(), request.RequestID(), fingerprint, session.SourceFingerprint(), running))
 	if err != nil {
 		return repository.ScanResult{}, mapDependencyError(err, "execute-scan", "scan-begin-failed", repository.ErrorPersistenceUnavailable)
 	}
@@ -196,32 +196,36 @@ func (service *Service) execute(ctx context.Context, request repository.ExecuteS
 	case BeginOrphaned:
 		return repository.ScanResult{}, repository.NewError(repository.ErrorOrphanedScan, "execute-scan", "durable-running-without-leader", false, nil)
 	case BeginStarted:
+		// Persistence owns durable lifecycle timestamps. All subsequent
+		// publication checks must use the authoritative running record returned
+		// by Begin rather than the coordinator's pre-persistence candidate.
+		running = begin.Scan()
 	default:
 		return repository.ScanResult{}, repository.NewError(repository.ErrorIntegrityFailure, "execute-scan", "invalid-begin-status", false, nil)
 	}
 
 	analysis, err := session.Analyze(executionCtx)
 	if err != nil {
-		return repository.ScanResult{}, service.failRunning(request.Scope(), running, executionCtx, err, "analysis-failed")
+		return repository.ScanResult{}, service.failRunning(request.Scope(), request.RequestID(), running, executionCtx, err, "analysis-failed")
 	}
 	if analysis.Profile() != request.Profile() || len(analysis.Candidates()) > service.config.MaxArtifacts {
-		return repository.ScanResult{}, service.failRunning(request.Scope(), running, executionCtx, repository.NewError(repository.ErrorIntegrityFailure, "execute-scan", "analysis-result-mismatch", false, nil), "analysis-result-mismatch")
+		return repository.ScanResult{}, service.failRunning(request.Scope(), request.RequestID(), running, executionCtx, repository.NewError(repository.ErrorIntegrityFailure, "execute-scan", "analysis-result-mismatch", false, nil), "analysis-result-mismatch")
 	}
 	if err := contextFailure(executionCtx, "execute-scan"); err != nil {
-		return repository.ScanResult{}, service.failRunning(request.Scope(), running, executionCtx, err, "canceled")
+		return repository.ScanResult{}, service.failRunning(request.Scope(), request.RequestID(), running, executionCtx, err, "canceled")
 	}
 	finished := service.clock.Now().UTC()
 	if finished.IsZero() || finished.Before(running.StartedAt()) {
-		return repository.ScanResult{}, service.failRunning(request.Scope(), running, executionCtx, repository.NewError(repository.ErrorInternal, "execute-scan", "invalid-clock", false, nil), "invalid-clock")
+		return repository.ScanResult{}, service.failRunning(request.Scope(), request.RequestID(), running, executionCtx, repository.NewError(repository.ErrorInternal, "execute-scan", "invalid-clock", false, nil), "invalid-clock")
 	}
 	succeeded, publication, err := service.buildPublication(request, running, finished, analysis)
 	if err != nil {
-		return repository.ScanResult{}, service.failRunning(request.Scope(), running, executionCtx, err, "artifact-metadata-failed")
+		return repository.ScanResult{}, service.failRunning(request.Scope(), request.RequestID(), running, executionCtx, err, "artifact-metadata-failed")
 	}
 	if err := contextFailure(executionCtx, "execute-scan"); err != nil {
-		return repository.ScanResult{}, service.failRunning(request.Scope(), running, executionCtx, err, "canceled")
+		return repository.ScanResult{}, service.failRunning(request.Scope(), request.RequestID(), running, executionCtx, err, "canceled")
 	}
-	result, err := service.store.Publish(executionCtx, newPublishCommand(request.Scope(), succeeded, publication))
+	result, err := service.store.Publish(executionCtx, newPublishCommand(request.Scope(), request.RequestID(), succeeded, publication))
 	if err == nil {
 		if !publicationMatches(result, succeeded, publication) {
 			return repository.ScanResult{}, repository.NewError(repository.ErrorIntegrityFailure, "execute-scan", "publication-result-mismatch", false, nil)
@@ -254,7 +258,7 @@ func (service *Service) buildPublication(request repository.ExecuteScanRequest, 
 	return succeeded, publication, err
 }
 
-func (service *Service) failRunning(scope repository.Scope, running repository.Scan, executionCtx context.Context, cause error, reason string) error {
+func (service *Service) failRunning(scope repository.Scope, requestID repository.RequestID, running repository.Scan, executionCtx context.Context, cause error, reason string) error {
 	state, kind := repository.ScanFailed, repository.ErrorAnalysisFailed
 	if executionCtx.Err() != nil || repository.KindOf(cause) == repository.ErrorCanceled || repository.KindOf(cause) == repository.ErrorTimeout {
 		state, kind, reason = repository.ScanCanceled, repository.ErrorCanceled, "canceled"
@@ -269,7 +273,7 @@ func (service *Service) failRunning(scope repository.Scope, running repository.S
 	}
 	finalizeCtx, cancel := context.WithTimeout(context.Background(), service.config.FinalizationTimeout)
 	defer cancel()
-	if _, err = service.store.Finalize(finalizeCtx, newFinalizeCommand(scope, terminal)); err != nil {
+	if _, err = service.store.Finalize(finalizeCtx, newFinalizeCommand(scope, requestID, terminal)); err != nil {
 		return mapDependencyError(err, "execute-scan", "terminal-finalization-failed", repository.ErrorPersistenceUnavailable)
 	}
 	if kind == repository.ErrorCanceled {
@@ -304,7 +308,7 @@ func (service *Service) reconcilePublication(request repository.ExecuteScanReque
 
 func publicationMatches(result repository.ScanResult, expected repository.Scan, publication []PublicationArtifact) bool {
 	actualScan := result.Scan()
-	if actualScan.RepositoryID() != expected.RepositoryID() || actualScan.ScanID() != expected.ScanID() || actualScan.Profile() != expected.Profile() || actualScan.SourceRevision() != expected.SourceRevision() || actualScan.State() != repository.ScanSucceeded || actualScan.RequestedAt() != expected.RequestedAt() || actualScan.StartedAt() != expected.StartedAt() || actualScan.FinishedAt() != expected.FinishedAt() {
+	if actualScan.RepositoryID() != expected.RepositoryID() || actualScan.ScanID() != expected.ScanID() || actualScan.Profile() != expected.Profile() || actualScan.SourceRevision() != expected.SourceRevision() || actualScan.State() != repository.ScanSucceeded || actualScan.RequestedAt() != expected.RequestedAt() || actualScan.StartedAt() != expected.StartedAt() || actualScan.FinishedAt().IsZero() || actualScan.FinishedAt().Before(actualScan.StartedAt()) || actualScan.FinishedAt().Location() != time.UTC {
 		return false
 	}
 	artifacts := result.Artifacts()
@@ -313,7 +317,7 @@ func publicationMatches(result repository.ScanResult, expected repository.Scan, 
 	}
 	for index, item := range publication {
 		left, right := artifacts[index], item.Metadata()
-		if left.ArtifactID() != right.ArtifactID() || left.ScanID() != right.ScanID() || left.Name() != right.Name() || left.Version() != right.Version() || left.StableIDScheme() != right.StableIDScheme() || left.CodecName() != right.CodecName() || left.CodecVersion() != right.CodecVersion() || left.MediaType() != right.MediaType() || left.PayloadDigest() != right.PayloadDigest() || left.PayloadSize() != right.PayloadSize() || left.ProducerName() != right.ProducerName() || left.ProducerVersion() != right.ProducerVersion() || left.CreatedAt() != right.CreatedAt() {
+		if left.ArtifactID() != right.ArtifactID() || left.ScanID() != right.ScanID() || left.Name() != right.Name() || left.Version() != right.Version() || left.StableIDScheme() != right.StableIDScheme() || left.CodecName() != right.CodecName() || left.CodecVersion() != right.CodecVersion() || left.MediaType() != right.MediaType() || left.PayloadDigest() != right.PayloadDigest() || left.PayloadSize() != right.PayloadSize() || left.ProducerName() != right.ProducerName() || left.ProducerVersion() != right.ProducerVersion() || left.CreatedAt().IsZero() || left.CreatedAt().Before(actualScan.StartedAt()) || left.CreatedAt().Location() != time.UTC {
 			return false
 		}
 	}

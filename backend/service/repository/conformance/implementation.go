@@ -15,6 +15,17 @@ import (
 	"github.com/AjayMunagala/software-engineering-platform/backend/service/repository"
 )
 
+const (
+	primaryScopeID       = "00000000-0000-4000-8000-000000000001"
+	otherScopeID         = "00000000-0000-4000-8000-000000000002"
+	seedRepositoryID     = "11111111-1111-4111-8111-111111111111"
+	createdRepositoryID  = "11111111-1111-4111-8111-111111111112"
+	conflictRepositoryID = "11111111-1111-4111-8111-111111111113"
+	succeededScanID      = "22222222-2222-4222-8222-222222222222"
+	runningScanID        = "22222222-2222-4222-8222-222222222223"
+	createdScanID        = "22222222-2222-4222-8222-222222222224"
+)
+
 type Suite struct{ config Config }
 
 func New(configs ...Config) (*Suite, error) {
@@ -139,7 +150,7 @@ func (suite *Suite) scanScopeIsolation(t *testing.T, fixture ScanFixture) {
 
 func (suite *Suite) scanMutations(t *testing.T, fixture ScanFixture) {
 	scenario := fixture.Scenario
-	execute, _ := fixture.Contract.NewExecuteScanRequest(repository.ExecuteScanParams{Scope: scenario.PrimaryScope, RequestID: "scan-conformance-execute", RepositoryID: scenario.RepositoryID, ScanID: "scan-conformance-created", SourceHandle: scenario.SourceHandle, Profile: scenario.Profile})
+	execute, _ := fixture.Contract.NewExecuteScanRequest(repository.ExecuteScanParams{Scope: scenario.PrimaryScope, RequestID: "scan-conformance-execute", RepositoryID: scenario.RepositoryID, ScanID: createdScanID, SourceHandle: scenario.SourceHandle, Profile: scenario.Profile})
 	result, err := fixture.Service.ExecuteScan(context.Background(), execute)
 	if err != nil || result.Scan().State() != repository.ScanSucceeded || result.Disposition() != repository.DispositionCreated {
 		t.Fatalf("execute: %+v, %v", result, err)
@@ -233,7 +244,7 @@ func (suite *Suite) lifecycleScopeIsolation(t *testing.T, fixture LifecycleFixtu
 
 func (suite *Suite) lifecycleMutations(t *testing.T, fixture LifecycleFixture) {
 	scenario := fixture.Scenario
-	request, _ := fixture.Contract.NewRegisterRepositoryRequest(repository.RegisterRepositoryParams{Scope: scenario.PrimaryScope, RequestID: "lifecycle-register", RepositoryID: "lifecycle-created", DisplayName: "Lifecycle Created", SourceHandle: scenario.SourceHandle})
+	request, _ := fixture.Contract.NewRegisterRepositoryRequest(repository.RegisterRepositoryParams{Scope: scenario.PrimaryScope, RequestID: "lifecycle-register", RepositoryID: createdRepositoryID, DisplayName: "Lifecycle Created", SourceHandle: scenario.SourceHandle})
 	created, err := fixture.Service.RegisterRepository(context.Background(), request)
 	if err != nil || created.State() != repository.RepositoryActive {
 		t.Fatalf("register: %+v, %v", created, err)
@@ -242,7 +253,7 @@ func (suite *Suite) lifecycleMutations(t *testing.T, fixture LifecycleFixture) {
 	if err != nil || retried.RepositoryID() != created.RepositoryID() || retried.CreatedAt() != created.CreatedAt() {
 		t.Fatalf("register retry: %+v, %v", retried, err)
 	}
-	conflict, _ := fixture.Contract.NewRegisterRepositoryRequest(repository.RegisterRepositoryParams{Scope: scenario.PrimaryScope, RequestID: "lifecycle-register", RepositoryID: "lifecycle-conflict", DisplayName: "Conflict", SourceHandle: scenario.SourceHandle})
+	conflict, _ := fixture.Contract.NewRegisterRepositoryRequest(repository.RegisterRepositoryParams{Scope: scenario.PrimaryScope, RequestID: "lifecycle-register", RepositoryID: conflictRepositoryID, DisplayName: "Conflict", SourceHandle: scenario.SourceHandle})
 	if _, err = fixture.Service.RegisterRepository(context.Background(), conflict); repository.KindOf(err) != repository.ErrorIdempotencyConflict {
 		t.Fatalf("register conflict: %v", err)
 	}
@@ -373,7 +384,7 @@ func (suite *Suite) scopeIsolation(t *testing.T, fixture Fixture) {
 	if _, err = fixture.Service.CancelScan(context.Background(), cancel); repository.KindOf(err) != repository.ErrorNotFound {
 		t.Fatalf("cancel scope escape: %v", err)
 	}
-	execute, _ := fixture.Contract.NewExecuteScanRequest(repository.ExecuteScanParams{Scope: scenario.OtherScope, RequestID: "scope-execute", RepositoryID: scenario.Repository.RepositoryID(), ScanID: "scope-scan", SourceHandle: scenario.SourceHandle, Profile: scenario.Profile})
+	execute, _ := fixture.Contract.NewExecuteScanRequest(repository.ExecuteScanParams{Scope: scenario.OtherScope, RequestID: "scope-execute", RepositoryID: scenario.Repository.RepositoryID(), ScanID: createdScanID, SourceHandle: scenario.SourceHandle, Profile: scenario.Profile})
 	if _, err = fixture.Service.ExecuteScan(context.Background(), execute); repository.KindOf(err) != repository.ErrorNotFound {
 		t.Fatalf("execute scope escape: %v", err)
 	}
@@ -408,7 +419,7 @@ func (suite *Suite) scopeIsolation(t *testing.T, fixture Fixture) {
 
 func (suite *Suite) repositoryMutations(t *testing.T, fixture Fixture) {
 	scenario := fixture.Scenario
-	request, err := fixture.Contract.NewRegisterRepositoryRequest(repository.RegisterRepositoryParams{Scope: scenario.PrimaryScope, RequestID: "conformance-register", RepositoryID: "conformance-repository", DisplayName: "Conformance Repository", SourceHandle: scenario.SourceHandle})
+	request, err := fixture.Contract.NewRegisterRepositoryRequest(repository.RegisterRepositoryParams{Scope: scenario.PrimaryScope, RequestID: "conformance-register", RepositoryID: createdRepositoryID, DisplayName: "Conformance Repository", SourceHandle: scenario.SourceHandle})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -420,7 +431,7 @@ func (suite *Suite) repositoryMutations(t *testing.T, fixture Fixture) {
 	if err != nil || retried.RepositoryID() != created.RepositoryID() {
 		t.Fatalf("idempotent register: %+v, %v", retried, err)
 	}
-	conflict, _ := fixture.Contract.NewRegisterRepositoryRequest(repository.RegisterRepositoryParams{Scope: scenario.PrimaryScope, RequestID: "conformance-register", RepositoryID: "different-repository", DisplayName: "Different", SourceHandle: scenario.SourceHandle})
+	conflict, _ := fixture.Contract.NewRegisterRepositoryRequest(repository.RegisterRepositoryParams{Scope: scenario.PrimaryScope, RequestID: "conformance-register", RepositoryID: conflictRepositoryID, DisplayName: "Different", SourceHandle: scenario.SourceHandle})
 	if _, err = fixture.Service.RegisterRepository(context.Background(), conflict); repository.KindOf(err) != repository.ErrorIdempotencyConflict {
 		t.Fatalf("idempotency conflict: %v", err)
 	}
@@ -433,7 +444,7 @@ func (suite *Suite) repositoryMutations(t *testing.T, fixture Fixture) {
 
 func (suite *Suite) scanExecutionAndCancel(t *testing.T, fixture Fixture) {
 	scenario := fixture.Scenario
-	execute, err := fixture.Contract.NewExecuteScanRequest(repository.ExecuteScanParams{Scope: scenario.PrimaryScope, RequestID: "conformance-execute", RepositoryID: scenario.Repository.RepositoryID(), ScanID: "conformance-scan", SourceHandle: scenario.SourceHandle, Profile: scenario.Profile})
+	execute, err := fixture.Contract.NewExecuteScanRequest(repository.ExecuteScanParams{Scope: scenario.PrimaryScope, RequestID: "conformance-execute", RepositoryID: scenario.Repository.RepositoryID(), ScanID: createdScanID, SourceHandle: scenario.SourceHandle, Profile: scenario.Profile})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -505,14 +516,14 @@ func openMemoryFixture(ctx context.Context) (Fixture, Cleanup, error) {
 	if err != nil {
 		return Fixture{}, nil, err
 	}
-	primary, _ := repository.NewScope("scope-primary", "principal-primary")
-	other, _ := repository.NewScope("scope-other", "principal-other")
+	primary, _ := repository.NewScope(primaryScopeID, "principal-primary")
+	other, _ := repository.NewScope(otherScopeID, "principal-other")
 	profile := contract.Profiles().Definitions()[0].Profile()
 	now := time.Date(2026, 7, 27, 0, 0, 0, 0, time.UTC)
 	fingerprint := repository.DigestBytes([]byte("source-proof"))
-	repositoryValue, _ := repository.NewRepository(repository.RepositoryParams{RepositoryID: "repository-seeded", DisplayName: "Seeded Repository", SourceKind: "local", FingerprintScheme: "sha256/v1", Fingerprint: fingerprint, State: repository.RepositoryActive, CurrentScanID: "scan-succeeded", CreatedAt: now, UpdatedAt: now})
-	succeeded, _ := repository.NewScan(repository.ScanParams{RepositoryID: repositoryValue.RepositoryID(), ScanID: "scan-succeeded", Profile: profile, SourceRevision: "revision-1", State: repository.ScanSucceeded, RequestedAt: now, StartedAt: now, FinishedAt: now})
-	running, _ := repository.NewScan(repository.ScanParams{RepositoryID: repositoryValue.RepositoryID(), ScanID: "scan-running", Profile: profile, SourceRevision: "revision-1", State: repository.ScanRunning, RequestedAt: now, StartedAt: now})
+	repositoryValue, _ := repository.NewRepository(repository.RepositoryParams{RepositoryID: seedRepositoryID, DisplayName: "Seeded Repository", SourceKind: "local", FingerprintScheme: "sha256/v1", Fingerprint: fingerprint, State: repository.RepositoryActive, CurrentScanID: succeededScanID, CreatedAt: now, UpdatedAt: now})
+	succeeded, _ := repository.NewScan(repository.ScanParams{RepositoryID: repositoryValue.RepositoryID(), ScanID: succeededScanID, Profile: profile, SourceRevision: "revision-1", State: repository.ScanSucceeded, RequestedAt: now, StartedAt: now, FinishedAt: now})
+	running, _ := repository.NewScan(repository.ScanParams{RepositoryID: repositoryValue.RepositoryID(), ScanID: runningScanID, Profile: profile, SourceRevision: "revision-1", State: repository.ScanRunning, RequestedAt: now, StartedAt: now})
 	payload := []byte("{\"seeded\":true}\n")
 	digest := repository.DigestBytes(payload)
 	artifactID, _ := repository.NewArtifactID(repositoryValue.RepositoryID(), succeeded.ScanID(), "repository-intelligence-summary", "1.0.0", repository.ArtifactIdentityScheme)

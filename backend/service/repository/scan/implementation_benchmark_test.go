@@ -3,7 +3,7 @@ package scan
 import (
 	"context"
 	"crypto/sha256"
-	"strconv"
+	"fmt"
 	"testing"
 	"time"
 
@@ -12,16 +12,16 @@ import (
 
 func BenchmarkScanGet(b *testing.B) {
 	contract, _ := repository.New()
-	scope, _ := repository.NewScope("benchmark-scope", "benchmark-principal")
+	scope, _ := repository.NewScope(scanTestScopeID, "benchmark-principal")
 	profile := contract.Profiles().Definitions()[0].Profile()
 	clock := &stepClock{current: time.Date(2026, 7, 27, 18, 0, 0, 0, time.UTC)}
 	store := newMemoryStore()
-	store.addRepository(scope, "repository", repository.RepositoryActive)
+	store.addRepository(scope, scanTestRepositoryID, repository.RepositoryActive)
 	preparer := benchmarkPreparer(profile)
 	service, _ := New(store, newFakeAdmission(), preparer, clock)
-	request, _ := contract.NewExecuteScanRequest(repository.ExecuteScanParams{Scope: scope, RequestID: "request", RepositoryID: "repository", ScanID: "scan", SourceHandle: "source", Profile: profile})
+	request, _ := contract.NewExecuteScanRequest(repository.ExecuteScanParams{Scope: scope, RequestID: "request", RepositoryID: scanTestRepositoryID, ScanID: scanTestScanID, SourceHandle: "source", Profile: profile})
 	_, _ = service.ExecuteScan(context.Background(), request)
-	query, _ := repository.NewScanQuery(scope, "repository", "scan")
+	query, _ := repository.NewScanQuery(scope, scanTestRepositoryID, scanTestScanID)
 	b.ReportAllocs()
 	b.ResetTimer()
 	for range b.N {
@@ -31,26 +31,25 @@ func BenchmarkScanGet(b *testing.B) {
 
 func BenchmarkScanExecuteIndependent(b *testing.B) {
 	contract, _ := repository.New()
-	scope, _ := repository.NewScope("benchmark-scope", "benchmark-principal")
+	scope, _ := repository.NewScope(scanTestScopeID, "benchmark-principal")
 	profile := contract.Profiles().Definitions()[0].Profile()
 	clock := &stepClock{current: time.Date(2026, 7, 27, 18, 0, 0, 0, time.UTC)}
 	store := newMemoryStore()
-	store.addRepository(scope, "repository", repository.RepositoryActive)
+	store.addRepository(scope, scanTestRepositoryID, repository.RepositoryActive)
 	service, _ := New(store, newFakeAdmission(), benchmarkPreparer(profile), clock)
 	b.ReportAllocs()
 	b.ResetTimer()
 	for index := range b.N {
-		value := strconv.Itoa(index)
-		request, _ := contract.NewExecuteScanRequest(repository.ExecuteScanParams{Scope: scope, RequestID: repository.RequestID("request-" + value), RepositoryID: "repository", ScanID: repository.ScanID("scan-" + value), SourceHandle: "source", Profile: profile})
+		request, _ := contract.NewExecuteScanRequest(repository.ExecuteScanParams{Scope: scope, RequestID: repository.RequestID(fmt.Sprintf("request-%d", index)), RepositoryID: scanTestRepositoryID, ScanID: repository.ScanID(fmt.Sprintf("22222222-2222-4222-8222-%012d", index)), SourceHandle: "source", Profile: profile})
 		_, _ = service.ExecuteScan(context.Background(), request)
 	}
 }
 
 func BenchmarkExecuteFingerprint(b *testing.B) {
 	contract, _ := repository.New()
-	scope, _ := repository.NewScope("benchmark-scope", "benchmark-principal")
+	scope, _ := repository.NewScope(scanTestScopeID, "benchmark-principal")
 	profile := contract.Profiles().Definitions()[0].Profile()
-	request, _ := contract.NewExecuteScanRequest(repository.ExecuteScanParams{Scope: scope, RequestID: "request", RepositoryID: "repository", ScanID: "scan", SourceHandle: "source", Profile: profile})
+	request, _ := contract.NewExecuteScanRequest(repository.ExecuteScanParams{Scope: scope, RequestID: "request", RepositoryID: scanTestRepositoryID, ScanID: scanTestScanID, SourceHandle: "source", Profile: profile})
 	source := repository.DigestBytes([]byte("source"))
 	b.ReportAllocs()
 	for range b.N {

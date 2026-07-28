@@ -9,7 +9,7 @@
 - Phase 4.0.4 scan execution core: accepted on 2026-07-28
 - Phase 4.0.5 intelligence and materialization adapters: accepted on 2026-07-28
 - Phase 4.0.6 persistence and runtime integration design: accepted with recommendations on 2026-07-28
-- Phase 4.0.6 production implementation: authorized under frozen golden-vector conditions
+- Phase 4.0.6 production implementation and local validation: complete; engineering acceptance pending
 - Phase 4.1 transports: unauthorized
 - Date: 2026-07-27
 
@@ -160,7 +160,7 @@ Evidence is recorded in
 Engineering accepted the implementation and validation evidence on 2026-07-28
 and authorized Phase 4.0.6 design only.
 
-## Phase 4.0.6 — Persistence and runtime integration (implementation authorized)
+## Phase 4.0.6 — Persistence and runtime integration (awaiting engineering acceptance)
 
 Design package:
 
@@ -187,6 +187,11 @@ No migrations run at service startup. Pool construction remains runtime-owned.
 
 Exit gate: conformance runs before adapter-specific tests; all integration,
 race, rollback, scope-isolation, and leak tests pass.
+
+Local evidence is recorded in
+`docs/Validation/PERSISTENCE_RUNTIME_INTEGRATION_VALIDATION_REPORT.md`. The
+implementation has reached the local exit gate but is not committed or pushed
+until engineering accepts the report. Phase 4.0.7 remains unauthorized.
 
 ## Phase 4.0.7 — Real repository validation
 

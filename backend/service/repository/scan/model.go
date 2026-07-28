@@ -192,19 +192,23 @@ func (result AnalysisResult) Candidates() []ArtifactCandidate {
 }
 
 type BeginCommand struct {
-	scope       repository.Scope
-	requestID   repository.RequestID
-	fingerprint repository.Digest
-	scan        repository.Scan
+	scope               repository.Scope
+	requestID           repository.RequestID
+	mutationFingerprint repository.Digest
+	sourceFingerprint   repository.Digest
+	scan                repository.Scan
 }
 
-func newBeginCommand(scope repository.Scope, requestID repository.RequestID, fingerprint repository.Digest, scan repository.Scan) BeginCommand {
-	return BeginCommand{scope: scope, requestID: requestID, fingerprint: fingerprint, scan: scan}
+func newBeginCommand(scope repository.Scope, requestID repository.RequestID, mutationFingerprint, sourceFingerprint repository.Digest, scan repository.Scan) BeginCommand {
+	return BeginCommand{scope: scope, requestID: requestID, mutationFingerprint: mutationFingerprint, sourceFingerprint: sourceFingerprint, scan: scan}
 }
-func (command BeginCommand) Scope() repository.Scope                { return command.scope }
-func (command BeginCommand) RequestID() repository.RequestID        { return command.requestID }
-func (command BeginCommand) MutationFingerprint() repository.Digest { return command.fingerprint }
-func (command BeginCommand) Scan() repository.Scan                  { return command.scan }
+func (command BeginCommand) Scope() repository.Scope         { return command.scope }
+func (command BeginCommand) RequestID() repository.RequestID { return command.requestID }
+func (command BeginCommand) MutationFingerprint() repository.Digest {
+	return command.mutationFingerprint
+}
+func (command BeginCommand) SourceFingerprint() repository.Digest { return command.sourceFingerprint }
+func (command BeginCommand) Scan() repository.Scan                { return command.scan }
 
 type BeginResult struct {
 	status    BeginStatus
@@ -250,35 +254,42 @@ func newPublicationArtifact(metadata repository.Artifact, payload ArtifactCandid
 	return PublicationArtifact{metadata: metadata, payload: payload}
 }
 func (artifact PublicationArtifact) Metadata() repository.Artifact { return artifact.metadata }
+func (artifact PublicationArtifact) Dependencies() []ArtifactDependency {
+	return artifact.payload.Dependencies()
+}
 func (artifact PublicationArtifact) Open(ctx context.Context) (io.ReadCloser, error) {
 	return artifact.payload.Open(ctx)
 }
 
 type PublishCommand struct {
 	scope     repository.Scope
+	requestID repository.RequestID
 	scan      repository.Scan
 	artifacts []PublicationArtifact
 }
 
-func newPublishCommand(scope repository.Scope, scan repository.Scan, artifacts []PublicationArtifact) PublishCommand {
-	return PublishCommand{scope: scope, scan: scan, artifacts: append([]PublicationArtifact(nil), artifacts...)}
+func newPublishCommand(scope repository.Scope, requestID repository.RequestID, scan repository.Scan, artifacts []PublicationArtifact) PublishCommand {
+	return PublishCommand{scope: scope, requestID: requestID, scan: scan, artifacts: append([]PublicationArtifact(nil), artifacts...)}
 }
-func (command PublishCommand) Scope() repository.Scope { return command.scope }
-func (command PublishCommand) Scan() repository.Scan   { return command.scan }
+func (command PublishCommand) Scope() repository.Scope         { return command.scope }
+func (command PublishCommand) RequestID() repository.RequestID { return command.requestID }
+func (command PublishCommand) Scan() repository.Scan           { return command.scan }
 func (command PublishCommand) Artifacts() []PublicationArtifact {
 	return append([]PublicationArtifact(nil), command.artifacts...)
 }
 
 type FinalizeCommand struct {
-	scope repository.Scope
-	scan  repository.Scan
+	scope     repository.Scope
+	requestID repository.RequestID
+	scan      repository.Scan
 }
 
-func newFinalizeCommand(scope repository.Scope, scan repository.Scan) FinalizeCommand {
-	return FinalizeCommand{scope: scope, scan: scan}
+func newFinalizeCommand(scope repository.Scope, requestID repository.RequestID, scan repository.Scan) FinalizeCommand {
+	return FinalizeCommand{scope: scope, requestID: requestID, scan: scan}
 }
-func (command FinalizeCommand) Scope() repository.Scope { return command.scope }
-func (command FinalizeCommand) Scan() repository.Scan   { return command.scan }
+func (command FinalizeCommand) Scope() repository.Scope         { return command.scope }
+func (command FinalizeCommand) RequestID() repository.RequestID { return command.requestID }
+func (command FinalizeCommand) Scan() repository.Scan           { return command.scan }
 
 type CancelCommand struct {
 	scope        repository.Scope

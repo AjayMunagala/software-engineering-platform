@@ -56,7 +56,7 @@ func (contract *Contract) Profiles() *ProfileRegistry {
 }
 
 func NewScope(scopeID ScopeID, principalID PrincipalID) (Scope, error) {
-	if !validMachine(string(scopeID), 128) || !validMachine(string(principalID), 128) {
+	if !validUUID(string(scopeID)) || !validMachine(string(principalID), 128) {
 		return Scope{}, NewError(ErrorInvalidInput, "new-scope", "invalid-scope", false, nil)
 	}
 	return Scope{scopeID: scopeID, principalID: principalID}, nil
@@ -77,7 +77,7 @@ func NewAnalysisProfile(name, version string, digest Digest) (AnalysisProfile, e
 }
 
 func (contract *Contract) NewRegisterRepositoryRequest(params RegisterRepositoryParams) (RegisterRepositoryRequest, error) {
-	if contract == nil || params.Scope.IsZero() || !validMachine(string(params.RequestID), 128) || !validMachine(string(params.RepositoryID), 128) || !validSafeText(params.DisplayName, contract.config.MaxDisplayNameBytes) {
+	if contract == nil || params.Scope.IsZero() || !validMachine(string(params.RequestID), 128) || !validUUID(string(params.RepositoryID)) || !validSafeText(params.DisplayName, contract.config.MaxDisplayNameBytes) {
 		return RegisterRepositoryRequest{}, NewError(ErrorInvalidInput, "register-repository", "invalid-request", false, nil)
 	}
 	handle, err := NewSourceHandle(params.SourceHandle, contract.config.MaxSourceHandleBytes)
@@ -88,7 +88,7 @@ func (contract *Contract) NewRegisterRepositoryRequest(params RegisterRepository
 }
 
 func NewRepositoryQuery(scope Scope, repositoryID RepositoryID) (RepositoryQuery, error) {
-	if scope.IsZero() || !validMachine(string(repositoryID), 128) {
+	if scope.IsZero() || !validUUID(string(repositoryID)) {
 		return RepositoryQuery{}, invalid("get-repository")
 	}
 	return RepositoryQuery{scope: scope, repositoryID: repositoryID}, nil
@@ -102,14 +102,14 @@ func (contract *Contract) NewRepositoryListRequest(params RepositoryListParams) 
 }
 
 func NewArchiveRepositoryRequest(params ArchiveRepositoryParams) (ArchiveRepositoryRequest, error) {
-	if params.Scope.IsZero() || !validMachine(string(params.RequestID), 128) || !validMachine(string(params.RepositoryID), 128) {
+	if params.Scope.IsZero() || !validMachine(string(params.RequestID), 128) || !validUUID(string(params.RepositoryID)) {
 		return ArchiveRepositoryRequest{}, invalid("archive-repository")
 	}
 	return ArchiveRepositoryRequest{scope: params.Scope, requestID: params.RequestID, repositoryID: params.RepositoryID}, nil
 }
 
 func (contract *Contract) NewExecuteScanRequest(params ExecuteScanParams) (ExecuteScanRequest, error) {
-	if contract == nil || params.Scope.IsZero() || !validMachine(string(params.RequestID), 128) || !validMachine(string(params.RepositoryID), 128) || !validMachine(string(params.ScanID), 128) || params.Profile.IsZero() {
+	if contract == nil || params.Scope.IsZero() || !validMachine(string(params.RequestID), 128) || !validUUID(string(params.RepositoryID)) || !validUUID(string(params.ScanID)) || params.Profile.IsZero() {
 		return ExecuteScanRequest{}, invalid("execute-scan")
 	}
 	if _, ok := contract.profiles.Resolve(params.Profile.Name(), params.Profile.Version(), params.Profile.Digest()); !ok {
@@ -123,35 +123,35 @@ func (contract *Contract) NewExecuteScanRequest(params ExecuteScanParams) (Execu
 }
 
 func NewScanQuery(scope Scope, repositoryID RepositoryID, scanID ScanID) (ScanQuery, error) {
-	if scope.IsZero() || !validMachine(string(repositoryID), 128) || !validMachine(string(scanID), 128) {
+	if scope.IsZero() || !validUUID(string(repositoryID)) || !validUUID(string(scanID)) {
 		return ScanQuery{}, invalid("get-scan")
 	}
 	return ScanQuery{scope: scope, repositoryID: repositoryID, scanID: scanID}, nil
 }
 
 func (contract *Contract) NewScanListRequest(params ScanListParams) (ScanListRequest, error) {
-	if contract == nil || params.Scope.IsZero() || !validMachine(string(params.RepositoryID), 128) || params.PageSize < 1 || params.PageSize > contract.config.MaxPageSize || !validOptionalMachine(string(params.Cursor), 1024) {
+	if contract == nil || params.Scope.IsZero() || !validUUID(string(params.RepositoryID)) || params.PageSize < 1 || params.PageSize > contract.config.MaxPageSize || !validOptionalMachine(string(params.Cursor), 1024) {
 		return ScanListRequest{}, invalid("list-scans")
 	}
 	return ScanListRequest{scope: params.Scope, repositoryID: params.RepositoryID, pageSize: params.PageSize, cursor: params.Cursor}, nil
 }
 
 func NewCancelScanRequest(params CancelScanParams) (CancelScanRequest, error) {
-	if params.Scope.IsZero() || !validMachine(string(params.RequestID), 128) || !validMachine(string(params.RepositoryID), 128) || !validMachine(string(params.ScanID), 128) {
+	if params.Scope.IsZero() || !validMachine(string(params.RequestID), 128) || !validUUID(string(params.RepositoryID)) || !validUUID(string(params.ScanID)) {
 		return CancelScanRequest{}, invalid("cancel-scan")
 	}
 	return CancelScanRequest{scope: params.Scope, requestID: params.RequestID, repositoryID: params.RepositoryID, scanID: params.ScanID}, nil
 }
 
 func NewArtifactQuery(scope Scope, repositoryID RepositoryID, scanID ScanID, artifactID ArtifactID) (ArtifactQuery, error) {
-	if scope.IsZero() || !validMachine(string(repositoryID), 128) || !validMachine(string(scanID), 128) || !validMachine(string(artifactID), 256) {
+	if scope.IsZero() || !validUUID(string(repositoryID)) || !validUUID(string(scanID)) || !validMachine(string(artifactID), 256) {
 		return ArtifactQuery{}, invalid("get-artifact")
 	}
 	return ArtifactQuery{scope: scope, repositoryID: repositoryID, scanID: scanID, artifactID: artifactID}, nil
 }
 
 func (contract *Contract) NewArtifactListRequest(params ArtifactListParams) (ArtifactListRequest, error) {
-	if contract == nil || params.Scope.IsZero() || !validMachine(string(params.RepositoryID), 128) || !validMachine(string(params.ScanID), 128) || params.PageSize < 1 || params.PageSize > contract.config.MaxPageSize || !validOptionalMachine(string(params.Cursor), 1024) {
+	if contract == nil || params.Scope.IsZero() || !validUUID(string(params.RepositoryID)) || !validUUID(string(params.ScanID)) || params.PageSize < 1 || params.PageSize > contract.config.MaxPageSize || !validOptionalMachine(string(params.Cursor), 1024) {
 		return ArtifactListRequest{}, invalid("list-artifacts")
 	}
 	return ArtifactListRequest{scope: params.Scope, repositoryID: params.RepositoryID, scanID: params.ScanID, pageSize: params.PageSize, cursor: params.Cursor}, nil
@@ -165,7 +165,7 @@ func NewExportArtifactRequest(query ArtifactQuery) (ExportArtifactRequest, error
 }
 
 func NewRepository(params RepositoryParams) (Repository, error) {
-	if !validMachine(string(params.RepositoryID), 128) || !validSafeText(params.DisplayName, defaultMaxDisplayNameBytes) || !validName(params.SourceKind, 64) || !validName(params.FingerprintScheme, 128) || params.Fingerprint.IsZero() || !validRepositoryState(params.State) || !validOptionalMachine(string(params.CurrentScanID), 128) || params.CreatedAt.IsZero() || params.UpdatedAt.IsZero() || params.UpdatedAt.Before(params.CreatedAt) {
+	if !validUUID(string(params.RepositoryID)) || !validSafeText(params.DisplayName, defaultMaxDisplayNameBytes) || !validName(params.SourceKind, 64) || !validName(params.FingerprintScheme, 128) || params.Fingerprint.IsZero() || !validRepositoryState(params.State) || (params.CurrentScanID != "" && !validUUID(string(params.CurrentScanID))) || params.CreatedAt.IsZero() || params.UpdatedAt.IsZero() || params.UpdatedAt.Before(params.CreatedAt) {
 		return Repository{}, invalid("new-repository")
 	}
 	params.CreatedAt, params.UpdatedAt = params.CreatedAt.UTC(), params.UpdatedAt.UTC()
@@ -173,7 +173,7 @@ func NewRepository(params RepositoryParams) (Repository, error) {
 }
 
 func NewScan(params ScanParams) (Scan, error) {
-	if !validMachine(string(params.RepositoryID), 128) || !validMachine(string(params.ScanID), 128) || params.Profile.IsZero() || !validScanState(params.State) || (params.SourceRevision != "" && !validIdentityField(params.SourceRevision)) || params.RequestedAt.IsZero() || !validOptionalToken(params.ReasonCode, 128) || !validScanTimes(params) {
+	if !validUUID(string(params.RepositoryID)) || !validUUID(string(params.ScanID)) || params.Profile.IsZero() || !validScanState(params.State) || (params.SourceRevision != "" && !validIdentityField(params.SourceRevision)) || params.RequestedAt.IsZero() || !validOptionalToken(params.ReasonCode, 128) || !validScanTimes(params) {
 		return Scan{}, invalid("new-scan")
 	}
 	params.RequestedAt, params.StartedAt, params.FinishedAt = params.RequestedAt.UTC(), params.StartedAt.UTC(), params.FinishedAt.UTC()
@@ -181,7 +181,7 @@ func NewScan(params ScanParams) (Scan, error) {
 }
 
 func NewArtifact(params ArtifactParams) (Artifact, error) {
-	if !validMachine(string(params.ArtifactID), 256) || !validMachine(string(params.ScanID), 128) || !validName(params.Name, 128) || !validVersion(params.Version) || !validName(params.StableIDScheme, 128) || !validName(params.CodecName, 128) || !validVersion(params.CodecVersion) || !validMediaType(params.MediaType) || params.PayloadDigest.IsZero() || params.PayloadSize == 0 || params.PayloadSize > defaultMaxArtifactBytes || !validName(params.ProducerName, 128) || !validVersion(params.ProducerVersion) || params.CreatedAt.IsZero() {
+	if !validMachine(string(params.ArtifactID), 256) || !validUUID(string(params.ScanID)) || !validName(params.Name, 128) || !validVersion(params.Version) || !validName(params.StableIDScheme, 128) || !validName(params.CodecName, 128) || !validVersion(params.CodecVersion) || !validMediaType(params.MediaType) || params.PayloadDigest.IsZero() || params.PayloadSize == 0 || params.PayloadSize > defaultMaxArtifactBytes || !validName(params.ProducerName, 128) || !validVersion(params.ProducerVersion) || params.CreatedAt.IsZero() {
 		return Artifact{}, invalid("new-artifact")
 	}
 	params.CreatedAt = params.CreatedAt.UTC()
@@ -243,6 +243,9 @@ func NewExportReceipt(digest Digest, size uint64) (ExportReceipt, error) {
 // CanonicalArtifactIdentity freezes repository-service-artifact-id/v1 bytes.
 func CanonicalArtifactIdentity(repositoryID RepositoryID, scanID ScanID, name, version, stableIDScheme string) ([]byte, error) {
 	fields := []string{string(repositoryID), string(scanID), name, version, stableIDScheme}
+	if !validUUID(fields[0]) || !validUUID(fields[1]) {
+		return nil, invalid("artifact-identity")
+	}
 	result := append([]byte(nil), artifactIdentityDomain...)
 	var length [4]byte
 	for _, field := range fields {
@@ -410,6 +413,20 @@ func validMachine(value string, maximum int) bool {
 }
 func validOptionalMachine(value string, maximum int) bool {
 	return value == "" || validMachine(value, maximum)
+}
+func validUUID(value string) bool {
+	if len(value) != 36 || value[8] != '-' || value[13] != '-' || value[18] != '-' || value[23] != '-' || value[14] < '1' || value[14] > '8' || !strings.ContainsRune("89ab", rune(value[19])) {
+		return false
+	}
+	for index := range value {
+		if index == 8 || index == 13 || index == 18 || index == 23 {
+			continue
+		}
+		if (value[index] < '0' || value[index] > '9') && (value[index] < 'a' || value[index] > 'f') {
+			return false
+		}
+	}
+	return true
 }
 func validSensitive(value string, maximum int) bool {
 	if value == "" || len(value) > maximum || strings.TrimSpace(value) != value || !utf8.ValidString(value) {

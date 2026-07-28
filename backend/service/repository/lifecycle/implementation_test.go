@@ -3,6 +3,7 @@ package lifecycle
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sort"
 	"strconv"
 	"strings"
@@ -13,6 +14,13 @@ import (
 
 	"github.com/AjayMunagala/software-engineering-platform/backend/service/repository"
 	"github.com/AjayMunagala/software-engineering-platform/backend/service/repository/conformance"
+)
+
+const (
+	lifecycleScopeID      = "00000000-0000-4000-8000-000000000021"
+	lifecycleOtherScopeID = "00000000-0000-4000-8000-000000000022"
+	lifecycleRepositoryID = "11111111-1111-4111-8111-111111111131"
+	lifecycleProofRepoID  = "11111111-1111-4111-8111-111111111132"
 )
 
 func TestLifecycleConformance(t *testing.T) {
@@ -29,7 +37,7 @@ func TestRegisterResolvesClosesAndPersistsOnlyProof(t *testing.T) {
 	resolver := service.resolver.(*fakeResolver)
 	resolvedBefore, closedBefore := resolver.resolveCount.Load(), resolver.closeCount.Load()
 	contract := fixture.Contract
-	request, _ := contract.NewRegisterRepositoryRequest(repository.RegisterRepositoryParams{Scope: fixture.Scenario.PrimaryScope, RequestID: "proof-register", RepositoryID: "proof-repository", DisplayName: "Proof Repository", SourceHandle: "sensitive-local-handle"})
+	request, _ := contract.NewRegisterRepositoryRequest(repository.RegisterRepositoryParams{Scope: fixture.Scenario.PrimaryScope, RequestID: "proof-register", RepositoryID: lifecycleProofRepoID, DisplayName: "Proof Repository", SourceHandle: "sensitive-local-handle"})
 	value, err := service.RegisterRepository(context.Background(), request)
 	if err != nil {
 		t.Fatal(err)
@@ -48,9 +56,9 @@ func TestRegisterResolvesClosesAndPersistsOnlyProof(t *testing.T) {
 func TestLifecycleDependencyFailuresAreSafe(t *testing.T) {
 	now := time.Date(2026, 7, 27, 12, 0, 0, 0, time.UTC)
 	contract, _ := repository.New()
-	scope, _ := repository.NewScope("scope", "principal")
+	scope, _ := repository.NewScope(lifecycleScopeID, "principal")
 	proof, _ := NewSourceProof("local", "sha256/v1", repository.DigestBytes([]byte("proof")), "revision")
-	request, _ := contract.NewRegisterRepositoryRequest(repository.RegisterRepositoryParams{Scope: scope, RequestID: "request", RepositoryID: "repository", DisplayName: "Repository", SourceHandle: "handle"})
+	request, _ := contract.NewRegisterRepositoryRequest(repository.RegisterRepositoryParams{Scope: scope, RequestID: "request", RepositoryID: lifecycleRepositoryID, DisplayName: "Repository", SourceHandle: "handle"})
 
 	resolver := &fakeResolver{proof: proof, resolveErr: errors.New("path=C:\\secret password=value")}
 	service, _ := New(newMemoryStore(), resolver, ClockFunc(func() time.Time { return now }))
@@ -103,8 +111,8 @@ func TestLifecycleValidationAndIntegrity(t *testing.T) {
 		t.Fatalf("nil context=%v", err)
 	}
 	contract, _ := repository.New()
-	scope, _ := repository.NewScope("scope", "principal")
-	request, _ := contract.NewRegisterRepositoryRequest(repository.RegisterRepositoryParams{Scope: scope, RequestID: "request", RepositoryID: "repo", DisplayName: "Repo", SourceHandle: "handle"})
+	scope, _ := repository.NewScope(lifecycleScopeID, "principal")
+	request, _ := contract.NewRegisterRepositoryRequest(repository.RegisterRepositoryParams{Scope: scope, RequestID: "request", RepositoryID: lifecycleRepositoryID, DisplayName: "Repo", SourceHandle: "handle"})
 	store.overrideResult = true
 	store.resultOverride = repository.Repository{}
 	if _, err := service.RegisterRepository(context.Background(), request); repository.KindOf(err) != repository.ErrorIntegrityFailure {
@@ -114,33 +122,33 @@ func TestLifecycleValidationAndIntegrity(t *testing.T) {
 
 func TestMutationFingerprintsAndDetachedList(t *testing.T) {
 	contract, _ := repository.New()
-	scope, _ := repository.NewScope("scope", "principal")
+	scope, _ := repository.NewScope(lifecycleScopeID, "principal")
 	proof, _ := NewSourceProof("local", "sha256/v1", repository.DigestBytes([]byte("proof")), "revision")
-	request, _ := contract.NewRegisterRepositoryRequest(repository.RegisterRepositoryParams{Scope: scope, RequestID: "request", RepositoryID: "repo", DisplayName: "Repo", SourceHandle: "handle"})
+	request, _ := contract.NewRegisterRepositoryRequest(repository.RegisterRepositoryParams{Scope: scope, RequestID: "request", RepositoryID: lifecycleRepositoryID, DisplayName: "Repo", SourceHandle: "handle"})
 	first := registerFingerprint(request, proof)
 	second := registerFingerprint(request, proof)
 	changedProof, _ := NewSourceProof("local", "sha256/v1", repository.DigestBytes([]byte("changed")), "revision")
 	if first != second || first == registerFingerprint(request, changedProof) {
 		t.Fatal("registration fingerprint is not deterministic/sensitive")
 	}
-	archive, _ := repository.NewArchiveRepositoryRequest(repository.ArchiveRepositoryParams{Scope: scope, RequestID: "archive", RepositoryID: "repo"})
+	archive, _ := repository.NewArchiveRepositoryRequest(repository.ArchiveRepositoryParams{Scope: scope, RequestID: "archive", RepositoryID: lifecycleRepositoryID})
 	if archiveFingerprint(archive) != archiveFingerprint(archive) {
 		t.Fatal("archive fingerprint is not deterministic")
 	}
 	now := time.Now().UTC()
-	value, _ := repository.NewRepository(repository.RepositoryParams{RepositoryID: "repo", DisplayName: "Repo", SourceKind: "local", FingerprintScheme: "sha256/v1", Fingerprint: proof.Fingerprint(), State: repository.RepositoryActive, CreatedAt: now, UpdatedAt: now})
+	value, _ := repository.NewRepository(repository.RepositoryParams{RepositoryID: lifecycleRepositoryID, DisplayName: "Repo", SourceKind: "local", FingerprintScheme: "sha256/v1", Fingerprint: proof.Fingerprint(), State: repository.RepositoryActive, CreatedAt: now, UpdatedAt: now})
 	list, _ := NewRepositoryList([]repository.Repository{value}, "next")
 	items := list.Items()
 	items[0] = repository.Repository{}
-	if list.Items()[0].RepositoryID() != "repo" || list.NextCursor() != "next" {
+	if list.Items()[0].RepositoryID() != lifecycleRepositoryID || list.NextCursor() != "next" {
 		t.Fatal("repository list was mutable")
 	}
 	command := newRegisterCommand(scope, "request", first, value)
-	if command.Scope() != scope || command.RequestID() != "request" || command.MutationFingerprint() != first || command.Repository().RepositoryID() != "repo" {
+	if command.Scope() != scope || command.RequestID() != "request" || command.MutationFingerprint() != first || command.Repository().RepositoryID() != lifecycleRepositoryID {
 		t.Fatal("register command accessors failed")
 	}
-	archiveCommand := newArchiveCommand(scope, "archive", "repo", archiveFingerprint(archive), now)
-	if archiveCommand.Scope() != scope || archiveCommand.RequestID() != "archive" || archiveCommand.RepositoryID() != "repo" || archiveCommand.At() != now || archiveCommand.MutationFingerprint().IsZero() {
+	archiveCommand := newArchiveCommand(scope, "archive", lifecycleRepositoryID, archiveFingerprint(archive), now)
+	if archiveCommand.Scope() != scope || archiveCommand.RequestID() != "archive" || archiveCommand.RepositoryID() != lifecycleRepositoryID || archiveCommand.At() != now || archiveCommand.MutationFingerprint().IsZero() {
 		t.Fatal("archive command accessors failed")
 	}
 }
@@ -154,7 +162,7 @@ func TestConcurrentIdempotencyPaginationAndConflicts(t *testing.T) {
 	service := fixture.Service
 	contract := fixture.Contract
 	scope := fixture.Scenario.PrimaryScope
-	request, _ := contract.NewRegisterRepositoryRequest(repository.RegisterRepositoryParams{Scope: scope, RequestID: "concurrent-register", RepositoryID: "concurrent-repository", DisplayName: "Concurrent", SourceHandle: fixture.Scenario.SourceHandle})
+	request, _ := contract.NewRegisterRepositoryRequest(repository.RegisterRepositoryParams{Scope: scope, RequestID: "concurrent-register", RepositoryID: lifecycleProofRepoID, DisplayName: "Concurrent", SourceHandle: fixture.Scenario.SourceHandle})
 	results := make(chan repository.Repository, 100)
 	errorsFound := make(chan error, 100)
 	var wait sync.WaitGroup
@@ -181,16 +189,16 @@ func TestConcurrentIdempotencyPaginationAndConflicts(t *testing.T) {
 		if createdAt.IsZero() {
 			createdAt = value.CreatedAt()
 		}
-		if value.RepositoryID() != "concurrent-repository" || value.CreatedAt() != createdAt {
+		if value.RepositoryID() != lifecycleProofRepoID || value.CreatedAt() != createdAt {
 			t.Fatalf("non-idempotent result=%+v", value)
 		}
 	}
-	duplicate, _ := contract.NewRegisterRepositoryRequest(repository.RegisterRepositoryParams{Scope: scope, RequestID: "different-request", RepositoryID: "concurrent-repository", DisplayName: "Concurrent", SourceHandle: fixture.Scenario.SourceHandle})
+	duplicate, _ := contract.NewRegisterRepositoryRequest(repository.RegisterRepositoryParams{Scope: scope, RequestID: "different-request", RepositoryID: lifecycleProofRepoID, DisplayName: "Concurrent", SourceHandle: fixture.Scenario.SourceHandle})
 	if _, err = service.RegisterRepository(context.Background(), duplicate); repository.KindOf(err) != repository.ErrorConflict {
 		t.Fatalf("duplicate repository=%v", err)
 	}
 	for index := range 3 {
-		id := repository.RepositoryID("page-" + strconv.Itoa(index))
+		id := repository.RepositoryID(fmt.Sprintf("11111111-1111-4111-8111-%012d", index+200))
 		item, _ := contract.NewRegisterRepositoryRequest(repository.RegisterRepositoryParams{Scope: scope, RequestID: repository.RequestID("page-request-" + strconv.Itoa(index)), RepositoryID: id, DisplayName: "Page", SourceHandle: fixture.Scenario.SourceHandle})
 		if _, err = service.RegisterRepository(context.Background(), item); err != nil {
 			t.Fatal(err)
@@ -378,8 +386,8 @@ func lifecycleRequestKey(scope repository.Scope, id repository.RequestID) string
 
 func openLifecycleFixture(ctx context.Context) (conformance.LifecycleFixture, conformance.Cleanup, error) {
 	contract, _ := repository.New()
-	primary, _ := repository.NewScope("lifecycle-primary", "principal-primary")
-	other, _ := repository.NewScope("lifecycle-other", "principal-other")
+	primary, _ := repository.NewScope(lifecycleScopeID, "principal-primary")
+	other, _ := repository.NewScope(lifecycleOtherScopeID, "principal-other")
 	proof, _ := NewSourceProof("local", "sha256/v1", repository.DigestBytes([]byte("source-proof")), "revision-1")
 	resolver := &fakeResolver{proof: proof}
 	now := time.Date(2026, 7, 27, 12, 0, 0, 0, time.UTC)
@@ -388,7 +396,7 @@ func openLifecycleFixture(ctx context.Context) (conformance.LifecycleFixture, co
 	if err != nil {
 		return conformance.LifecycleFixture{}, nil, err
 	}
-	request, _ := contract.NewRegisterRepositoryRequest(repository.RegisterRepositoryParams{Scope: primary, RequestID: "seed-register", RepositoryID: "repository-seeded", DisplayName: "Seeded Repository", SourceHandle: "seed-source"})
+	request, _ := contract.NewRegisterRepositoryRequest(repository.RegisterRepositoryParams{Scope: primary, RequestID: "seed-register", RepositoryID: lifecycleRepositoryID, DisplayName: "Seeded Repository", SourceHandle: "seed-source"})
 	seeded, err := service.RegisterRepository(ctx, request)
 	if err != nil {
 		return conformance.LifecycleFixture{}, nil, err

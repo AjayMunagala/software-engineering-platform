@@ -1222,7 +1222,7 @@ Detailed evidence:
   docs/Validation/INTELLIGENCE_MATERIALIZATION_ADAPTERS_VALIDATION_REPORT.md
 
 ======================================================================
-21. PHASE 4.0.6 PERSISTENCE & RUNTIME INTEGRATION DESIGN
+21. PHASE 4.0.6 PERSISTENCE & RUNTIME INTEGRATION
 ======================================================================
 
 Status on 2026-07-28:
@@ -1230,7 +1230,9 @@ Status on 2026-07-28:
   - architecture/design package: COMPLETE;
   - engineering design acceptance: ACCEPTED WITH RECOMMENDATIONS;
   - UUID/manifest golden-vector contract: FROZEN;
-  - production implementation: AUTHORIZED;
+  - production implementation and local validation: COMPLETE;
+  - engineering implementation acceptance: PENDING;
+  - commit and push: PENDING ENGINEERING ACCEPTANCE;
   - Phase 4.0.7: UNAUTHORIZED.
 
 Design deliverables:
@@ -1240,7 +1242,7 @@ Design deliverables:
   - integration validation plan.
   - normative UUID, physical artifact ID, and manifest golden vectors.
 
-Important integration decisions proposed for review:
+Implemented integration decisions:
   - canonical UUID ScopeID, RepositoryID, and ScanID at the candidate service
     boundary because the accepted PostgreSQL physical schema uses UUIDs;
   - deterministic RFC 9562 version-8 physical UUID mapping for public
@@ -1256,11 +1258,42 @@ Important integration decisions proposed for review:
   - sequential exact-byte staging followed by one atomic publication;
   - complete durable-state reconciliation for ambiguous publication responses.
 
-No production Go integration code, SQL, migration, connection, credential,
-transport, authentication, UI, AI, network, or command execution was added.
+Validation:
+  - frozen UUID/physical-ID/818-byte manifest vectors: PASS on Windows and Ubuntu;
+  - PostgreSQL neutral conformance: PASS;
+  - 100 disposable PostgreSQL start-ready-register-scan-publish-export-stop
+    cycles: PASS;
+  - full Windows and Ubuntu regression, vet, shuffle, and race: PASS;
+  - zero data races;
+  - integration coverage: 85.2%;
+  - changed package coverage: 85.0%-94.8%;
+  - integration fuzzing: 748,486 executions, PASS;
+  - dependency, secret, path, listener, network, and command audits: PASS.
+
+Performance:
+  - ten-artifact canonical manifest: 5.769-6.055 us/op on Windows;
+  - ten-artifact combined ID/manifest translation: 12.058-14.581 us/op;
+  - disposable PostgreSQL complete scan p95: 310.291 ms;
+  - full start-to-stop service cycle p95: 352.169 ms.
+
+Defects found and corrected:
+  - the scan coordinator retained a pre-persistence timestamp candidate after
+    durable Begin; it now adopts the persistence-authoritative running record;
+  - the 100-cycle fixture reused a durable source proof across distinct
+    repositories; each fixture repository now has an independent proof;
+  - a one-character fuzz assertion produced a false leak positive; the test now
+    uses a unique digest-derived raw-cause marker;
+  - persisted record translation now fails closed on every scope, identifier,
+    profile, state, and physical-artifact mismatch.
+
+No SQL, pgx, pool construction, TLS loading, migration execution, credential,
+transport, authentication, UI, AI, listener, network, or command execution was
+added to the integration package. Frozen foundation contracts were not changed.
 
 Design package:
   docs/Architecture/REPOSITORY_SERVICE_PERSISTENCE_RUNTIME_INTEGRATION.md
   docs/API/REPOSITORY_SERVICE_INTEGRATION_CANDIDATE_API.md
+  docs/API/REPOSITORY_SERVICE_INTEGRATION_GOLDEN_VECTORS.md
   docs/Decisions/0017-repository-service-persistence-runtime-integration.md
   docs/Validation/PERSISTENCE_RUNTIME_INTEGRATION_VALIDATION_PLAN.md
+  docs/Validation/PERSISTENCE_RUNTIME_INTEGRATION_VALIDATION_REPORT.md

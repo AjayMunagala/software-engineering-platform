@@ -133,7 +133,7 @@ func TestPrepareRejectsUnsupportedProfileAndInvalidSources(t *testing.T) {
 	otherArtifact, _ := repository.NewProfileArtifact("other", "1.0.0", repository.ArtifactIdentityScheme)
 	otherDefinition, _ := repository.NewProfileDefinition("other", "1", []repository.ProfileArtifact{otherArtifact})
 	contract, _ := repository.New()
-	otherRequest, _ := contract.NewExecuteScanRequest(repository.ExecuteScanParams{Scope: request.Scope(), RequestID: "other-request", RepositoryID: request.RepositoryID(), ScanID: "other-scan", SourceHandle: "source", Profile: otherDefinition.Profile()})
+	otherRequest, _ := contract.NewExecuteScanRequest(repository.ExecuteScanParams{Scope: request.Scope(), RequestID: "other-request", RepositoryID: request.RepositoryID(), ScanID: "22222222-2222-4222-8222-222222222232", SourceHandle: "source", Profile: otherDefinition.Profile()})
 	_, err := adapter.Prepare(context.Background(), scan.NewAnalysisRequest(otherRequest))
 	if repository.KindOf(err) != repository.ErrorInvalidInput {
 		t.Fatalf("kind = %s", repository.KindOf(err))
@@ -507,8 +507,8 @@ func makeAdapter(t *testing.T, root, spool string, override Config) (*Adapter, *
 		t.Fatal(err)
 	}
 	contract, _ := repository.New()
-	scope, _ := repository.NewScope("tenant", "principal")
-	request, err := contract.NewExecuteScanRequest(repository.ExecuteScanParams{Scope: scope, RequestID: "request", RepositoryID: "repository", ScanID: "scan", SourceHandle: "source", Profile: repository.DefaultRepositoryGoProfile().Profile()})
+	scope, _ := repository.NewScope("00000000-0000-4000-8000-000000000031", "principal")
+	request, err := contract.NewExecuteScanRequest(repository.ExecuteScanParams{Scope: scope, RequestID: "request", RepositoryID: "11111111-1111-4111-8111-111111111141", ScanID: "22222222-2222-4222-8222-222222222231", SourceHandle: "source", Profile: repository.DefaultRepositoryGoProfile().Profile()})
 	if err != nil {
 		t.Fatal(err)
 	}
