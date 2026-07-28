@@ -54,6 +54,120 @@ func (suite *Suite) RunLifecycle(t *testing.T, factory LifecycleFactory) {
 	suite.runLifecycle(t, factory, "lifecycle-context-cancellation", suite.lifecycleCancellation)
 }
 
+func (suite *Suite) RunScan(t *testing.T, factory ScanFactory) {
+	t.Helper()
+	if factory == nil {
+		t.Fatal(ErrFactoryRequired)
+	}
+	suite.runScan(t, factory, "scan-seeded-reads", suite.scanSeededReads)
+	suite.runScan(t, factory, "scan-scope-isolation", suite.scanScopeIsolation)
+	suite.runScan(t, factory, "scan-execute-retry-cancel", suite.scanMutations)
+	suite.runScan(t, factory, "scan-context-cancellation", suite.scanCancellation)
+}
+
+func (suite *Suite) runScan(t *testing.T, factory ScanFactory, name string, check func(*testing.T, ScanFixture)) {
+	t.Helper()
+	t.Run(name, func(t *testing.T) {
+		fixture, cleanup, err := factory.OpenScan(context.Background())
+		if err != nil {
+			t.Fatalf("open scan fixture: %v", err)
+		}
+		if fixture.Service == nil || fixture.Contract == nil || fixture.Scenario.SucceededScan.ScanID() == "" || fixture.Scenario.Artifact.ArtifactID() == "" || cleanup == nil {
+			t.Fatal(ErrInvalidFixture)
+		}
+		t.Cleanup(func() {
+			if err := cleanup(context.Background()); err != nil {
+				t.Errorf("cleanup scan fixture: %v", err)
+			}
+			if err := cleanup(context.Background()); err != nil {
+				t.Errorf("idempotent scan cleanup: %v", err)
+			}
+		})
+		check(t, ScanFixture{Service: fixture.Service, Contract: fixture.Contract, Scenario: fixture.Scenario.clone()})
+	})
+}
+
+func (suite *Suite) scanSeededReads(t *testing.T, fixture ScanFixture) {
+	scenario := fixture.Scenario
+	query, _ := repository.NewScanQuery(scenario.PrimaryScope, scenario.RepositoryID, scenario.SucceededScan.ScanID())
+	value, err := fixture.Service.GetScan(context.Background(), query)
+	if err != nil || value.State() != repository.ScanSucceeded {
+		t.Fatalf("get scan: %+v, %v", value, err)
+	}
+	list, _ := fixture.Contract.NewScanListRequest(repository.ScanListParams{Scope: scenario.PrimaryScope, RepositoryID: scenario.RepositoryID, PageSize: 10})
+	page, err := fixture.Service.ListScans(context.Background(), list)
+	if err != nil || len(page.Items()) < 2 {
+		t.Fatalf("list scans: %+v, %v", page, err)
+	}
+	artifactQuery, _ := repository.NewArtifactQuery(scenario.PrimaryScope, scenario.RepositoryID, scenario.SucceededScan.ScanID(), scenario.Artifact.ArtifactID())
+	artifact, err := fixture.Service.GetArtifact(context.Background(), artifactQuery)
+	if err != nil || artifact.PayloadDigest() != scenario.Artifact.PayloadDigest() {
+		t.Fatalf("get artifact: %+v, %v", artifact, err)
+	}
+	artifactList, _ := fixture.Contract.NewArtifactListRequest(repository.ArtifactListParams{Scope: scenario.PrimaryScope, RepositoryID: scenario.RepositoryID, ScanID: scenario.SucceededScan.ScanID(), PageSize: 10})
+	artifacts, err := fixture.Service.ListArtifacts(context.Background(), artifactList)
+	if err != nil || len(artifacts.Items()) == 0 {
+		t.Fatalf("list artifacts: %+v, %v", artifacts, err)
+	}
+	export, _ := repository.NewExportArtifactRequest(artifactQuery)
+	var output bytes.Buffer
+	receipt, err := fixture.Service.ExportArtifact(context.Background(), export, &output)
+	if err != nil || !bytes.Equal(output.Bytes(), scenario.Payload) || receipt.PayloadDigest() != scenario.Artifact.PayloadDigest() || output.Len() > suite.config.MaxExportBytes {
+		t.Fatalf("export bytes=%d receipt=%+v err=%v", output.Len(), receipt, err)
+	}
+}
+
+func (suite *Suite) scanScopeIsolation(t *testing.T, fixture ScanFixture) {
+	scenario := fixture.Scenario
+	query, _ := repository.NewScanQuery(scenario.OtherScope, scenario.RepositoryID, scenario.SucceededScan.ScanID())
+	if _, err := fixture.Service.GetScan(context.Background(), query); repository.KindOf(err) != repository.ErrorNotFound {
+		t.Fatalf("scan scope escape: %v", err)
+	}
+	list, _ := fixture.Contract.NewScanListRequest(repository.ScanListParams{Scope: scenario.OtherScope, RepositoryID: scenario.RepositoryID, PageSize: 10})
+	if page, err := fixture.Service.ListScans(context.Background(), list); err != nil || len(page.Items()) != 0 {
+		t.Fatalf("scan list scope escape: %+v, %v", page, err)
+	}
+	artifactQuery, _ := repository.NewArtifactQuery(scenario.OtherScope, scenario.RepositoryID, scenario.SucceededScan.ScanID(), scenario.Artifact.ArtifactID())
+	if _, err := fixture.Service.GetArtifact(context.Background(), artifactQuery); repository.KindOf(err) != repository.ErrorNotFound {
+		t.Fatalf("artifact scope escape: %v", err)
+	}
+	export, _ := repository.NewExportArtifactRequest(artifactQuery)
+	if _, err := fixture.Service.ExportArtifact(context.Background(), export, io.Discard); repository.KindOf(err) != repository.ErrorNotFound {
+		t.Fatalf("export scope escape: %v", err)
+	}
+}
+
+func (suite *Suite) scanMutations(t *testing.T, fixture ScanFixture) {
+	scenario := fixture.Scenario
+	execute, _ := fixture.Contract.NewExecuteScanRequest(repository.ExecuteScanParams{Scope: scenario.PrimaryScope, RequestID: "scan-conformance-execute", RepositoryID: scenario.RepositoryID, ScanID: "scan-conformance-created", SourceHandle: scenario.SourceHandle, Profile: scenario.Profile})
+	result, err := fixture.Service.ExecuteScan(context.Background(), execute)
+	if err != nil || result.Scan().State() != repository.ScanSucceeded || result.Disposition() != repository.DispositionCreated {
+		t.Fatalf("execute: %+v, %v", result, err)
+	}
+	retried, err := fixture.Service.ExecuteScan(context.Background(), execute)
+	if err != nil || retried.Disposition() != repository.DispositionAlreadyPresent {
+		t.Fatalf("retry: %+v, %v", retried, err)
+	}
+	cancel, _ := repository.NewCancelScanRequest(repository.CancelScanParams{Scope: scenario.PrimaryScope, RequestID: "scan-conformance-cancel", RepositoryID: scenario.RepositoryID, ScanID: scenario.RunningScan.ScanID()})
+	canceled, err := fixture.Service.CancelScan(context.Background(), cancel)
+	if err != nil || canceled.State() != repository.ScanCanceled {
+		t.Fatalf("cancel: %+v, %v", canceled, err)
+	}
+	retriedCancel, err := fixture.Service.CancelScan(context.Background(), cancel)
+	if err != nil || retriedCancel.FinishedAt() != canceled.FinishedAt() {
+		t.Fatalf("retry cancel: %+v, %v", retriedCancel, err)
+	}
+}
+
+func (suite *Suite) scanCancellation(t *testing.T, fixture ScanFixture) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	query, _ := repository.NewScanQuery(fixture.Scenario.PrimaryScope, fixture.Scenario.RepositoryID, fixture.Scenario.SucceededScan.ScanID())
+	if _, err := fixture.Service.GetScan(ctx, query); repository.KindOf(err) != repository.ErrorCanceled {
+		t.Fatalf("canceled scan read: %v", err)
+	}
+}
+
 func (suite *Suite) runLifecycle(t *testing.T, factory LifecycleFactory, name string, check func(*testing.T, LifecycleFixture)) {
 	t.Helper()
 	t.Run(name, func(t *testing.T) {
@@ -361,6 +475,24 @@ func NewMemoryLifecycleFactory() LifecycleFactory {
 		return LifecycleFixture{Service: fixture.Service, Contract: fixture.Contract, Scenario: LifecycleScenario{
 			PrimaryScope: fixture.Scenario.PrimaryScope, OtherScope: fixture.Scenario.OtherScope,
 			Repository: fixture.Scenario.Repository, SourceHandle: fixture.Scenario.SourceHandle,
+		}}, cleanup, nil
+	})
+}
+
+// NewMemoryScanFactory returns the scan-and-artifact view of the thread-safe
+// Phase 4.0.2 fake adapter.
+func NewMemoryScanFactory() ScanFactory {
+	return ScanFactoryFunc(func(ctx context.Context) (ScanFixture, Cleanup, error) {
+		fixture, cleanup, err := openMemoryFixture(ctx)
+		if err != nil {
+			return ScanFixture{}, nil, err
+		}
+		scenario := fixture.Scenario
+		return ScanFixture{Service: fixture.Service, Contract: fixture.Contract, Scenario: ScanScenario{
+			PrimaryScope: scenario.PrimaryScope, OtherScope: scenario.OtherScope,
+			RepositoryID: scenario.Repository.RepositoryID(), SucceededScan: scenario.SucceededScan,
+			RunningScan: scenario.RunningScan, Artifact: scenario.Artifact, Payload: append([]byte(nil), scenario.Payload...),
+			SourceHandle: scenario.SourceHandle, Profile: scenario.Profile,
 		}}, cleanup, nil
 	})
 }

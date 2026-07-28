@@ -8,7 +8,8 @@
 - Phase 4.0.1 design spike: accepted
 - Phase 4.0.2 neutral contract: accepted
 - Phase 4.0.3 repository lifecycle: accepted on 2026-07-27
-- Phase 4.0.4 scan execution core: authorized
+- Phase 4.0.4 scan execution core: accepted on 2026-07-28
+- Phase 4.0.5 intelligence and materialization adapters: authorized
 - Date: 2026-07-27
 
 ## Purpose
@@ -93,7 +94,9 @@ Local Phase 4.0.2 evidence is recorded in
 Windows and Ubuntu regression, vet, shuffle, race, benchmark, fuzz, scope, and
 dependency evidence pass. Phase 4.0.3 local evidence is recorded in
 `REPOSITORY_LIFECYCLE_VALIDATION_REPORT.md`; its evidence was accepted on
-2026-07-27 and Phase 4.0.4 was authorized.
+2026-07-27 and Phase 4.0.4 was authorized. Phase 4.0.4 local evidence is
+recorded in `SCAN_EXECUTION_CORE_VALIDATION_REPORT.md`; engineering accepted
+the evidence on 2026-07-28 and authorized Phase 4.0.5 only.
 
 - constructor validation for every ID, enum, profile, timestamp, and limit;
 - deep-copy and detached-view validation;
@@ -128,6 +131,10 @@ dependency evidence pass. Phase 4.0.3 local evidence is recorded in
 - publication happens at most once;
 - duplicate artifact candidates and missing dependencies fail closed;
 - scan result and artifact order are deterministic.
+
+All Phase 4.0.4 local gates pass on Windows and Ubuntu and were accepted.
+Phase 4.0.5 may introduce production intelligence and materialization adapters.
+Persistence and runtime integrations remain excluded until Phase 4.0.6.
 
 ## Intelligence integration gates
 

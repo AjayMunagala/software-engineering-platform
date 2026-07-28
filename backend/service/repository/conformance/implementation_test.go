@@ -17,6 +17,60 @@ func TestMemoryAdapterPassesLifecycleConformance(t *testing.T) {
 	RunLifecycle(t, NewMemoryLifecycleFactory())
 }
 
+func TestMemoryAdapterPassesScanConformance(t *testing.T) {
+	RunScan(t, NewMemoryScanFactory())
+}
+
+func TestMemoryScanFactoryCancellationAndEdges(t *testing.T) {
+	canceledContext, cancel := context.WithCancel(context.Background())
+	cancel()
+	if _, _, err := NewMemoryScanFactory().OpenScan(canceledContext); repository.KindOf(err) != repository.ErrorCanceled {
+		t.Fatalf("canceled scan fixture: %v", err)
+	}
+	fixture, cleanup, err := NewMemoryScanFactory().OpenScan(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = cleanup(context.Background()) }()
+	scenario := fixture.Scenario
+
+	cancelSucceeded, _ := repository.NewCancelScanRequest(repository.CancelScanParams{Scope: scenario.PrimaryScope, RequestID: "cancel-succeeded", RepositoryID: scenario.RepositoryID, ScanID: scenario.SucceededScan.ScanID()})
+	if _, err = fixture.Service.CancelScan(context.Background(), cancelSucceeded); repository.KindOf(err) != repository.ErrorConflict {
+		t.Fatalf("cancel succeeded: %v", err)
+	}
+	missingExecution, _ := fixture.Contract.NewExecuteScanRequest(repository.ExecuteScanParams{Scope: scenario.PrimaryScope, RequestID: "missing-execute", RepositoryID: "missing-repository", ScanID: "missing-scan", SourceHandle: scenario.SourceHandle, Profile: scenario.Profile})
+	if _, err = fixture.Service.ExecuteScan(context.Background(), missingExecution); repository.KindOf(err) != repository.ErrorNotFound {
+		t.Fatalf("missing repository execute: %v", err)
+	}
+
+	scanList, _ := fixture.Contract.NewScanListRequest(repository.ScanListParams{Scope: scenario.PrimaryScope, RepositoryID: scenario.RepositoryID, PageSize: 1, Cursor: "invalid"})
+	if page, err := fixture.Service.ListScans(context.Background(), scanList); err != nil || len(page.Items()) != 0 {
+		t.Fatalf("invalid scan cursor: %+v, %v", page, err)
+	}
+	artifactList, _ := fixture.Contract.NewArtifactListRequest(repository.ArtifactListParams{Scope: scenario.PrimaryScope, RepositoryID: scenario.RepositoryID, ScanID: scenario.SucceededScan.ScanID(), PageSize: 1, Cursor: "invalid"})
+	if page, err := fixture.Service.ListArtifacts(context.Background(), artifactList); err != nil || len(page.Items()) != 0 {
+		t.Fatalf("invalid artifact cursor: %+v, %v", page, err)
+	}
+
+	ctx, stop := context.WithCancel(context.Background())
+	stop()
+	if _, err = fixture.Service.ListScans(ctx, scanList); repository.KindOf(err) != repository.ErrorCanceled {
+		t.Fatalf("canceled scan list: %v", err)
+	}
+	cancelRunning, _ := repository.NewCancelScanRequest(repository.CancelScanParams{Scope: scenario.PrimaryScope, RequestID: "cancel-canceled", RepositoryID: scenario.RepositoryID, ScanID: scenario.RunningScan.ScanID()})
+	if _, err = fixture.Service.CancelScan(ctx, cancelRunning); repository.KindOf(err) != repository.ErrorCanceled {
+		t.Fatalf("canceled cancel: %v", err)
+	}
+	artifactQuery, _ := repository.NewArtifactQuery(scenario.PrimaryScope, scenario.RepositoryID, scenario.SucceededScan.ScanID(), scenario.Artifact.ArtifactID())
+	export, _ := repository.NewExportArtifactRequest(artifactQuery)
+	if _, err = fixture.Service.ExportArtifact(ctx, export, io.Discard); repository.KindOf(err) != repository.ErrorCanceled {
+		t.Fatalf("canceled export: %v", err)
+	}
+	if _, err = fixture.Service.ExportArtifact(context.Background(), export, failingWriter{}); repository.KindOf(err) != repository.ErrorInternal {
+		t.Fatalf("failed writer: %v", err)
+	}
+}
+
 func TestMemoryLifecycleCancellationEdges(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
@@ -76,8 +130,30 @@ func TestConfigurationAndFactoryValidation(t *testing.T) {
 	if _, err := New(Config{MaxExportBytes: 1}); err != nil {
 		t.Fatalf("partial config: %v", err)
 	}
+	if _, err := New(Config{}); err != nil {
+		t.Fatalf("zero config defaults: %v", err)
+	}
 	if _, _, err := NewMemoryFactory().Open(nil); repository.KindOf(err) != repository.ErrorInvalidInput {
 		t.Fatalf("nil context: %v", err)
+	}
+}
+
+func TestMemoryAdapterMissingIdempotentResult(t *testing.T) {
+	fixture, cleanup, err := NewMemoryFactory().Open(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = cleanup(context.Background()) }()
+	service := fixture.Service.(*memoryService)
+	request, _ := fixture.Contract.NewRegisterRepositoryRequest(repository.RegisterRepositoryParams{Scope: fixture.Scenario.PrimaryScope, RequestID: "missing-result-request", RepositoryID: "missing-result-repository", DisplayName: "Missing Result", SourceHandle: fixture.Scenario.SourceHandle})
+	if _, err = service.RegisterRepository(context.Background(), request); err != nil {
+		t.Fatal(err)
+	}
+	service.mu.Lock()
+	delete(service.repositories, repositoryKey(request.Scope(), request.RepositoryID()))
+	service.mu.Unlock()
+	if _, err = service.RegisterRepository(context.Background(), request); repository.KindOf(err) != repository.ErrorConflict {
+		t.Fatalf("missing idempotent result: %v", err)
 	}
 }
 

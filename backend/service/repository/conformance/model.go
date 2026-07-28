@@ -30,6 +30,35 @@ type LifecycleScenario struct {
 	SourceHandle string
 }
 
+type ScanService interface {
+	repository.ScanExecutionService
+	repository.ArtifactQueryService
+}
+
+type ScanFixture struct {
+	Service  ScanService
+	Contract *repository.Contract
+	Scenario ScanScenario
+}
+
+type ScanScenario struct {
+	PrimaryScope  repository.Scope
+	OtherScope    repository.Scope
+	RepositoryID  repository.RepositoryID
+	SucceededScan repository.Scan
+	RunningScan   repository.Scan
+	Artifact      repository.Artifact
+	Payload       []byte
+	SourceHandle  string
+	Profile       repository.AnalysisProfile
+}
+
+func (scenario ScanScenario) clone() ScanScenario {
+	result := scenario
+	result.Payload = append([]byte(nil), scenario.Payload...)
+	return result
+}
+
 func (scenario LifecycleScenario) clone() LifecycleScenario { return scenario }
 
 func (scenario Scenario) clone() Scenario {

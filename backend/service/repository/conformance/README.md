@@ -24,3 +24,8 @@ infrastructure, not production repository lifecycle or scan orchestration.
 so production lifecycle behavior can pass neutral conformance before any
 store-specific integration. `NewMemoryLifecycleFactory` exercises that suite
 against the existing fake.
+
+`RunScan` is the additive Phase 4.0.4 scan-and-artifact suite. It accepts only
+`ScanExecutionService` and `ArtifactQueryService`, so production scan behavior
+can pass neutral conformance without implementing repository lifecycle or any
+future persistence/runtime adapter.

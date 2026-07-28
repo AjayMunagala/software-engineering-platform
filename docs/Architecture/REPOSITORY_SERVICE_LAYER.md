@@ -9,7 +9,8 @@
 - Phase 4.0.1 design spike: accepted
 - Phase 4.0.2 neutral contract: accepted
 - Phase 4.0.3 repository lifecycle: accepted on 2026-07-27
-- Phase 4.0.4 scan execution core: authorized
+- Phase 4.0.4 scan execution core: accepted on 2026-07-28
+- Phase 4.0.5 intelligence and materialization adapters: authorized
 
 ## Purpose
 

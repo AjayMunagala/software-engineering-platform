@@ -69,8 +69,9 @@
 - Phase 4.0.2: neutral service contract and conformance harness accepted on
   2026-07-27.
 - Phase 4.0.3: repository lifecycle accepted on 2026-07-27.
-- Phase 4.0.4: scan execution core authorized; later integration remains
-  gated.
+- Phase 4.0.4: scan execution core accepted on 2026-07-28.
+- Phase 4.0.5: intelligence and materialization adapters authorized; later
+  integration remains gated.
 - Phase 4.1: REST/gRPC query APIs remain gated.
 
 PostgreSQL remains downstream from immutable artifacts and is not an engine
@@ -78,7 +79,7 @@ dependency.
 
 ## Phase 4 — Repository Services and Query Access
 
-### Phase 4.0 — Repository Service Layer (Phase 4.0.4 authorized)
+### Phase 4.0 — Repository Service Layer (Phase 4.0.5 authorized)
 
 - Define storage-neutral repository service interfaces.
 - Coordinate repository and scan lifecycle through application services.
@@ -90,9 +91,9 @@ dependency.
 - Architecture, candidate API, ADR 0016, staged implementation roadmap, and
   validation plan were accepted together on 2026-07-27.
 - The bounded Phase 4.0.1 design spike and Phase 4.0.2 neutral contract are
-  accepted. Phase 4.0.3 Repository Lifecycle is accepted. Only Phase 4.0.4
-  Scan Execution Core is authorized; later implementation remains separately
-  gated.
+  accepted. Phase 4.0.3 Repository Lifecycle and Phase 4.0.4 Scan Execution
+  Core are accepted. Only Phase 4.0.5 Intelligence & Materialization Adapters
+  is authorized. Phase 4.0.6 and later implementation remain unauthorized.
 
 Detailed milestones are defined in
 `docs/Roadmap/PHASE_4_REPOSITORY_SERVICE_ROADMAP.md`.

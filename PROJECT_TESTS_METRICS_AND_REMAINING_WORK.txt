@@ -1055,7 +1055,7 @@ Detailed evidence:
 Status on 2026-07-27:
   - implementation and local validation: COMPLETE;
   - engineering acceptance: ACCEPTED;
-  - commit and push: APPROVED;
+  - commit and push: COMPLETE (`7dec0ef` on `main`);
   - Phase 4.0.4 Scan Execution Core: AUTHORIZED.
 
 Implemented:
@@ -1097,3 +1097,70 @@ reserved for Phase 4.0.6 by the accepted milestone boundary.
 
 Detailed evidence:
   docs/Validation/REPOSITORY_LIFECYCLE_VALIDATION_REPORT.md
+
+======================================================================
+19. PHASE 4.0.4 SCAN EXECUTION CORE
+======================================================================
+
+Status on 2026-07-27:
+  - implementation and local validation: COMPLETE;
+  - engineering acceptance: ACCEPTED on 2026-07-28;
+  - commit and push: APPROVED;
+  - Phase 4.0.5 Intelligence & Materialization Adapters: AUTHORIZED.
+
+Implemented:
+  - synchronous scan state machine over a storage-neutral atomic Store;
+  - keyed in-process single-flight with exact request-equivalence checks;
+  - one admission lease per newly created execution flight;
+  - independent waiter cancellation and all-interested-caller cancellation;
+  - explicit active-flight cancellation through CancelScan;
+  - deterministic fake analysis candidate orchestration;
+  - atomic publication commands and ordered artifact metadata verification;
+  - bounded detached terminal finalization and cleanup;
+  - durable publication reconciliation for ambiguous adapter responses;
+  - get/list/cancel scan and get/list/export artifact query coordination;
+  - additive adapter-independent scan conformance suite.
+
+Validation:
+  - scan and conformance tests: PASS;
+  - 100 identical concurrent calls: one created flight, 99 joined callers,
+    one admission, one begin, one analysis, and one publication;
+  - full backend regression, vet, and three shuffled repetitions: PASS;
+  - Windows targeted/full race: PASS, zero races;
+  - Ubuntu targeted/full regression, vet, and race: PASS, zero races;
+  - scan coverage: 88.4%;
+  - conformance coverage: 85.0%;
+  - artifact candidate fuzz: 913,409 executions, no panic;
+  - forbidden dependency audit: PASS;
+  - production SourceHandle.Reveal audit: PASS.
+
+Windows benchmark ranges:
+  - scan get: 157.6-178.3 ns/op, 160 B/op, 3 allocs/op;
+  - independent fake scan execution: 13.002-15.044 us/op,
+    9,677-9,731 B/op, 73 allocs/op;
+  - execute mutation fingerprint: 640.6-762.9 ns/op,
+    736 B/op, 8 allocs/op.
+
+Ubuntu benchmark ranges:
+  - scan get: 158.8-180.3 ns/op, 160 B/op, 3 allocs/op;
+  - independent fake scan execution: 21.231-21.566 us/op,
+    9,613-9,671 B/op, 73 allocs/op;
+  - execute mutation fingerprint: 559.3-598.0 ns/op,
+    736 B/op, 8 allocs/op.
+
+Defects found and corrected:
+  - publication success and reconciliation initially verified only scan state
+    and ID; validation now compares every scan field and each ordered artifact
+    metadata field and fails closed on any mismatch;
+  - admission cancellation was initially observed only through an asynchronous
+    callback; startup now also checks the lease context synchronously;
+  - additive scan-conformance branches were expanded until the package-level
+    coverage gate exceeded 85%.
+
+No real RIE/LIE orchestration, artifact materialization, Persistence Port,
+PostgreSQL, runtime package, SQL, pgx, HTTP, filesystem traversal, command
+execution, network access, API, listener, authentication, UI, AI, credential,
+or repository mutation was introduced.
+
+Detailed evidence:
+  docs/Validation/SCAN_EXECUTION_CORE_VALIDATION_REPORT.md
