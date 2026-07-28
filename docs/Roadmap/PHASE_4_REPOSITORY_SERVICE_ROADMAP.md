@@ -8,8 +8,8 @@
 - Phase 4.0.3 repository lifecycle: accepted on 2026-07-27
 - Phase 4.0.4 scan execution core: accepted on 2026-07-28
 - Phase 4.0.5 intelligence and materialization adapters: accepted on 2026-07-28
-- Phase 4.0.6 persistence and runtime integration design: authorized
-- Phase 4.0.6 production implementation: unauthorized pending design acceptance
+- Phase 4.0.6 persistence and runtime integration design: accepted with recommendations on 2026-07-28
+- Phase 4.0.6 production implementation: authorized under frozen golden-vector conditions
 - Phase 4.1 transports: unauthorized
 - Date: 2026-07-27
 
@@ -160,17 +160,20 @@ Evidence is recorded in
 Engineering accepted the implementation and validation evidence on 2026-07-28
 and authorized Phase 4.0.6 design only.
 
-## Phase 4.0.6 — Persistence and runtime integration (design authorized)
+## Phase 4.0.6 — Persistence and runtime integration (implementation authorized)
 
 Design package:
 
 - `docs/Architecture/REPOSITORY_SERVICE_PERSISTENCE_RUNTIME_INTEGRATION.md`;
 - `docs/API/REPOSITORY_SERVICE_INTEGRATION_CANDIDATE_API.md`;
+- `docs/API/REPOSITORY_SERVICE_INTEGRATION_GOLDEN_VECTORS.md`;
 - `docs/Decisions/0017-repository-service-persistence-runtime-integration.md`;
 - `docs/Validation/PERSISTENCE_RUNTIME_INTEGRATION_VALIDATION_PLAN.md`.
 
-The design package is proposed for engineering review. Production
-implementation remains unauthorized.
+Engineering accepted the design with recommendations on 2026-07-28. UUID
+validation, physical artifact mapping, and manifest golden vectors are frozen
+as mandatory pre-implementation contracts. Production implementation is
+authorized only within this accepted scope.
 
 After design acceptance, implement only:
 

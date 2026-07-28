@@ -3,8 +3,8 @@
 ## Status
 
 - Phase: 4.0.6 design
-- Status: Proposed
-- Implementation: Unauthorized
+- Status: Accepted with recommendations on 2026-07-28
+- Implementation: Authorized under the frozen golden-vector contract
 - Date: 2026-07-28
 
 ## Goal
@@ -38,6 +38,10 @@ Adapter-specific success cannot compensate for a neutral conformance failure.
 
 ## Contract-refinement tests
 
+The normative fixtures are frozen in
+`docs/API/REPOSITORY_SERVICE_INTEGRATION_GOLDEN_VECTORS.md`. Conformance must
+execute those exact values before adapter-specific tests.
+
 - accept canonical lowercase UUID scope/repository/scan IDs;
 - reject uppercase, braced, truncated, malformed, or non-UUID values;
 - keep RequestID and PrincipalID behavior unchanged;
@@ -61,6 +65,7 @@ Adapter-specific success cannot compensate for a neutral conformance failure.
 ## Manifest tests
 
 - golden vectors for `repository-service-manifest/v1`;
+- exact 818-byte normative preimage and its frozen SHA-256 digest;
 - identical manifests and digests on Windows and Ubuntu;
 - every field boundary and raw digest byte is covered;
 - artifact ordering is canonical;

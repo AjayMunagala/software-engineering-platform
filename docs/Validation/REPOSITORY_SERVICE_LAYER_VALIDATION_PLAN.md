@@ -10,8 +10,8 @@
 - Phase 4.0.3 repository lifecycle: accepted on 2026-07-27
 - Phase 4.0.4 scan execution core: accepted on 2026-07-28
 - Phase 4.0.5 intelligence and materialization adapters: accepted on 2026-07-28
-- Phase 4.0.6 design package: proposed for review
-- Phase 4.0.6 production implementation: unauthorized pending design acceptance
+- Phase 4.0.6 design package: accepted with recommendations on 2026-07-28
+- Phase 4.0.6 production implementation: authorized under frozen golden-vector conditions
 - Date: 2026-07-27
 
 ## Purpose

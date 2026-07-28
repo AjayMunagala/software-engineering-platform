@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed
+Accepted with recommendations
 
 ## Date
 
@@ -58,6 +58,8 @@ implementation conversions.
     state. Never mark a possibly published scan failed.
 13. Keep projections, diagnostics, statistics, retention scheduling,
     transports, authentication, UI, and AI outside Phase 4.0.6.
+14. Freeze UUID validation, physical artifact UUID mapping, and the canonical
+    manifest as normative golden vectors before implementation begins.
 
 ## Rationale
 
@@ -140,6 +142,8 @@ compatibility.
 
 ## Acceptance gate
 
-Promote this ADR to Accepted only after the architecture, candidate API, and
-validation plan are reviewed together. Acceptance authorizes Phase 4.0.6
-implementation only. Phase 4.0.7 remains separately gated.
+Engineering accepted this ADR with recommendations on 2026-07-28 after the
+required golden-vector contract was recorded in
+`docs/API/REPOSITORY_SERVICE_INTEGRATION_GOLDEN_VECTORS.md`. That acceptance
+authorizes Phase 4.0.6 implementation only. Phase 4.0.7 remains separately
+gated.

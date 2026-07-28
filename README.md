@@ -44,8 +44,9 @@ design spike and Phase 4.0.2 neutral contract/conformance harness are accepted.
 Phase 4.0.3 Repository Lifecycle was accepted on 2026-07-27. Phase 4.0.4 Scan
 Execution Core was accepted on 2026-07-28. Phase 4.0.5 Intelligence &
 Materialization Adapters was accepted on 2026-07-28. Phase 4.0.6 Persistence &
-Runtime Integration design is authorized; production implementation remains
-deferred pending design acceptance.
+Runtime Integration design was accepted with recommendations on 2026-07-28.
+The UUID/manifest golden-vector contracts are frozen and implementation is
+authorized. Phase 4.0.7 remains unauthorized.
 Intelligence engines remain database-independent.
 
 ## Run RIE
@@ -109,6 +110,7 @@ The command emits the versioned JSON schema `1.0.0`.
 - [Phase 4.0.5 Intelligence & Materialization Adapters validation](docs/Validation/INTELLIGENCE_MATERIALIZATION_ADAPTERS_VALIDATION_REPORT.md)
 - [Phase 4.0.6 persistence/runtime integration architecture](docs/Architecture/REPOSITORY_SERVICE_PERSISTENCE_RUNTIME_INTEGRATION.md)
 - [Phase 4.0.6 integration candidate API](docs/API/REPOSITORY_SERVICE_INTEGRATION_CANDIDATE_API.md)
+- [Phase 4.0.6 integration golden vectors](docs/API/REPOSITORY_SERVICE_INTEGRATION_GOLDEN_VECTORS.md)
 - [ADR 0017 — Repository Service persistence/runtime integration](docs/Decisions/0017-repository-service-persistence-runtime-integration.md)
 - [Phase 4.0.6 integration validation plan](docs/Validation/PERSISTENCE_RUNTIME_INTEGRATION_VALIDATION_PLAN.md)
 - [Complete project tests, metrics, and remaining work](PROJECT_TESTS_METRICS_AND_REMAINING_WORK.txt)
@@ -121,7 +123,8 @@ Phase 3.5.4 Runtime Integration & Release Freeze is accepted and Runtime
 Infrastructure **1.0.0** is frozen. Phase 4.0 Repository Service Layer is the
 only authorized next milestone. The Phase 4.0 design package is accepted, but
 production implementation remains gated. Phase 4.0.1 spike evidence is
-accepted, and Phase 4.0.2 through Phase 4.0.5 are accepted. The Phase 4.0.6
-Persistence & Runtime Integration design package is proposed for engineering
-review. Its production implementation, HTTP health endpoints, REST/gRPC, UI,
-LLM, patch generation, and repository mutation remain unauthorized.
+accepted, and Phase 4.0.2 through Phase 4.0.5 are accepted. Phase 4.0.6 design
+is accepted with recommendations and production implementation is authorized
+under frozen golden-vector conditions. Phase 4.0.7, HTTP health endpoints,
+REST/gRPC, UI, LLM, patch generation, and repository mutation remain
+unauthorized.

@@ -3,8 +3,8 @@
 ## Status
 
 - Phase: 4.0.6 design
-- Status: Proposed for engineering review
-- Production implementation: Unauthorized
+- Status: Accepted with recommendations on 2026-07-28
+- Production implementation: Authorized under frozen golden-vector conditions
 - Candidate integration contract: `0.1.0`
 - Date: 2026-07-28
 
@@ -270,8 +270,11 @@ paths, source handles, request IDs, principals, and database UUID mappings are
 excluded. Duplicate artifacts, missing dependencies, reordered ordinals,
 self-edges, cycles, overflow, or trailing data fail closed.
 
-The manifest algorithm must receive golden-vector validation before production
-implementation is accepted.
+The UUID grammar, physical mapping, and manifest algorithm are frozen before
+implementation in
+`docs/API/REPOSITORY_SERVICE_INTEGRATION_GOLDEN_VECTORS.md`. Changing any
+preimage, validation rule, version/variant bit, ordering rule, or expected
+output requires a new versioned scheme and engineering decision.
 
 ## Request and actor policy
 
@@ -378,7 +381,9 @@ only neutral persistence/runtime capabilities.
 
 ## Design acceptance gate
 
-Production implementation remains unauthorized until engineering approves:
+Engineering approved this design with recommendations on 2026-07-28 after the
+required UUID and manifest contracts were frozen. Implementation is authorized
+only under these accepted conditions:
 
 1. the UUID compatibility policy;
 2. physical artifact UUID mapping;
@@ -389,4 +394,4 @@ Production implementation remains unauthorized until engineering approves:
 7. runtime admission and capability ownership;
 8. transaction, ambiguity, error, and cleanup behavior;
 9. validation plan and performance gates;
-10. ADR 0017.
+10. ADR 0017 and the normative golden-vector document.

@@ -4,8 +4,8 @@
 
 - Phase: 4.0.6 design
 - Version: `0.1.0`
-- Status: Proposed
-- Production implementation: Unauthorized
+- Status: Accepted with recommendations on 2026-07-28
+- Production implementation: Authorized under the frozen golden-vector rules
 - Date: 2026-07-28
 
 This document describes internal application integration boundaries. It does
@@ -140,6 +140,12 @@ RequestID    existing bounded machine value
 PrincipalID  existing bounded opaque value
 ArtifactID   repository-service-artifact-id/v1
 ```
+
+The exact UUID grammar, accepted/rejected fixtures, physical UUID algorithm,
+and manifest fixtures are normative in
+`docs/API/REPOSITORY_SERVICE_INTEGRATION_GOLDEN_VECTORS.md`. All service
+constructors and conformance fixtures must use those rules before any
+PostgreSQL-backed behavior is considered valid.
 
 Physical artifact IDs use the internal
 `repository-service-storage-artifact-id/v1` UUID mapping defined by the

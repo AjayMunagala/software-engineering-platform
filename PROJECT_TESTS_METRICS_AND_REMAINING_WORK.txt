@@ -1173,8 +1173,8 @@ Status on 2026-07-28:
   - implementation and local validation: COMPLETE;
   - engineering acceptance: ACCEPTED;
   - commit and push: COMPLETE (`4105bba` on `main`);
-  - Phase 4.0.6 Persistence & Runtime Integration design: AUTHORIZED;
-  - Phase 4.0.6 production implementation: UNAUTHORIZED pending design review.
+  - Phase 4.0.6 Persistence & Runtime Integration design: ACCEPTED WITH RECOMMENDATIONS;
+  - Phase 4.0.6 production implementation: AUTHORIZED under frozen golden-vector conditions.
 
 Implemented:
   - fresh released RIE and conditional Go LIE orchestration;
@@ -1228,8 +1228,9 @@ Detailed evidence:
 Status on 2026-07-28:
   - Phase 4.0.5 accepted, committed as `4105bba`, and pushed to `main`;
   - architecture/design package: COMPLETE;
-  - engineering design acceptance: PENDING;
-  - production implementation: UNAUTHORIZED;
+  - engineering design acceptance: ACCEPTED WITH RECOMMENDATIONS;
+  - UUID/manifest golden-vector contract: FROZEN;
+  - production implementation: AUTHORIZED;
   - Phase 4.0.7: UNAUTHORIZED.
 
 Design deliverables:
@@ -1237,6 +1238,7 @@ Design deliverables:
   - integration candidate API;
   - ADR 0017;
   - integration validation plan.
+  - normative UUID, physical artifact ID, and manifest golden vectors.
 
 Important integration decisions proposed for review:
   - canonical UUID ScopeID, RepositoryID, and ScanID at the candidate service
