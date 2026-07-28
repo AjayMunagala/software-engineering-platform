@@ -10,7 +10,8 @@
 - Phase 4.0.2 neutral contract implementation: accepted
 - Phase 4.0.3 repository lifecycle: accepted on 2026-07-27
 - Phase 4.0.4 scan execution core: accepted on 2026-07-28
-- Phase 4.0.5 intelligence and materialization adapters: locally complete, awaiting acceptance
+- Phase 4.0.5 intelligence and materialization adapters: accepted on 2026-07-28
+- Phase 4.0.6 persistence/runtime integration refinements: proposed for review
 
 This document defines Go service semantics. It is not an HTTP, gRPC, CLI, or
 authorization contract.

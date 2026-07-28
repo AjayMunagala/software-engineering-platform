@@ -107,6 +107,10 @@ The command emits the versioned JSON schema `1.0.0`.
 - [Phase 4.0.3 Repository Lifecycle validation](docs/Validation/REPOSITORY_LIFECYCLE_VALIDATION_REPORT.md)
 - [Phase 4.0.4 Scan Execution Core validation](docs/Validation/SCAN_EXECUTION_CORE_VALIDATION_REPORT.md)
 - [Phase 4.0.5 Intelligence & Materialization Adapters validation](docs/Validation/INTELLIGENCE_MATERIALIZATION_ADAPTERS_VALIDATION_REPORT.md)
+- [Phase 4.0.6 persistence/runtime integration architecture](docs/Architecture/REPOSITORY_SERVICE_PERSISTENCE_RUNTIME_INTEGRATION.md)
+- [Phase 4.0.6 integration candidate API](docs/API/REPOSITORY_SERVICE_INTEGRATION_CANDIDATE_API.md)
+- [ADR 0017 — Repository Service persistence/runtime integration](docs/Decisions/0017-repository-service-persistence-runtime-integration.md)
+- [Phase 4.0.6 integration validation plan](docs/Validation/PERSISTENCE_RUNTIME_INTEGRATION_VALIDATION_PLAN.md)
 - [Complete project tests, metrics, and remaining work](PROJECT_TESTS_METRICS_AND_REMAINING_WORK.txt)
 
 ## Next milestone
@@ -117,8 +121,7 @@ Phase 3.5.4 Runtime Integration & Release Freeze is accepted and Runtime
 Infrastructure **1.0.0** is frozen. Phase 4.0 Repository Service Layer is the
 only authorized next milestone. The Phase 4.0 design package is accepted, but
 production implementation remains gated. Phase 4.0.1 spike evidence is
-accepted, and Phase 4.0.2 through Phase 4.0.4 are accepted. Phase 4.0.5
-Intelligence & Materialization Adapters is locally complete and awaiting
-engineering acceptance. Persistence/runtime
-integration, HTTP health endpoints, REST/gRPC, UI, LLM, patch generation, and
-repository mutation remain unauthorized.
+accepted, and Phase 4.0.2 through Phase 4.0.5 are accepted. The Phase 4.0.6
+Persistence & Runtime Integration design package is proposed for engineering
+review. Its production implementation, HTTP health endpoints, REST/gRPC, UI,
+LLM, patch generation, and repository mutation remain unauthorized.

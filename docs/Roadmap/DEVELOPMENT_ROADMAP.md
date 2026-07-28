@@ -73,7 +73,8 @@
 - Phase 4.0.5: intelligence and materialization adapters accepted on
   2026-07-28.
 - Phase 4.0.6: persistence and runtime integration design authorized;
-  production implementation remains gated pending design acceptance.
+  design package completed and proposed for review; production implementation
+  remains gated pending design acceptance.
 - Phase 4.1: REST/gRPC query APIs remain gated.
 
 PostgreSQL remains downstream from immutable artifacts and is not an engine
@@ -95,8 +96,9 @@ dependency.
 - The bounded Phase 4.0.1 design spike and Phase 4.0.2 neutral contract are
   accepted. Phase 4.0.3 Repository Lifecycle and Phase 4.0.4 Scan Execution
   Core and Phase 4.0.5 Intelligence & Materialization Adapters are accepted.
-  Phase 4.0.6 design is authorized; its production implementation and later
-  milestones remain unauthorized pending their respective acceptance gates.
+  Phase 4.0.6 design package is proposed for review; its production
+  implementation and later milestones remain unauthorized pending their
+  respective acceptance gates.
 
 Detailed milestones are defined in
 `docs/Roadmap/PHASE_4_REPOSITORY_SERVICE_ROADMAP.md`.

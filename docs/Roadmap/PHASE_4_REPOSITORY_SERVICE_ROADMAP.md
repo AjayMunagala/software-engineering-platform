@@ -162,7 +162,17 @@ and authorized Phase 4.0.6 design only.
 
 ## Phase 4.0.6 — Persistence and runtime integration (design authorized)
 
-Implement:
+Design package:
+
+- `docs/Architecture/REPOSITORY_SERVICE_PERSISTENCE_RUNTIME_INTEGRATION.md`;
+- `docs/API/REPOSITORY_SERVICE_INTEGRATION_CANDIDATE_API.md`;
+- `docs/Decisions/0017-repository-service-persistence-runtime-integration.md`;
+- `docs/Validation/PERSISTENCE_RUNTIME_INTEGRATION_VALIDATION_PLAN.md`.
+
+The design package is proposed for engineering review. Production
+implementation remains unauthorized.
+
+After design acceptance, implement only:
 
 - adapters to Persistence Port `1.0.0`;
 - Runtime Infrastructure admission integration;

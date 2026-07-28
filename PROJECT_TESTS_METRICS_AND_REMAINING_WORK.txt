@@ -1172,7 +1172,7 @@ Detailed evidence:
 Status on 2026-07-28:
   - implementation and local validation: COMPLETE;
   - engineering acceptance: ACCEPTED;
-  - commit and push: AUTHORIZED;
+  - commit and push: COMPLETE (`4105bba` on `main`);
   - Phase 4.0.6 Persistence & Runtime Integration design: AUTHORIZED;
   - Phase 4.0.6 production implementation: UNAUTHORIZED pending design review.
 
@@ -1220,3 +1220,45 @@ authentication, UI, or AI integration was introduced.
 
 Detailed evidence:
   docs/Validation/INTELLIGENCE_MATERIALIZATION_ADAPTERS_VALIDATION_REPORT.md
+
+======================================================================
+21. PHASE 4.0.6 PERSISTENCE & RUNTIME INTEGRATION DESIGN
+======================================================================
+
+Status on 2026-07-28:
+  - Phase 4.0.5 accepted, committed as `4105bba`, and pushed to `main`;
+  - architecture/design package: COMPLETE;
+  - engineering design acceptance: PENDING;
+  - production implementation: UNAUTHORIZED;
+  - Phase 4.0.7: UNAUTHORIZED.
+
+Design deliverables:
+  - Repository Service Persistence & Runtime Integration architecture;
+  - integration candidate API;
+  - ADR 0017;
+  - integration validation plan.
+
+Important integration decisions proposed for review:
+  - canonical UUID ScopeID, RepositoryID, and ScanID at the candidate service
+    boundary because the accepted PostgreSQL physical schema uses UUIDs;
+  - deterministic RFC 9562 version-8 physical UUID mapping for public
+    repository-service-artifact-id/v1 values;
+  - persistence-returned timestamps are authoritative, with deterministic
+    invariant validation instead of cross-clock nanosecond equality;
+  - additive immutable source-fingerprint, request-ID, and dependency accessors
+    on internal scan commands;
+  - source fingerprint must match the registered repository before BeginScan;
+  - repository-service-manifest/v1 exact canonical preimage;
+  - runtime admission, ingest, and read capabilities are borrowed without pool
+    construction, migration, credential, startup, or shutdown ownership;
+  - sequential exact-byte staging followed by one atomic publication;
+  - complete durable-state reconciliation for ambiguous publication responses.
+
+No production Go integration code, SQL, migration, connection, credential,
+transport, authentication, UI, AI, network, or command execution was added.
+
+Design package:
+  docs/Architecture/REPOSITORY_SERVICE_PERSISTENCE_RUNTIME_INTEGRATION.md
+  docs/API/REPOSITORY_SERVICE_INTEGRATION_CANDIDATE_API.md
+  docs/Decisions/0017-repository-service-persistence-runtime-integration.md
+  docs/Validation/PERSISTENCE_RUNTIME_INTEGRATION_VALIDATION_PLAN.md

@@ -8,8 +8,10 @@
 - Codec contract: `canonical-json/1.0.0`
 - Local implementation: complete
 - Local validation: pass
-- Engineering acceptance: pending
-- Phase 4.0.6 Persistence & Runtime Integration: unauthorized
+- Engineering acceptance: accepted on 2026-07-28
+- Accepted commit: `4105bba`
+- Phase 4.0.6 design: authorized
+- Phase 4.0.6 production implementation: unauthorized pending design acceptance
 - Date: 2026-07-28
 
 ## Scope
