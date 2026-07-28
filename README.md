@@ -46,8 +46,8 @@ Execution Core was accepted on 2026-07-28. Phase 4.0.5 Intelligence &
 Materialization Adapters was accepted on 2026-07-28. Phase 4.0.6 Persistence &
 Runtime Integration design was accepted with recommendations on 2026-07-28.
 The UUID/manifest golden-vector contracts are frozen. Local implementation and
-validation pass; engineering acceptance and commit/push remain pending. Phase
-4.0.7 remains unauthorized.
+validation pass and review candidate `abdb395` is pushed to `main`.
+Engineering acceptance remains pending. Phase 4.0.7 remains unauthorized.
 Intelligence engines remain database-independent.
 
 ## Run RIE

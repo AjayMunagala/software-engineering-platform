@@ -74,8 +74,8 @@
   2026-07-28.
 - Phase 4.0.6: persistence and runtime integration design authorized;
   design accepted with recommendations on 2026-07-28; golden-vector contracts
-  frozen; local implementation and validation complete; engineering acceptance
-  and commit/push pending.
+  frozen; local implementation and validation complete; review commit
+  `abdb395` pushed to `main`; engineering acceptance pending.
 - Phase 4.1: REST/gRPC query APIs remain gated.
 
 PostgreSQL remains downstream from immutable artifacts and is not an engine
@@ -99,7 +99,8 @@ dependency.
   Core and Phase 4.0.5 Intelligence & Materialization Adapters are accepted.
   Phase 4.0.6 design is accepted with recommendations, and its production
   implementation and local validation are complete under the frozen
-  golden-vector contracts. Engineering acceptance and commit/push are pending.
+  golden-vector contracts. Review commit `abdb395` is pushed to `main` and
+  engineering acceptance is pending.
   Phase 4.0.7 and later milestones remain unauthorized pending their
   respective acceptance gates.
 
