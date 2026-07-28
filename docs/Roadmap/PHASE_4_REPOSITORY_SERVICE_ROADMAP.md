@@ -7,7 +7,9 @@
 - Phase 4.0.2 neutral service contract and conformance harness: accepted on 2026-07-27
 - Phase 4.0.3 repository lifecycle: accepted on 2026-07-27
 - Phase 4.0.4 scan execution core: accepted on 2026-07-28
-- Phase 4.0.5 intelligence and materialization adapters: authorized
+- Phase 4.0.5 intelligence and materialization adapters: accepted on 2026-07-28
+- Phase 4.0.6 persistence and runtime integration design: authorized
+- Phase 4.0.6 production implementation: unauthorized pending design acceptance
 - Phase 4.1 transports: unauthorized
 - Date: 2026-07-27
 
@@ -139,7 +141,7 @@ Evidence is recorded in
 `docs/Validation/SCAN_EXECUTION_CORE_VALIDATION_REPORT.md`. Engineering
 accepted the evidence on 2026-07-28 and authorized Phase 4.0.5 only.
 
-## Phase 4.0.5 — Intelligence and materialization adapters (current, authorized)
+## Phase 4.0.5 — Intelligence and materialization adapters ✅
 
 Implement:
 
@@ -153,7 +155,12 @@ Implement:
 Exit gate: identical input produces identical artifact bytes, IDs, dependency
 order, and terminal result on Windows and Ubuntu.
 
-## Phase 4.0.6 — Persistence and runtime integration
+Evidence is recorded in
+`docs/Validation/INTELLIGENCE_MATERIALIZATION_ADAPTERS_VALIDATION_REPORT.md`.
+Engineering accepted the implementation and validation evidence on 2026-07-28
+and authorized Phase 4.0.6 design only.
+
+## Phase 4.0.6 — Persistence and runtime integration (design authorized)
 
 Implement:
 

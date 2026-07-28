@@ -30,7 +30,9 @@ type AnalysisRequest struct {
 	profile      repository.AnalysisProfile
 }
 
-func newAnalysisRequest(request repository.ExecuteScanRequest) AnalysisRequest {
+// NewAnalysisRequest creates the immutable adapter input from an already
+// validated public execute request.
+func NewAnalysisRequest(request repository.ExecuteScanRequest) AnalysisRequest {
 	return AnalysisRequest{scope: request.Scope(), repositoryID: request.RepositoryID(), scanID: request.ScanID(), source: request.SourceHandle(), profile: request.Profile()}
 }
 func (request AnalysisRequest) Scope() repository.Scope               { return request.scope }
@@ -46,16 +48,47 @@ type ArtifactCandidateParams struct {
 	PayloadDigest                 repository.Digest
 	PayloadSize                   uint64
 	ProducerName, ProducerVersion string
+	Dependencies                  []ArtifactDependency
 	Payload                       PayloadSource
 }
 
-// ArtifactCandidate is immutable fake-analysis metadata plus a reopenable
+// ArtifactDependency is one deterministic edge in the frozen analysis
+// profile. Ordinals are local to the dependent artifact and begin at zero.
+type ArtifactDependency struct {
+	name, version string
+	ordinal       int
+}
+
+func NewArtifactDependency(name, version string, ordinal int) (ArtifactDependency, error) {
+	if !validName(name, 128) || !validVersion(version) || ordinal < 0 || ordinal >= defaultMaxArtifacts {
+		return ArtifactDependency{}, repository.NewError(repository.ErrorInvalidInput, "new-artifact-dependency", "invalid-dependency", false, nil)
+	}
+	return ArtifactDependency{name: name, version: version, ordinal: ordinal}, nil
+}
+
+func (dependency ArtifactDependency) Name() string    { return dependency.name }
+func (dependency ArtifactDependency) Version() string { return dependency.version }
+func (dependency ArtifactDependency) Ordinal() int    { return dependency.ordinal }
+
+// ArtifactCandidate is immutable analysis metadata plus a reopenable
 // exact payload source. It contains no engine artifact or filesystem path.
 type ArtifactCandidate struct{ params ArtifactCandidateParams }
 
 func NewArtifactCandidate(params ArtifactCandidateParams) (ArtifactCandidate, error) {
 	if !validName(params.Name, 128) || !validVersion(params.Version) || !validName(params.StableIDScheme, 128) || !validName(params.CodecName, 128) || !validVersion(params.CodecVersion) || (params.MediaType != "application/json" && params.MediaType != "application/octet-stream") || params.PayloadDigest.IsZero() || params.PayloadSize == 0 || !validName(params.ProducerName, 128) || !validVersion(params.ProducerVersion) || params.Payload == nil {
 		return ArtifactCandidate{}, repository.NewError(repository.ErrorInvalidInput, "new-artifact-candidate", "invalid-candidate", false, nil)
+	}
+	params.Dependencies = append([]ArtifactDependency(nil), params.Dependencies...)
+	seen := make(map[string]struct{}, len(params.Dependencies))
+	for index, dependency := range params.Dependencies {
+		key := dependency.Name() + "\x00" + dependency.Version()
+		if dependency.Name() == "" || dependency.Ordinal() != index {
+			return ArtifactCandidate{}, repository.NewError(repository.ErrorInvalidInput, "new-artifact-candidate", "invalid-dependency-order", false, nil)
+		}
+		if _, exists := seen[key]; exists {
+			return ArtifactCandidate{}, repository.NewError(repository.ErrorConflict, "new-artifact-candidate", "duplicate-dependency", false, nil)
+		}
+		seen[key] = struct{}{}
 	}
 	return ArtifactCandidate{params: params}, nil
 }
@@ -71,6 +104,9 @@ func (candidate ArtifactCandidate) PayloadDigest() repository.Digest {
 func (candidate ArtifactCandidate) PayloadSize() uint64     { return candidate.params.PayloadSize }
 func (candidate ArtifactCandidate) ProducerName() string    { return candidate.params.ProducerName }
 func (candidate ArtifactCandidate) ProducerVersion() string { return candidate.params.ProducerVersion }
+func (candidate ArtifactCandidate) Dependencies() []ArtifactDependency {
+	return append([]ArtifactDependency(nil), candidate.params.Dependencies...)
+}
 func (candidate ArtifactCandidate) Open(ctx context.Context) (io.ReadCloser, error) {
 	return candidate.params.Payload.Open(ctx)
 }
@@ -96,12 +132,59 @@ func NewAnalysisResult(profile repository.AnalysisProfile, candidates []Artifact
 		}
 		seen[key] = struct{}{}
 	}
+	for _, candidate := range copyCandidates {
+		for _, dependency := range candidate.Dependencies() {
+			if _, exists := seen[dependency.Name()+"\x00"+dependency.Version()]; !exists {
+				return AnalysisResult{}, repository.NewError(repository.ErrorInvalidInput, "new-analysis-result", "missing-dependency", false, nil)
+			}
+			if dependency.Name() == candidate.Name() && dependency.Version() == candidate.Version() {
+				return AnalysisResult{}, repository.NewError(repository.ErrorInvalidInput, "new-analysis-result", "self-dependency", false, nil)
+			}
+		}
+	}
+	if !acyclicCandidates(copyCandidates) {
+		return AnalysisResult{}, repository.NewError(repository.ErrorInvalidInput, "new-analysis-result", "cyclic-dependency", false, nil)
+	}
 	sort.Slice(copyCandidates, func(i, j int) bool {
 		left := copyCandidates[i].Name() + "\x00" + copyCandidates[i].Version() + "\x00" + copyCandidates[i].StableIDScheme()
 		right := copyCandidates[j].Name() + "\x00" + copyCandidates[j].Version() + "\x00" + copyCandidates[j].StableIDScheme()
 		return left < right
 	})
 	return AnalysisResult{profile: profile, candidates: copyCandidates}, nil
+}
+
+func acyclicCandidates(candidates []ArtifactCandidate) bool {
+	edges := make(map[string][]string, len(candidates))
+	for _, candidate := range candidates {
+		key := candidate.Name() + "\x00" + candidate.Version()
+		for _, dependency := range candidate.Dependencies() {
+			edges[key] = append(edges[key], dependency.Name()+"\x00"+dependency.Version())
+		}
+	}
+	states := make(map[string]uint8, len(edges))
+	var visit func(string) bool
+	visit = func(key string) bool {
+		if states[key] == 1 {
+			return false
+		}
+		if states[key] == 2 {
+			return true
+		}
+		states[key] = 1
+		for _, dependency := range edges[key] {
+			if !visit(dependency) {
+				return false
+			}
+		}
+		states[key] = 2
+		return true
+	}
+	for key := range edges {
+		if !visit(key) {
+			return false
+		}
+	}
+	return true
 }
 func (result AnalysisResult) Profile() repository.AnalysisProfile { return result.profile }
 func (result AnalysisResult) Candidates() []ArtifactCandidate {

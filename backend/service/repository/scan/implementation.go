@@ -155,7 +155,7 @@ func (service *Service) execute(ctx context.Context, request repository.ExecuteS
 		return repository.ScanResult{}, err
 	}
 
-	session, err := service.preparer.Prepare(executionCtx, newAnalysisRequest(request))
+	session, err := service.preparer.Prepare(executionCtx, NewAnalysisRequest(request))
 	if err != nil {
 		return repository.ScanResult{}, mapDependencyError(err, "execute-scan", "source-unavailable", repository.ErrorSourceUnavailable)
 	}

@@ -1105,7 +1105,7 @@ Detailed evidence:
 Status on 2026-07-27:
   - implementation and local validation: COMPLETE;
   - engineering acceptance: ACCEPTED on 2026-07-28;
-  - commit and push: APPROVED;
+  - commit and push: COMPLETE (`894eab8` on `main`);
   - Phase 4.0.5 Intelligence & Materialization Adapters: AUTHORIZED.
 
 Implemented:
@@ -1164,3 +1164,59 @@ or repository mutation was introduced.
 
 Detailed evidence:
   docs/Validation/SCAN_EXECUTION_CORE_VALIDATION_REPORT.md
+
+======================================================================
+20. PHASE 4.0.5 INTELLIGENCE & MATERIALIZATION ADAPTERS
+======================================================================
+
+Status on 2026-07-28:
+  - implementation and local validation: COMPLETE;
+  - engineering acceptance: ACCEPTED;
+  - commit and push: AUTHORIZED;
+  - Phase 4.0.6 Persistence & Runtime Integration design: AUTHORIZED;
+  - Phase 4.0.6 production implementation: UNAUTHORIZED pending design review.
+
+Implemented:
+  - fresh released RIE and conditional Go LIE orchestration;
+  - frozen repository-go/v1 seven/ten-artifact behavior;
+  - canonical-json/1.0.0 deterministic codecs;
+  - immutable dependency ordinals with missing/self/cycle validation;
+  - sealed file-backed streaming materialization;
+  - exact SHA-256 and byte counts during the only serialization;
+  - four-GiB limit, physical-size verification, and mode-0600 spools;
+  - stable service Repository ID in place of path-derived repository names;
+  - source/root redaction scan and repository-external spool enforcement;
+  - bounded idempotent spool and authorized-source cleanup.
+
+Validation:
+  - real released Go profile and non-Go profile: PASS;
+  - ten Windows/Ubuntu exact artifact hashes: IDENTICAL;
+  - full backend regression, vet, and shuffle: PASS;
+  - Windows targeted/full race: PASS, zero races;
+  - Ubuntu targeted/full race: PASS, zero races;
+  - adapter coverage: 86.4%;
+  - scan coverage: 89.4%;
+  - forbidden-root fuzz: 87,896 executions, no panic;
+  - forbidden dependency and SourceHandle.Reveal audits: PASS.
+
+10,000-entry sealed RepositorySnapshot benchmark:
+  - Windows: 62.03-90.20 ms/op, 2,621,119-2,622,031 B/op,
+    20,091-20,094 allocs/op;
+  - Ubuntu: 9.65-17.11 ms/op, 1,561,661-1,561,715 B/op,
+    20,051 allocs/op.
+
+Defects found and corrected:
+  - path-derived RIE repository names made bytes deployment-root-dependent;
+    durable codecs now use the stable service Repository ID;
+  - fake candidates lacked the future durable dependency graph; candidates now
+    carry validated deterministic edges and reject missing, self, and cyclic
+    dependencies;
+  - spool configuration could point inside the analyzed repository; symlink-
+    resolved repository containment is now rejected before execution.
+
+No Persistence Port, PostgreSQL, runtime, SQL, pgx, database connection,
+credential, HTTP, network, command execution, repository mutation,
+authentication, UI, or AI integration was introduced.
+
+Detailed evidence:
+  docs/Validation/INTELLIGENCE_MATERIALIZATION_ADAPTERS_VALIDATION_REPORT.md

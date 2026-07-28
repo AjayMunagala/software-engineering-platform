@@ -43,8 +43,9 @@ package and ADR 0016 were accepted on 2026-07-27. The bounded Phase 4.0.1
 design spike and Phase 4.0.2 neutral contract/conformance harness are accepted.
 Phase 4.0.3 Repository Lifecycle was accepted on 2026-07-27. Phase 4.0.4 Scan
 Execution Core was accepted on 2026-07-28. Phase 4.0.5 Intelligence &
-Materialization Adapters is authorized; persistence and runtime integration
-remain deferred.
+Materialization Adapters was accepted on 2026-07-28. Phase 4.0.6 Persistence &
+Runtime Integration design is authorized; production implementation remains
+deferred pending design acceptance.
 Intelligence engines remain database-independent.
 
 ## Run RIE
@@ -105,6 +106,7 @@ The command emits the versioned JSON schema `1.0.0`.
 - [Phase 4.0.2 Repository Service contract validation](docs/Validation/REPOSITORY_SERVICE_CONTRACT_VALIDATION_REPORT.md)
 - [Phase 4.0.3 Repository Lifecycle validation](docs/Validation/REPOSITORY_LIFECYCLE_VALIDATION_REPORT.md)
 - [Phase 4.0.4 Scan Execution Core validation](docs/Validation/SCAN_EXECUTION_CORE_VALIDATION_REPORT.md)
+- [Phase 4.0.5 Intelligence & Materialization Adapters validation](docs/Validation/INTELLIGENCE_MATERIALIZATION_ADAPTERS_VALIDATION_REPORT.md)
 - [Complete project tests, metrics, and remaining work](PROJECT_TESTS_METRICS_AND_REMAINING_WORK.txt)
 
 ## Next milestone
@@ -115,7 +117,8 @@ Phase 3.5.4 Runtime Integration & Release Freeze is accepted and Runtime
 Infrastructure **1.0.0** is frozen. Phase 4.0 Repository Service Layer is the
 only authorized next milestone. The Phase 4.0 design package is accepted, but
 production implementation remains gated. Phase 4.0.1 spike evidence is
-accepted, and Phase 4.0.2 through Phase 4.0.4 are accepted. Only Phase 4.0.5
-Intelligence & Materialization Adapters is authorized. Persistence/runtime
+accepted, and Phase 4.0.2 through Phase 4.0.4 are accepted. Phase 4.0.5
+Intelligence & Materialization Adapters is locally complete and awaiting
+engineering acceptance. Persistence/runtime
 integration, HTTP health endpoints, REST/gRPC, UI, LLM, patch generation, and
 repository mutation remain unauthorized.

@@ -9,7 +9,8 @@
 - Phase 4.0.2 neutral contract: accepted
 - Phase 4.0.3 repository lifecycle: accepted on 2026-07-27
 - Phase 4.0.4 scan execution core: accepted on 2026-07-28
-- Phase 4.0.5 intelligence and materialization adapters: authorized
+- Phase 4.0.5 intelligence and materialization adapters: locally complete, awaiting acceptance
+- Phase 4.0.6 persistence and runtime integration: unauthorized
 - Date: 2026-07-27
 
 ## Purpose
@@ -135,6 +136,10 @@ the evidence on 2026-07-28 and authorized Phase 4.0.5 only.
 All Phase 4.0.4 local gates pass on Windows and Ubuntu and were accepted.
 Phase 4.0.5 may introduce production intelligence and materialization adapters.
 Persistence and runtime integrations remain excluded until Phase 4.0.6.
+
+Phase 4.0.5 local evidence is recorded in
+`INTELLIGENCE_MATERIALIZATION_ADAPTERS_VALIDATION_REPORT.md`. All local
+Windows and Ubuntu gates pass; engineering acceptance is pending.
 
 ## Intelligence integration gates
 

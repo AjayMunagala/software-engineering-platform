@@ -330,6 +330,54 @@ func TestConstructionModelsAndErrorBoundaries(t *testing.T) {
 	}
 }
 
+func TestArtifactDependencyValidationAndGraph(t *testing.T) {
+	if _, err := NewArtifactDependency("", "1.0.0", 0); repository.KindOf(err) != repository.ErrorInvalidInput {
+		t.Fatalf("empty dependency = %v", err)
+	}
+	if _, err := NewArtifactDependency("first", "1.0.0", -1); repository.KindOf(err) != repository.ErrorInvalidInput {
+		t.Fatalf("negative ordinal = %v", err)
+	}
+	firstToSecond, _ := NewArtifactDependency("second", "1.0.0", 0)
+	secondToFirst, _ := NewArtifactDependency("first", "1.0.0", 0)
+	if firstToSecond.Name() != "second" || firstToSecond.Version() != "1.0.0" || firstToSecond.Ordinal() != 0 {
+		t.Fatal("dependency accessors failed")
+	}
+	badOrder, _ := NewArtifactDependency("second", "1.0.0", 1)
+	if _, err := dependencyCandidate("first", []ArtifactDependency{badOrder}); repository.KindOf(err) != repository.ErrorInvalidInput {
+		t.Fatalf("bad order = %v", err)
+	}
+	duplicateAtOne, _ := NewArtifactDependency("second", "1.0.0", 1)
+	if _, err := dependencyCandidate("first", []ArtifactDependency{firstToSecond, duplicateAtOne}); repository.KindOf(err) != repository.ErrorConflict {
+		t.Fatalf("duplicate = %v", err)
+	}
+	first, _ := dependencyCandidate("first", []ArtifactDependency{firstToSecond})
+	if first.Dependencies()[0].Name() != "second" {
+		t.Fatal("dependency copy failed")
+	}
+	profile := repository.DefaultRepositoryGoProfile().Profile()
+	if _, err := NewAnalysisResult(profile, []ArtifactCandidate{first}); repository.KindOf(err) != repository.ErrorInvalidInput {
+		t.Fatalf("missing dependency = %v", err)
+	}
+	self, _ := NewArtifactDependency("first", "1.0.0", 0)
+	selfCandidate, _ := dependencyCandidate("first", []ArtifactDependency{self})
+	if _, err := NewAnalysisResult(profile, []ArtifactCandidate{selfCandidate}); repository.KindOf(err) != repository.ErrorInvalidInput {
+		t.Fatalf("self dependency = %v", err)
+	}
+	second, _ := dependencyCandidate("second", []ArtifactDependency{secondToFirst})
+	if _, err := NewAnalysisResult(profile, []ArtifactCandidate{first, second}); repository.KindOf(err) != repository.ErrorInvalidInput {
+		t.Fatalf("cycle = %v", err)
+	}
+	second, _ = dependencyCandidate("second", nil)
+	if result, err := NewAnalysisResult(profile, []ArtifactCandidate{first, second}); err != nil || len(result.Candidates()) != 2 {
+		t.Fatalf("acyclic result = %v", err)
+	}
+}
+
+func dependencyCandidate(name string, dependencies []ArtifactDependency) (ArtifactCandidate, error) {
+	payload := []byte("{}")
+	return NewArtifactCandidate(ArtifactCandidateParams{Name: name, Version: "1.0.0", StableIDScheme: repository.ArtifactIdentityScheme, CodecName: "canonical-json", CodecVersion: "1.0.0", MediaType: "application/json", PayloadDigest: sha256.Sum256(payload), PayloadSize: uint64(len(payload)), ProducerName: "test", ProducerVersion: "1.0.0", Dependencies: dependencies, Payload: byteSource(payload)})
+}
+
 func TestExecutionDependencyAndStateBranches(t *testing.T) {
 	t.Run("admission failure", func(t *testing.T) {
 		fixture := newFixture(t)
@@ -481,7 +529,7 @@ func TestQueryCancellationErrorsAndModelAccessors(t *testing.T) {
 	if _, err := fixture.service.ExportArtifact(ctx, export, io.Discard); repository.KindOf(err) != repository.ErrorCanceled {
 		t.Fatal(err)
 	}
-	analysisRequest := newAnalysisRequest(fixture.request)
+	analysisRequest := NewAnalysisRequest(fixture.request)
 	if analysisRequest.Scope() != fixture.scope || analysisRequest.RepositoryID() != fixture.request.RepositoryID() || analysisRequest.ScanID() != fixture.request.ScanID() || analysisRequest.SourceHandle() != fixture.request.SourceHandle() || analysisRequest.Profile() != fixture.profile {
 		t.Fatal("analysis accessors")
 	}

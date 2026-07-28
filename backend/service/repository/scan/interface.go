@@ -1,9 +1,10 @@
-// Package scan implements Phase 4.0.4 synchronous scan coordination.
+// Package scan implements transport-, persistence-, runtime-, and
+// engine-neutral synchronous scan coordination.
 //
 // It depends only on the neutral Repository Service contract and narrow
-// admission, prepared-analysis, clock, and atomic-store capabilities. Real
-// intelligence engines, materializers, persistence adapters, runtime wiring,
-// database drivers, and transports are deliberately outside this package.
+// admission, prepared-analysis, clock, and atomic-store capabilities.
+// Intelligence engines, materializers, persistence adapters, runtime wiring,
+// database drivers, and transports remain behind those boundaries.
 package scan
 
 import (
@@ -44,15 +45,15 @@ type WorkLease interface {
 	Done()
 }
 
-// AnalysisPreparer resolves the opaque source and returns one isolated fake or
-// future adapter-owned analysis session. Phase 4.0.4 implementations must not
-// execute the real RIE/LIE pipeline.
+// AnalysisPreparer resolves the opaque source and returns one isolated,
+// adapter-owned analysis session. Engine-specific behavior remains outside the
+// scan coordinator.
 type AnalysisPreparer interface {
 	Prepare(context.Context, AnalysisRequest) (AnalysisSession, error)
 }
 
-// AnalysisSession exposes path-free source proof and already-prepared fake
-// artifact inputs. Close must respect its bounded context.
+// AnalysisSession exposes path-free source proof and prepared artifact inputs.
+// Close must respect its bounded context.
 type AnalysisSession interface {
 	SourceFingerprint() repository.Digest
 	SourceRevision() string
@@ -60,8 +61,7 @@ type AnalysisSession interface {
 	Close(context.Context) error
 }
 
-// PayloadSource reopens exact fake-analysis bytes. Real materialization is a
-// later milestone.
+// PayloadSource reopens exact sealed analysis bytes.
 type PayloadSource interface {
 	Open(context.Context) (io.ReadCloser, error)
 }
