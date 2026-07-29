@@ -9,9 +9,10 @@
 - Phase 4.0.4 scan execution core: accepted on 2026-07-28
 - Phase 4.0.5 intelligence and materialization adapters: accepted on 2026-07-28
 - Phase 4.0.6 persistence and runtime integration design: accepted with recommendations on 2026-07-28
-- Phase 4.0.6 production implementation and local validation: complete; review commit `abdb395` pushed; engineering acceptance pending
+- Phase 4.0.6 persistence and runtime integration: accepted and frozen on 2026-07-29; implementation commit `abdb395` pushed
+- Phase 4.0.7 real-repository validation: design authorized; execution unauthorized pending design acceptance
 - Phase 4.1 transports: unauthorized
-- Date: 2026-07-27
+- Date: 2026-07-29
 
 ## Goal
 
@@ -160,7 +161,7 @@ Evidence is recorded in
 Engineering accepted the implementation and validation evidence on 2026-07-28
 and authorized Phase 4.0.6 design only.
 
-## Phase 4.0.6 — Persistence and runtime integration (awaiting engineering acceptance)
+## Phase 4.0.6 — Persistence and runtime integration ✅
 
 Design package:
 
@@ -190,11 +191,11 @@ race, rollback, scope-isolation, and leak tests pass.
 
 Local evidence is recorded in
 `docs/Validation/PERSISTENCE_RUNTIME_INTEGRATION_VALIDATION_REPORT.md`. The
-implementation has reached the local exit gate but is not committed or pushed
-as an accepted release; review candidate `abdb395` is pushed to `main`.
-Engineering acceptance is pending and Phase 4.0.7 remains unauthorized.
+implementation reached its exit gate in review candidate `abdb395`, which is
+pushed to `main`. Engineering accepted and froze Phase 4.0.6 on 2026-07-29.
+Phase 4.0.7 design is authorized; its execution remains separately gated.
 
-## Phase 4.0.7 — Real repository validation
+## Phase 4.0.7 — Real repository validation (design authorized)
 
 Validate representative inputs:
 
@@ -212,6 +213,10 @@ cancellation, and deterministic hashes.
 
 Exit gate: no crashes, scope escapes, path leaks, partial publication, digest
 mismatch, or unexplained nondeterminism; critical defects resolved.
+
+Governance gate: produce and commit the validation design before running the
+real-repository suite. Execution requires explicit engineering acceptance of
+that design. Phase 4.0.8 remains unauthorized.
 
 ## Phase 4.0.8 — Stabilization and Service Contract 1.0.0
 

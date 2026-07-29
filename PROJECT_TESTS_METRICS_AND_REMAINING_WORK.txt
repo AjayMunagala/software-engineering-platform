@@ -1231,9 +1231,11 @@ Status on 2026-07-28:
   - engineering design acceptance: ACCEPTED WITH RECOMMENDATIONS;
   - UUID/manifest golden-vector contract: FROZEN;
   - production implementation and local validation: COMPLETE;
-  - engineering implementation acceptance: PENDING;
+  - engineering implementation acceptance: ACCEPTED on 2026-07-29;
+  - milestone status: FROZEN;
   - review commit and push: COMPLETE (`abdb395` on `main`);
-  - Phase 4.0.7: UNAUTHORIZED.
+  - Phase 4.0.7 design: AUTHORIZED;
+  - Phase 4.0.7 validation execution: UNAUTHORIZED pending design acceptance.
 
 Design deliverables:
   - Repository Service Persistence & Runtime Integration architecture;
@@ -1289,6 +1291,14 @@ Defects found and corrected:
 No SQL, pgx, pool construction, TLS loading, migration execution, credential,
 transport, authentication, UI, AI, listener, network, or command execution was
 added to the integration package. Frozen foundation contracts were not changed.
+
+Engineering acceptance:
+  - Phase 4.0.6 was accepted and frozen on 2026-07-29 based on the reviewed
+    design package and recorded implementation/validation evidence;
+  - the acceptance does not claim a line-by-line audit of every changed source
+    file;
+  - Phase 4.0.7 may proceed through design review only. Real-repository
+    validation must not start until that design is explicitly accepted.
 
 Design package:
   docs/Architecture/REPOSITORY_SERVICE_PERSISTENCE_RUNTIME_INTEGRATION.md

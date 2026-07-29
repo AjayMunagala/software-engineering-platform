@@ -9,10 +9,10 @@
 - Implementation review commit: `abdb395`
 - Local implementation: complete
 - Local validation: pass
-- Engineering acceptance: pending
+- Engineering acceptance: accepted on 2026-07-29
 - Commit and push: complete on `main`
-- Phase 4.0.7: unauthorized
-- Date: 2026-07-28
+- Phase 4.0.7: design authorized; execution unauthorized pending design review
+- Date: 2026-07-29
 
 ## Scope delivered
 
@@ -287,6 +287,8 @@ gate. All mandatory local, Windows, Ubuntu, PostgreSQL, deterministic,
 integrity, race, fuzz, coverage, audit, and performance gates pass.
 
 Review candidate `abdb395` is committed and pushed to `main`. Engineering
-acceptance is still required before Phase 4.0.7 may begin. This report
-recommends engineering acceptance of Phase 4.0.6, followed by authorization of
-Phase 4.0.7 only through a separate explicit governance decision.
+accepted and froze Phase 4.0.6 on 2026-07-29 based on the reviewed architecture,
+API, ADR, validation plan, and the recorded implementation evidence. The review
+did not claim a line-by-line audit of every changed source file. Phase 4.0.7 is
+authorized for design only; validation execution requires separate design
+acceptance.

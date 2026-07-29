@@ -46,8 +46,10 @@ Execution Core was accepted on 2026-07-28. Phase 4.0.5 Intelligence &
 Materialization Adapters was accepted on 2026-07-28. Phase 4.0.6 Persistence &
 Runtime Integration design was accepted with recommendations on 2026-07-28.
 The UUID/manifest golden-vector contracts are frozen. Local implementation and
-validation pass and review candidate `abdb395` is pushed to `main`.
-Engineering acceptance remains pending. Phase 4.0.7 remains unauthorized.
+validation pass, review candidate `abdb395` is pushed to `main`, and engineering
+accepted and froze the milestone on 2026-07-29. Phase 4.0.7 design is authorized;
+its validation execution and every later milestone remain unauthorized pending
+design review.
 Intelligence engines remain database-independent.
 
 ## Run RIE
@@ -125,9 +127,9 @@ Phase 3.5.4 Runtime Integration & Release Freeze is accepted and Runtime
 Infrastructure **1.0.0** is frozen. Phase 4.0 Repository Service Layer is the
 only authorized next milestone. The Phase 4.0 design package is accepted, but
 production implementation remains gated. Phase 4.0.1 spike evidence is
-accepted, and Phase 4.0.2 through Phase 4.0.5 are accepted. Phase 4.0.6 design
-is accepted with recommendations. Local implementation and validation are
-complete under frozen golden-vector conditions but await engineering
-acceptance. Phase 4.0.7, HTTP health endpoints,
+accepted, and Phase 4.0.2 through Phase 4.0.5 are accepted. Phase 4.0.6 is
+accepted and frozen after passing its implementation and validation gates.
+Phase 4.0.7 is authorized for design only; validation execution remains gated
+on design review. HTTP health endpoints,
 REST/gRPC, UI, LLM, patch generation, and repository mutation remain
 unauthorized.
