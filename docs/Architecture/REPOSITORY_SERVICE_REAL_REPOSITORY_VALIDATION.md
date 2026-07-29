@@ -3,8 +3,8 @@
 ## Status
 
 - Phase: 4.0.7 design
-- Status: Proposed for engineering review
-- Implementation/validation execution: unauthorized
+- Status: Approved with recommendations on 2026-07-29
+- Implementation/validation execution: authorized
 - Date: 2026-07-29
 
 ## One-sentence responsibility
@@ -190,6 +190,9 @@ Controlled tests must prove:
   publication reaches the documented terminal behavior;
 - injected failure after publication commit but before response is reconciled
   to the complete durable publication;
+- after a successful publication, an operator-forced PostgreSQL immediate stop
+  and restart completes crash recovery, after which the scan, envelopes,
+  dependency graph, exact exports, and SHA-256 proofs remain intact;
 - injected pre-publication failures expose no artifact envelopes;
 - staged unreferenced payloads remain eligible for the accepted retention
   policy;
@@ -221,8 +224,10 @@ fetch time is never included.
 The reference workstation has limited memory. Large cases therefore use clean
 processes, bounded workers, streaming export, and continuous resource sampling.
 The harness must stop safely before host instability if the approved memory
-ceiling is crossed, record the case as a resource failure, and preserve logs
-without claiming a pass. It must not disable integrity, relationship, or
+ceiling is crossed and preserve logs without claiming a pass. Every
+Kubernetes-scale outcome is classified exactly as `success`, `memory_ceiling`,
+`timeout`, `correctness_failure`, or `environment_failure`; a generic resource
+failure label is forbidden. It must not disable integrity, relationship, or
 diagnostic limits to obtain a successful run.
 
 ## Defect policy
@@ -253,6 +258,7 @@ test, and re-run of affected cases plus the full required quality gates.
 
 ## Governance
 
-This document authorizes no validation execution. Engineering must review the
-design, fixture manifest, validation plan, and ADR 0018 together. Acceptance
-may authorize Phase 4.0.7 execution only. Phase 4.0.8 remains separately gated.
+Engineering approved this design with non-blocking recommendations on
+2026-07-29 and authorized Phase 4.0.7 validation execution. The three
+recommendations are incorporated as mandatory evidence in the validation
+package. Phase 4.0.8 remains separately gated.

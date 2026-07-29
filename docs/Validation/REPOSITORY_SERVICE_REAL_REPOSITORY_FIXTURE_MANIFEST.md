@@ -3,7 +3,7 @@
 ## Status
 
 - Phase: 4.0.7 design
-- Status: Proposed and not yet authorized for execution
+- Status: Approved with recommendations on 2026-07-29
 - Date: 2026-07-29
 
 ## Normative corpus
@@ -43,7 +43,7 @@ Before any case runs, the operator records:
 - canonical path/file-kind/size/SHA-256 manifest digest;
 - submodule declarations and whether they remain intentionally uninitialized;
 - symlink representation;
-- checkout tool and version.
+- checkout tool and exact Git version.
 
 The harness rejects a revision, tree, or canonical-manifest mismatch. It does
 not repair, clean, generate, install, or mutate a checkout automatically.

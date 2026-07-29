@@ -75,8 +75,9 @@
 - Phase 4.0.6: persistence and runtime integration accepted and frozen on
   2026-07-29 after its design, golden-vector, implementation, and validation
   gates passed; implementation commit `abdb395` is on `main`.
-- Phase 4.0.7: real-repository validation design complete and awaiting review;
-  validation execution remains unauthorized until the design is accepted.
+- Phase 4.0.7: real-repository validation design and ADR 0018 accepted with
+  recommendations on 2026-07-29; validation execution authorized; Phase 4.0.8
+  remains unauthorized.
 - Phase 4.1: REST/gRPC query APIs remain gated.
 
 PostgreSQL remains downstream from immutable artifacts and is not an engine
@@ -100,9 +101,9 @@ dependency.
   Core and Phase 4.0.5 Intelligence & Materialization Adapters are accepted.
   Phase 4.0.6 is accepted and frozen after its production implementation and
   validation passed under the frozen golden-vector contracts. Implementation
-  commit `abdb395` is pushed to `main`. Phase 4.0.7 design is complete and
-  awaiting review; validation execution and later milestones remain
-  unauthorized pending their respective acceptance gates.
+  commit `abdb395` is pushed to `main`. Phase 4.0.7 design is accepted with
+  recommendations and validation execution is authorized. Phase 4.0.8 and
+  later milestones remain unauthorized pending their respective gates.
 
 Detailed milestones are defined in
 `docs/Roadmap/PHASE_4_REPOSITORY_SERVICE_ROADMAP.md`.

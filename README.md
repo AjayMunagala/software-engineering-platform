@@ -47,9 +47,9 @@ Materialization Adapters was accepted on 2026-07-28. Phase 4.0.6 Persistence &
 Runtime Integration design was accepted with recommendations on 2026-07-28.
 The UUID/manifest golden-vector contracts are frozen. Local implementation and
 validation pass, review candidate `abdb395` is pushed to `main`, and engineering
-accepted and froze the milestone on 2026-07-29. Phase 4.0.7 design is authorized;
-its design package is complete and pushed for review. Validation execution and
-every later milestone remain unauthorized pending design review.
+accepted and froze the milestone on 2026-07-29. Phase 4.0.7 design and ADR 0018
+were accepted with recommendations on 2026-07-29. Validation execution is
+authorized; Phase 4.0.8 and every later milestone remain unauthorized.
 Intelligence engines remain database-independent.
 
 ## Run RIE
@@ -133,7 +133,7 @@ only authorized next milestone. The Phase 4.0 design package is accepted, but
 production implementation remains gated. Phase 4.0.1 spike evidence is
 accepted, and Phase 4.0.2 through Phase 4.0.5 are accepted. Phase 4.0.6 is
 accepted and frozen after passing its implementation and validation gates.
-Phase 4.0.7 design is complete and awaiting review; validation execution remains
-gated on design acceptance. HTTP health endpoints,
+Phase 4.0.7 design is accepted and validation execution is authorized. Phase
+4.0.8, HTTP health endpoints,
 REST/gRPC, UI, LLM, patch generation, and repository mutation remain
 unauthorized.

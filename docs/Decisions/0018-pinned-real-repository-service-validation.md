@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed
+Accepted
 
 ## Date
 
@@ -47,6 +47,9 @@ reproduce and could conceal privacy, determinism, or resource defects.
     authentication, UI, or AI capability.
 11. Require a committed validation report, machine-readable results, defect
     history, and explicit engineering acceptance before Phase 4.0.8.
+12. Require an interrupted PostgreSQL crash-recovery proof after atomic
+    publication, exact Git-version evidence during preflight, and explicit
+    Kubernetes outcome classification.
 
 ## Rationale
 
@@ -104,6 +107,7 @@ memory and repeated-run results misleading on the reference workstation.
 
 ## Acceptance gate
 
-Engineering must review this ADR with the architecture, fixture manifest, and
-validation plan. Acceptance authorizes Phase 4.0.7 validation execution only.
-ADR 0018 remains Proposed until that review. Phase 4.0.8 remains unauthorized.
+Engineering accepted this ADR with recommendations on 2026-07-29 after review
+with the architecture, fixture manifest, and validation plan. Acceptance
+authorizes Phase 4.0.7 validation execution only. Phase 4.0.8 remains
+unauthorized.

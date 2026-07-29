@@ -3,8 +3,8 @@
 ## Status
 
 - Phase: 4.0.7 design
-- Status: Proposed for engineering review
-- Execution: unauthorized
+- Status: Approved with recommendations on 2026-07-29
+- Execution: authorized
 - Phase 4.0.8: unauthorized
 - Date: 2026-07-29
 
@@ -23,8 +23,9 @@ Engineering reviews these documents together:
 - this validation plan;
 - `docs/Decisions/0018-pinned-real-repository-service-validation.md`.
 
-No harness execution, repository fetch, production-code change, database
-experiment, or Phase 4.0.8 work is authorized by committing this design.
+Engineering approved this package on 2026-07-29. Validation-owned harness work,
+pinned preflight fetches, execution, and compatible defect fixes are authorized.
+Phase 4.0.8 remains unauthorized.
 
 ## Required environments
 
@@ -37,7 +38,8 @@ Evidence is collected separately for:
 The final report records OS/build, kernel, CPU, logical cores, visible RAM,
 storage/filesystem, Go, compiler, PostgreSQL, Atlas, repository-service commit,
 migration checksum, pool configuration, worker limits, operational limits, and
-cache state. Credentials are disposable and never recorded.
+cache state. Repository preflight additionally records the exact Git version.
+Credentials are disposable and never recorded.
 
 ## Harness deliverables
 
@@ -113,6 +115,8 @@ listed in the architecture document may be excluded.
 - inject pre-commit failure: zero visible artifact envelopes;
 - inject commit-success/response-loss: complete-state reconciliation returns
   success;
+- publish successfully, force PostgreSQL to stop immediately, restart it, then
+  verify the scan, envelopes, dependencies, exact exports, and SHA-256 proofs;
 - malformed source: explicit artifact diagnostics, no panic;
 - stale source: digest mismatch is explicit and stale facts are not published;
 - all-interest cancellation and independent waiter cancellation retain the
@@ -165,6 +169,10 @@ Candidate acceptance targets:
   copies;
 - PostgreSQL publication remains within the accepted persistence target;
 - no unbounded growth across 25 repeated medium-repository lifecycle cycles.
+
+Every Kubernetes-scale run records exactly one terminal classification:
+`success`, `memory_ceiling`, `timeout`, `correctness_failure`, or
+`environment_failure`. A generic resource-failure category is not accepted.
 
 Real-repository end-to-end duration has no invented universal pass number in
 this phase; it is compared with upstream engine baselines and classified using
