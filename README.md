@@ -48,8 +48,8 @@ Runtime Integration design was accepted with recommendations on 2026-07-28.
 The UUID/manifest golden-vector contracts are frozen. Local implementation and
 validation pass, review candidate `abdb395` is pushed to `main`, and engineering
 accepted and froze the milestone on 2026-07-29. Phase 4.0.7 design is authorized;
-its validation execution and every later milestone remain unauthorized pending
-design review.
+its design package is complete and pushed for review. Validation execution and
+every later milestone remain unauthorized pending design review.
 Intelligence engines remain database-independent.
 
 ## Run RIE
@@ -117,6 +117,10 @@ The command emits the versioned JSON schema `1.0.0`.
 - [ADR 0017 — Repository Service persistence/runtime integration](docs/Decisions/0017-repository-service-persistence-runtime-integration.md)
 - [Phase 4.0.6 integration validation plan](docs/Validation/PERSISTENCE_RUNTIME_INTEGRATION_VALIDATION_PLAN.md)
 - [Phase 4.0.6 integration validation report](docs/Validation/PERSISTENCE_RUNTIME_INTEGRATION_VALIDATION_REPORT.md)
+- [Phase 4.0.7 real-repository validation architecture](docs/Architecture/REPOSITORY_SERVICE_REAL_REPOSITORY_VALIDATION.md)
+- [Phase 4.0.7 pinned fixture manifest](docs/Validation/REPOSITORY_SERVICE_REAL_REPOSITORY_FIXTURE_MANIFEST.md)
+- [Phase 4.0.7 real-repository validation plan](docs/Validation/REPOSITORY_SERVICE_REAL_REPOSITORY_VALIDATION_PLAN.md)
+- [ADR 0018 — Pinned real-repository service validation](docs/Decisions/0018-pinned-real-repository-service-validation.md)
 - [Complete project tests, metrics, and remaining work](PROJECT_TESTS_METRICS_AND_REMAINING_WORK.txt)
 
 ## Next milestone
@@ -129,7 +133,7 @@ only authorized next milestone. The Phase 4.0 design package is accepted, but
 production implementation remains gated. Phase 4.0.1 spike evidence is
 accepted, and Phase 4.0.2 through Phase 4.0.5 are accepted. Phase 4.0.6 is
 accepted and frozen after passing its implementation and validation gates.
-Phase 4.0.7 is authorized for design only; validation execution remains gated
-on design review. HTTP health endpoints,
+Phase 4.0.7 design is complete and awaiting review; validation execution remains
+gated on design acceptance. HTTP health endpoints,
 REST/gRPC, UI, LLM, patch generation, and repository mutation remain
 unauthorized.

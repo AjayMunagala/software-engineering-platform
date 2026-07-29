@@ -11,7 +11,8 @@
 - Phase 4.0.4 scan execution core: accepted on 2026-07-28
 - Phase 4.0.5 intelligence and materialization adapters: accepted on 2026-07-28
 - Phase 4.0.6 design package: accepted with recommendations on 2026-07-28
-- Phase 4.0.6 production implementation: authorized under frozen golden-vector conditions
+- Phase 4.0.6 production implementation and validation: accepted and frozen on 2026-07-29
+- Phase 4.0.7 design package: complete; awaiting review; execution unauthorized
 - Date: 2026-07-27
 
 ## Purpose
@@ -139,8 +140,11 @@ Phase 4.0.5 may introduce production intelligence and materialization adapters.
 Persistence and runtime integrations remain excluded until Phase 4.0.6.
 
 Phase 4.0.5 local evidence is recorded in
-`INTELLIGENCE_MATERIALIZATION_ADAPTERS_VALIDATION_REPORT.md`. All local
-Windows and Ubuntu gates pass; engineering acceptance is pending.
+`INTELLIGENCE_MATERIALIZATION_ADAPTERS_VALIDATION_REPORT.md` and is accepted.
+Phase 4.0.6 evidence is recorded in
+`PERSISTENCE_RUNTIME_INTEGRATION_VALIDATION_REPORT.md` and was accepted on
+2026-07-29. Phase 4.0.7 execution remains gated on review of its dedicated
+architecture, fixture manifest, validation plan, and ADR 0018.
 
 ## Intelligence integration gates
 
@@ -227,6 +231,10 @@ analysis regression.
   explicit tests even when aggregate coverage passes.
 
 ## Real-repository matrix
+
+The normative corpus, exact revisions, execution order, comparison rules,
+resource safeguards, and exit gates are defined by the Phase 4.0.7 design
+package. That design must be accepted before the matrix is executed.
 
 - documentation/configuration-only repository;
 - small Go CLI;

@@ -12,6 +12,8 @@
 - Phase 4.0.4 scan execution core: accepted on 2026-07-28
 - Phase 4.0.5 intelligence and materialization adapters: accepted on 2026-07-28
 - Phase 4.0.6 persistence/runtime integration design: accepted with recommendations on 2026-07-28
+- Phase 4.0.6 implementation and validation: accepted and frozen on 2026-07-29
+- Phase 4.0.7 real-repository validation design: complete; awaiting review
 
 ## Purpose
 

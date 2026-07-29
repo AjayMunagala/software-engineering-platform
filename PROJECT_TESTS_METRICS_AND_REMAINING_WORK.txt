@@ -1307,3 +1307,41 @@ Design package:
   docs/Decisions/0017-repository-service-persistence-runtime-integration.md
   docs/Validation/PERSISTENCE_RUNTIME_INTEGRATION_VALIDATION_PLAN.md
   docs/Validation/PERSISTENCE_RUNTIME_INTEGRATION_VALIDATION_REPORT.md
+
+======================================================================
+22. PHASE 4.0.7 REAL-REPOSITORY VALIDATION DESIGN
+======================================================================
+
+Status on 2026-07-29:
+  - Phase 4.0.6: ACCEPTED AND FROZEN;
+  - Phase 4.0.7 design: COMPLETE and awaiting engineering review;
+  - Phase 4.0.7 validation execution: UNAUTHORIZED;
+  - Phase 4.0.8: UNAUTHORIZED.
+
+Design decisions:
+  - reuse exact revisions from accepted RIE and Go LIE validation;
+  - validate both seven-artifact non-Go and ten-artifact Go profile branches;
+  - use pinned, clean, path-free canonical source manifests;
+  - permit network only for operator-owned preflight fetch, never analysis;
+  - run disposable migrated PostgreSQL with production service composition;
+  - compare exact bytes, SHA-256, IDs, dependencies, diagnostics, statistics,
+    omissions, and terminal publication state;
+  - run repeat, one/eight-worker, Windows, Ubuntu, cancellation, failure,
+    scope, privacy, and Kubernetes clean-process gates;
+  - preserve frozen foundation contracts and add no product capability.
+
+Normative corpus:
+  - sindresorhus/p-limit;
+  - junegunn/fzf;
+  - pocketbase/pocketbase;
+  - samber/lo;
+  - kubernetes-sigs/kustomize;
+  - open-telemetry/opentelemetry-go;
+  - kubernetes/kubernetes;
+  - controlled malformed and stale fixtures.
+
+Design package:
+  docs/Architecture/REPOSITORY_SERVICE_REAL_REPOSITORY_VALIDATION.md
+  docs/Validation/REPOSITORY_SERVICE_REAL_REPOSITORY_FIXTURE_MANIFEST.md
+  docs/Validation/REPOSITORY_SERVICE_REAL_REPOSITORY_VALIDATION_PLAN.md
+  docs/Decisions/0018-pinned-real-repository-service-validation.md

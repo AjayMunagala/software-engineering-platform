@@ -10,7 +10,7 @@
 - Phase 4.0.5 intelligence and materialization adapters: accepted on 2026-07-28
 - Phase 4.0.6 persistence and runtime integration design: accepted with recommendations on 2026-07-28
 - Phase 4.0.6 persistence and runtime integration: accepted and frozen on 2026-07-29; implementation commit `abdb395` pushed
-- Phase 4.0.7 real-repository validation: design authorized; execution unauthorized pending design acceptance
+- Phase 4.0.7 real-repository validation: design complete; awaiting review; execution unauthorized
 - Phase 4.1 transports: unauthorized
 - Date: 2026-07-29
 
@@ -195,7 +195,14 @@ implementation reached its exit gate in review candidate `abdb395`, which is
 pushed to `main`. Engineering accepted and froze Phase 4.0.6 on 2026-07-29.
 Phase 4.0.7 design is authorized; its execution remains separately gated.
 
-## Phase 4.0.7 — Real repository validation (design authorized)
+## Phase 4.0.7 — Real repository validation (design review pending)
+
+Design package:
+
+- `docs/Architecture/REPOSITORY_SERVICE_REAL_REPOSITORY_VALIDATION.md`;
+- `docs/Validation/REPOSITORY_SERVICE_REAL_REPOSITORY_FIXTURE_MANIFEST.md`;
+- `docs/Validation/REPOSITORY_SERVICE_REAL_REPOSITORY_VALIDATION_PLAN.md`;
+- `docs/Decisions/0018-pinned-real-repository-service-validation.md`.
 
 Validate representative inputs:
 
