@@ -10,7 +10,7 @@
 - Phase 4.0.5 intelligence and materialization adapters: accepted on 2026-07-28
 - Phase 4.0.6 persistence and runtime integration design: accepted with recommendations on 2026-07-28
 - Phase 4.0.6 persistence and runtime integration: accepted and frozen on 2026-07-29; implementation commit `abdb395` pushed
-- Phase 4.0.7 real-repository validation: design accepted with recommendations on 2026-07-29; execution authorized
+- Phase 4.0.7 real-repository validation: implementation complete; engineering review required for Kubernetes resource finding
 - Phase 4.1 transports: unauthorized
 - Date: 2026-07-29
 
@@ -193,9 +193,9 @@ Local evidence is recorded in
 `docs/Validation/PERSISTENCE_RUNTIME_INTEGRATION_VALIDATION_REPORT.md`. The
 implementation reached its exit gate in review candidate `abdb395`, which is
 pushed to `main`. Engineering accepted and froze Phase 4.0.6 on 2026-07-29.
-Phase 4.0.7 design is authorized; its execution remains separately gated.
+Phase 4.0.7 design was accepted and its validation execution is complete.
 
-## Phase 4.0.7 — Real repository validation (execution authorized)
+## Phase 4.0.7 — Real repository validation (engineering review required)
 
 Design package:
 
@@ -222,9 +222,12 @@ Exit gate: no crashes, scope escapes, path leaks, partial publication, digest
 mismatch, or unexplained nondeterminism; critical defects resolved.
 
 Governance gate: engineering accepted the design with recommendations on
-2026-07-29. Execution is authorized with interrupted PostgreSQL recovery, exact
-Git-version evidence, and explicit Kubernetes outcome classification required.
-Phase 4.0.8 remains unauthorized.
+2026-07-29. The harness and available-host evidence are complete. Interrupted
+PostgreSQL recovery, exact Git-version evidence, and explicit Kubernetes
+classification are recorded. All ordinary matrices pass, while Kubernetes
+one-worker Windows and Ubuntu runs exceed safe memory ceilings. Engineering
+must disposition that resource finding before accepting this phase. Phase
+4.0.8 remains unauthorized.
 
 ## Phase 4.0.8 — Stabilization and Service Contract 1.0.0
 

@@ -4,7 +4,8 @@
 
 - Phase: 4.0.7 design
 - Status: Approved with recommendations on 2026-07-29
-- Execution: authorized
+- Execution: complete on available host; engineering review required
+- Acceptance: pending Kubernetes resource-gate disposition
 - Phase 4.0.8: unauthorized
 - Date: 2026-07-29
 
@@ -80,7 +81,9 @@ For each successful scan:
 - repository registration and retry are idempotent;
 - the scan transitions through allowed states to exactly one success;
 - exactly seven or ten profile artifacts are atomically visible;
-- list/get order matches the frozen manifest order;
+- ExecuteScan and persisted ListArtifacts results match the released
+  deterministic artifact-name order; dependency ordinals retain their frozen
+  per-consumer manifest meaning;
 - every public artifact ID maps to the expected physical UUID;
 - every dependency edge is complete, same-scan, ordered, and acyclic;
 - every export byte count and SHA-256 matches the envelope and payload;
@@ -98,8 +101,10 @@ For every mandatory real repository:
 - one-worker and eight-worker outcomes are identical;
 - Windows and Ubuntu outcomes are identical when source manifests match;
 - discovery order perturbation does not change artifact order or bytes;
-- public artifact IDs, physical UUID mappings, exact bytes, digests,
-  dependencies, diagnostics, statistics, and omission counts match.
+- exact bytes, digests, dependencies, diagnostics, statistics, and omission
+  counts match. Scan-bound public IDs and physical UUIDs are independently
+  recomputed for each scan; they match directly only when isolated passes use
+  the same fixed Scan ID.
 
 The report publishes the normalization schema and both pre-normalization and
 normalized result digests. Only IDs/timestamps and operational measurements

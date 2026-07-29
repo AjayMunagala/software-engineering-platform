@@ -32,9 +32,10 @@ reproduce and could conceal privacy, determinism, or resource defects.
    measured run.
 5. Use disposable migrated PostgreSQL databases and production composition;
    do not add a validation-only product execution path.
-6. Compare exact artifact bytes, digests, IDs, dependencies, diagnostics,
-   statistics, and omission counts. Exclude only explicitly listed scan-local
-   identifiers, timestamps, and operational measurements.
+6. Compare exact artifact bytes, digests, dependencies, diagnostics,
+   statistics, and omission counts. Validate scan-bound public/physical IDs
+   independently and exclude them only between passes with distinct Scan IDs,
+   along with explicitly listed timestamps and operational measurements.
 7. Require repeated clean-process, one/eight-worker, Windows, and Ubuntu
    evidence when canonical source manifests match.
 8. Run Kubernetes-scale passes in separate clean processes with bounded

@@ -1,0 +1,23 @@
+{
+  "schema_version": "phase-4.0.7-results/v1",
+  "date": "2026-07-29",
+  "status": "engineering-review-required",
+  "source_revision": "79c5125",
+  "successful_scans": 30,
+  "unique_tracked_files": 35725,
+  "successful_tracked_file_visits": 81170,
+  "cases": [
+    {"id":"non-go-small","tracked_files":16,"artifacts":7,"normalized_sha256":"ab6097257f194bb62c15455b3eeb31544aebd924753463e93ec10a92dbeb4c59","windows_repeat":true,"worker_determinism":true,"cross_platform":true,"scan_seconds":0.253,"peak_heap_mib":8.8},
+    {"id":"go-cli","tracked_files":153,"artifacts":10,"normalized_sha256":"7228a8d7038650052a9729dcce9371777fb8582a3a1aab3f06d6db283c76e3dc","windows_repeat":true,"worker_determinism":true,"cross_platform":true,"scan_seconds":2.817,"peak_heap_mib":75.9},
+    {"id":"go-service","tracked_files":920,"artifacts":10,"normalized_sha256":"33bdf4d3d0eca19ca70b60825be3ab4dfa1297614705406d44aff841257a0afd","windows_repeat":true,"worker_determinism":true,"cross_platform":true,"scan_seconds":4.189,"peak_heap_mib":241.8},
+    {"id":"go-generics","tracked_files":675,"artifacts":10,"normalized_sha256":"6475638f15bdf5b35ae37880adb67eb5fa73f6193258fa65b178670739fcc144","windows_repeat":true,"worker_determinism":true,"cross_platform":true,"scan_seconds":3.562,"peak_heap_mib":195.5},
+    {"id":"go-workspace","tracked_files":1538,"artifacts":10,"normalized_sha256":"249ca881e7104183cbecc80c777e7c9aa46d4e8fc29a523abf50427244810e74","windows_repeat":true,"worker_determinism":true,"cross_platform":true,"scan_seconds":4.153,"peak_heap_mib":190.8},
+    {"id":"go-external","tracked_files":1555,"artifacts":10,"normalized_sha256":"15f7911a48d88049fc07e7d623a128f8a5adedcf08935ad72d05d0405629780c","windows_repeat":true,"worker_determinism":true,"cross_platform":true,"scan_seconds":19.631,"peak_heap_mib":1132.4},
+    {"id":"broken-go","tracked_files":3,"artifacts":10,"normalized_sha256":"ce1e949472f3c5cdf33be4b823bdf8dda4d2abfb318124383184242231fd475a","windows_repeat":true,"worker_determinism":true,"cross_platform":true,"scan_seconds":0.145,"peak_heap_mib":8.9},
+    {"id":"go-kubernetes","tracked_files":30865,"artifacts":10,"normalized_sha256":"a4721ee2a395c3ecff977c871a1e99f498325b8fa336b3ae08f7e531bc194e26","windows_repeat":true,"worker_determinism":false,"cross_platform":false,"scan_seconds":200.095,"peak_heap_mib":4312.3,"windows_worker1":"memory_ceiling","ubuntu_worker8":"memory_ceiling"},
+    {"id":"stale-go","windows":true,"ubuntu":true,"stale_files":1,"diagnostic":"semantic_digest_mismatch","artifact_sha256":"106e9ebd438831c60b2ea52ff6b01267aca87fa4564118cf031b613ff112c1f4"}
+  ],
+  "recovery": {"postgresql_immediate_stop_restart": "pass", "artifacts": 7, "exact_exports": true},
+  "quality": {"regression":"pass","vet":"pass","shuffle":"pass","windows_race":"pass","ubuntu_race":"pass","data_races":0,"integration_coverage_percent":85.2,"new_fuzz_executions":25308},
+  "release_gate": {"phase_4_0_7_accepted":false,"phase_4_0_8_authorized":false,"blocker":"Kubernetes one-worker and Ubuntu runs exceed safe host memory ceilings"}
+}

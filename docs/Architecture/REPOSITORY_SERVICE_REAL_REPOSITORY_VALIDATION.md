@@ -4,7 +4,8 @@
 
 - Phase: 4.0.7 design
 - Status: Approved with recommendations on 2026-07-29
-- Implementation/validation execution: authorized
+- Implementation/validation execution: complete on available host
+- Acceptance: pending Kubernetes resource-gate disposition
 - Date: 2026-07-29
 
 ## One-sentence responsibility
@@ -162,17 +163,24 @@ retain two Kubernetes semantic artifacts in one process.
 
 The following must match for equivalent source content and profile:
 
-- ordered artifact names, versions, producers, codecs, and stable public IDs;
+- ordered artifact names, versions, producers, and codecs;
 - exact artifact byte sizes and SHA-256 digests;
 - ordered artifact dependency graph;
 - functional diagnostics, warnings, statistics, omission counts, and metadata;
 - exported bytes;
 - terminal success state and publication contents.
 
-The comparison intentionally excludes scan UUIDs, request UUIDs, persistence-
-owned timestamps, elapsed durations, throughput, pool observations, process
-IDs, and machine-specific resource measurements. Exclusion rules are fixed in
-the validation harness and listed in the report; they are never applied ad hoc.
+Public artifact IDs and their physical UUID mappings are validated against the
+frozen algorithms in every run. They are scan-bound by contract, so comparisons
+between distinct Scan IDs normalize them out. Cross-process passes that reuse
+the same fixed Scan ID in isolated disposable databases must produce identical
+public and physical IDs.
+
+The comparison intentionally excludes distinct scan/request UUIDs, their
+derived artifact IDs, persistence-owned timestamps, elapsed durations,
+throughput, pool observations, process IDs, and machine-specific resource
+measurements. Exclusion rules are fixed in the validation harness and listed in
+the report; they are never applied ad hoc.
 
 One-worker versus eight-worker output must match. Windows versus Ubuntu output
 must match when the canonical source manifest matches. A source-tree mismatch

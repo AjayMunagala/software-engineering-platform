@@ -1350,3 +1350,56 @@ Design package:
   docs/Validation/REPOSITORY_SERVICE_REAL_REPOSITORY_FIXTURE_MANIFEST.md
   docs/Validation/REPOSITORY_SERVICE_REAL_REPOSITORY_VALIDATION_PLAN.md
   docs/Decisions/0018-pinned-real-repository-service-validation.md
+
+======================================================================
+23. PHASE 4.0.7 REAL-REPOSITORY VALIDATION EVIDENCE
+======================================================================
+
+Status on 2026-07-29:
+  - validation harness and available-host execution: COMPLETE;
+  - ordinary corpus matrices: PASS;
+  - interrupted PostgreSQL recovery: PASS;
+  - Phase 4.0.7 engineering acceptance: PENDING;
+  - Phase 4.0.8: UNAUTHORIZED.
+
+Corpus and execution:
+  - 35,725 unique tracked entries;
+  - 81,170 tracked-file visits across 30 successful scans;
+  - seven-artifact non-Go and ten-artifact Go profiles both validated;
+  - exact repeat, one/eight-worker, and Windows/Ubuntu normalized digests pass
+    for p-limit, fzf, PocketBase, lo, Kustomize, OpenTelemetry Go, and the
+    malformed Go fixture;
+  - controlled stale proof passes on Windows and Ubuntu with exactly one
+    semantic_digest_mismatch and no stale facts published;
+  - PostgreSQL immediate-stop/restart preserves publication and exact exports.
+
+Kubernetes evidence:
+  - 30,865 tracked files and ten artifacts;
+  - two Windows eight-worker clean processes: PASS with identical normalized
+    SHA-256 a4721ee2a395c3ecff977c871a1e99f498325b8fa336b3ae08f7e531bc194e26;
+  - representative scan: 200.095 seconds;
+  - peak Go heap: 4,312.3 MiB;
+  - Windows one-worker: memory_ceiling at the six-GiB safety boundary;
+  - Ubuntu eight-worker: memory_ceiling at the three-GiB WSL safety boundary;
+  - no correctness failure was observed, but required Kubernetes worker/OS
+    determinism remains unproven on this host.
+
+Quality gates:
+  - full regression, vet, shuffle: PASS;
+  - Windows and Ubuntu full race suites: PASS, zero races;
+  - integration statement coverage: 85.2%;
+  - new manifest/normalization fuzz executions: 25,308, PASS;
+  - targeted cancellation/failure/reconciliation tests repeated three times:
+    PASS;
+  - secret, dependency, listener, network, command, path, and mutation audits:
+    PASS.
+
+Remaining decision:
+  - run Kubernetes on a larger race-capable host, authorize a bounded memory
+    stabilization investigation, or explicitly accept the measured resource
+    limitation;
+  - do not start Phase 4.0.8 until engineering accepts Phase 4.0.7.
+
+Detailed evidence:
+  docs/Validation/REPOSITORY_SERVICE_REAL_REPOSITORY_VALIDATION_REPORT.md
+  docs/Validation/REPOSITORY_SERVICE_REAL_REPOSITORY_RESULTS.json
