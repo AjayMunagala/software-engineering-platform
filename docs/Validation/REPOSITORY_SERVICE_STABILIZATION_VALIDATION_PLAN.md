@@ -4,8 +4,9 @@
 
 - Phase: 4.0.8 design
 - Status: Approved with recommendations on 2026-07-30
-- Stabilization execution: authorized
-- Version promotion and release tags: unauthorized
+- Stabilization execution: complete
+- Final engineering acceptance: granted on 2026-07-30
+- Version promotion and release tag: authorized
 - Date: 2026-07-30
 
 ## Purpose
@@ -22,8 +23,8 @@ Engineering reviews these documents together:
 - `docs/Decisions/0019-repository-service-stabilization-and-release.md`;
 - this validation plan.
 
-The design package is accepted. Stabilization execution is authorized. Version
-promotion and release tags remain unauthorized until final evidence review.
+The design and completed stabilization evidence are accepted. Engineering
+authorized the narrowly scoped version promotion and annotated release tag.
 
 ## Mandatory versus optional evidence
 
@@ -186,5 +187,6 @@ reviewed qualification; no critical defect remains; the public API is approved;
 documentation matches the code; and engineering explicitly authorizes version
 promotion.
 
-The design commit itself must leave `ContractVersion` at `0.1.0`, make no
-production changes, and create no release tag.
+The design and evidence commits left `ContractVersion` at `0.1.0`. The final
+accepted release commit may change only the approved version constants and
+release metadata before the versioned gates and tag verification complete.

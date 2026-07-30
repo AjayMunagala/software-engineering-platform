@@ -4,18 +4,19 @@
 
 - Phase: 4.0.8 implementation and validation
 - Candidate revision tested: `2f31c2273f36e81d18e17e7280d9b019c3c27d6c`
-- Status: evidence complete; awaiting final engineering acceptance
-- Repository Service version: `0.1.0`
-- Proposed promotion: `1.0.0`
-- Release tags: not created
+- Status: accepted on 2026-07-30
+- Candidate evidence revision: `ad4ddffe3e6025f36e4d999cb7cff79c8dfff054`
+- Repository Service version: `1.0.0`
+- Release tag: `repository-service/v1.0.0`
 - Date: 2026-07-30
 
 ## Outcome
 
 All mandatory locally executable stabilization gates pass. No production defect
-was found and no production behavior changed. The Phase 4.0.7 larger-host
-Kubernetes qualification remains open and is presented for explicit release
-disposition; it is not reported as a pass.
+was found and no production behavior changed. Engineering accepted the Phase
+4.0.7 larger-host Kubernetes qualification for `1.0.0` as a documented
+reference-workstation validation limitation; it is not reported as a completed
+matrix.
 
 ## Review recommendations resolved
 
@@ -110,8 +111,8 @@ The normalized digest is identical to the accepted Phase 4.0.7 evidence.
   engine-neutral.
 - The three capability interfaces and composed convenience interface are
   unchanged.
-- All service/lifecycle/scan `ContractVersion` constants remain `0.1.0` until
-  final acceptance.
+- Service, lifecycle, scan, intelligence-adapter, and integration
+  `ContractVersion` constants are frozen at `1.0.0`.
 - Exact candidate source-file hashes are recorded in the release API snapshot.
 
 ## Performance summary
@@ -161,12 +162,13 @@ eight-worker clean processes completed with identical normalized output. No
 correctness, corruption, race, publication, or determinism defect was observed
 in completed runs.
 
-Final engineering review must explicitly accept this qualification for
-`1.0.0`, close it with append-only larger-host evidence, or block release.
+Engineering accepted this qualification for `1.0.0`. It remains visible in
+release notes and may be closed only with append-only larger-host evidence.
 
 ## Final local decision
 
-Phase 4.0.8 implementation and validation are locally complete. The candidate
-is ready for final engineering review. Version promotion, the final versioned
-regression/race rerun, and annotated namespaced tags remain unauthorized until
-that review accepts the evidence and qualification.
+Phase 4.0.8 is accepted. After promotion, the complete Windows regression,
+vet, three-run shuffle, full race, coverage, and golden-vector gates pass.
+The Ubuntu contract, five-run shuffle, full regression, vet, targeted/full
+race, and benchmark gates also pass. Zero data races were detected. The
+annotated namespaced release tag is authorized for the accepted release commit.

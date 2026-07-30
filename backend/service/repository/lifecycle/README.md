@@ -1,4 +1,4 @@
-# Repository Lifecycle 0.1.0
+# Repository Lifecycle 1.0.0
 
 This package implements only Phase 4.0.3 repository registration, lookup,
 listing, and archival.
@@ -18,5 +18,5 @@ SQL, pgx, Persistence Port adapter, pool, engine, runtime, filesystem, network,
 command, transport, authentication, UI, scan execution, or AI implementation
 appears here.
 
-The contract remains `0.1.0` until later lifecycle, scan, integration, and
-stabilization gates are accepted.
+The contract is frozen at `1.0.0`. The `1.x` line accepts compatible bug fixes
+only and does not add methods to frozen interfaces.

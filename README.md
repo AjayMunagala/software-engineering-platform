@@ -53,9 +53,11 @@ accepted on 2026-07-30 with one open release qualification. Every ordinary
 corpus matrix passes; Kubernetes completes deterministically with eight workers
 on Windows, while its one-worker Windows and Ubuntu completion remains pending
 on a larger race-capable host. The Phase 4.0.8 stabilization design was
-approved with recommendations on 2026-07-30. Stabilization evidence and the
-release-candidate package are complete and pushed for final review. Version
-promotion, release tags, and every later milestone remain unauthorized.
+approved with recommendations on 2026-07-30. Final engineering acceptance was
+granted on 2026-07-30, including the documented larger-host qualification.
+Repository Service **1.0.0** is frozen and released under the annotated
+`repository-service/v1.0.0` tag. Later milestones require separate design
+authorization.
 Intelligence engines remain database-independent.
 
 ## Run RIE
@@ -150,7 +152,8 @@ production implementation remains gated. Phase 4.0.1 spike evidence is
 accepted, and Phase 4.0.2 through Phase 4.0.5 are accepted. Phase 4.0.6 is
 accepted and frozen after passing its implementation and validation gates.
 Phase 4.0.7 is accepted with a larger-host Kubernetes release qualification.
-Phase 4.0.8 design is accepted and stabilization evidence is complete. Final
-engineering acceptance is pending. The `1.0.0` promotion, release tags, HTTP
-health endpoints, REST/gRPC, UI, LLM, patch generation, and repository mutation
-remain unauthorized.
+Phase 4.0.8 is accepted and Repository Service **1.0.0** is frozen. The
+Kubernetes larger-host qualification remains documented and append-only. Phase
+4.1 transport design is now eligible for a separate review, but HTTP health
+endpoints, REST/gRPC implementation, UI, LLM, patch generation, and repository
+mutation remain unauthorized.

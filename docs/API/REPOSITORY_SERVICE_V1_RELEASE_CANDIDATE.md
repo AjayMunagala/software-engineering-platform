@@ -1,20 +1,18 @@
-# Repository Service 1.0 Release Candidate Contract
+# Repository Service 1.0 Contract
 
 ## Status
 
 - Phase: 4.0.8 design
-- Status: Approved freeze candidate on 2026-07-30
-- Current implementation version: `0.1.0`
-- Proposed version after final acceptance: `1.0.0`
-- Version promotion: unauthorized
+- Status: Accepted and frozen on 2026-07-30
+- Current implementation version: `1.0.0`
+- Version promotion: complete
 - Date: 2026-07-30
 
-This document identifies the existing candidate API proposed for stabilization.
-It does not change source code or authorize a release.
+This document identifies the stable Repository Service `1.0.0` API.
 
 ## Capability interfaces
 
-The proposed `1.0.0` contract freezes these exact capability shapes:
+The `1.0.0` contract freezes these exact capability shapes:
 
 ```go
 type RepositoryLifecycleService interface {
@@ -120,10 +118,10 @@ For `1.x`:
 
 ## Release evidence required
 
-Promotion from `0.1.0` to `1.0.0` requires all evidence in
-`REPOSITORY_SERVICE_STABILIZATION_VALIDATION_PLAN.md`, an explicit disposition
-of every open release qualification, an engineering acceptance decision, and
-a reviewed commit before annotated tags are created.
+Promotion from `0.1.0` to `1.0.0` was authorized after all evidence in
+`REPOSITORY_SERVICE_STABILIZATION_VALIDATION_PLAN.md` passed and engineering
+accepted the open larger-host Kubernetes qualification as a documented
+validation limitation rather than a correctness defect.
 
 ## Not part of 1.0
 

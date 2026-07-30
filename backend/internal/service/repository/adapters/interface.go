@@ -14,7 +14,7 @@ import (
 	"github.com/AjayMunagala/software-engineering-platform/backend/service/repository/scan"
 )
 
-const ContractVersion = "0.1.0"
+const ContractVersion = "1.0.0"
 
 // SourceResolver resolves a process-local opaque handle without fetching or
 // cloning a repository. Implementations own authorization before returning.

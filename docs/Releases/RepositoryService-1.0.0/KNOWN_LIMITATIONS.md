@@ -2,7 +2,8 @@
 
 ## Open release qualification
 
-The available 8-GB-class workstation could not complete Kubernetes with one
+Engineering accepted this qualification for `1.0.0`. The available 8-GB-class
+workstation could not complete Kubernetes with one
 Windows worker or eight Ubuntu workers within safe memory ceilings. Two clean
 Windows eight-worker runs completed deterministically. This is classified as a
 host resource limitation, not an observed software defect. Larger-host evidence

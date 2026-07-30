@@ -13,7 +13,7 @@ import (
 	"github.com/AjayMunagala/software-engineering-platform/backend/service/repository"
 )
 
-const ContractVersion = "0.1.0"
+const ContractVersion = "1.0.0"
 
 // Store owns atomic repository mutation, idempotency, scope, and pagination
 // persistence semantics. Implementations must never persist SourceHandle.

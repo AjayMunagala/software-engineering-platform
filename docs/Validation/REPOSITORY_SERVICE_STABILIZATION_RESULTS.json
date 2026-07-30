@@ -3,8 +3,8 @@
   "date": "2026-07-30",
   "candidate_revision": "2f31c2273f36e81d18e17e7280d9b019c3c27d6c",
   "candidate_version": "0.1.0",
-  "proposed_version": "1.0.0",
-  "status": "awaiting-final-engineering-acceptance",
+  "release_version": "1.0.0",
+  "status": "accepted",
   "production_changes": 0,
   "quality": {
     "windows_regression": "pass",
@@ -60,7 +60,7 @@
     "production_tree_unchanged": true
   },
   "release_qualification": {
-    "state": "open",
+    "state": "accepted-open-qualification",
     "classification": "host_resource_limitation",
     "pending": [
       "Kubernetes Windows one-worker completion on a larger race-capable host",
@@ -69,8 +69,12 @@
     "observed_software_defect": false
   },
   "release_actions": {
-    "version_promoted": false,
-    "tags_created": false,
-    "final_acceptance_required": true
+    "version_promoted": true,
+    "tag_name": "repository-service/v1.0.0",
+    "tag_creation": "after accepted release commit",
+    "final_acceptance_required": false,
+    "post_promotion_windows_regression": "pass",
+    "post_promotion_windows_race": "pass",
+    "post_promotion_ubuntu_validation": "pass"
   }
 }

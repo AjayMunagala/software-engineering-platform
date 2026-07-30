@@ -67,7 +67,7 @@ func (scenario Scenario) clone() Scenario {
 	return result
 }
 
-// Fixture holds one isolated candidate implementation and seeded state.
+// Fixture holds one isolated conforming implementation and seeded state.
 type Fixture struct {
 	Service  repository.Service
 	Contract *repository.Contract

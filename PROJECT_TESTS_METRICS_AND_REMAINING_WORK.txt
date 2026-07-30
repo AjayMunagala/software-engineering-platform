@@ -1468,9 +1468,9 @@ Status on 2026-07-30:
   - mandatory locally executable gates: PASS;
   - production defects found: ZERO;
   - production changes made: ZERO;
-  - final engineering acceptance: PENDING;
-  - Repository Service version: 0.1.0 candidate;
-  - version promotion and tags: UNAUTHORIZED.
+  - final engineering acceptance: ACCEPTED on 2026-07-30;
+  - Repository Service version: 1.0.0;
+  - release tag: repository-service/v1.0.0.
 
 Fresh validation:
   - Windows and Ubuntu full backend regression: PASS;
@@ -1498,10 +1498,50 @@ Open qualification:
   - Kubernetes Windows one-worker and Ubuntu eight-worker completion remain
     pending larger race-capable hardware;
   - completed evidence contains no observed software defect;
-  - final engineering review must accept, close, or block on the qualification.
+  - final engineering review accepted the qualification for 1.0.0;
+  - later larger-host evidence remains append-only.
 
 Review package:
   docs/Validation/REPOSITORY_SERVICE_STABILIZATION_VALIDATION_REPORT.md
   docs/Validation/REPOSITORY_SERVICE_STABILIZATION_RESULTS.json
   docs/Releases/RepositoryService-1.0.0/README.md
   docs/Operations/REPOSITORY_SERVICE_RELEASE_CHECKLIST.md
+
+======================================================================
+26. REPOSITORY SERVICE 1.0.0 RELEASE
+======================================================================
+
+Status on 2026-07-30:
+  - Phase 4.0.8: ACCEPTED;
+  - Repository Service: RELEASED AND FROZEN AT 1.0.0;
+  - annotated tag: repository-service/v1.0.0;
+  - working policy: compatible bug fixes only on 1.0.x;
+  - new capabilities: require a separate design gate and new narrow interface.
+
+Approved version changes:
+  - neutral Repository Service contract: 1.0.0;
+  - Repository Lifecycle contract: 1.0.0;
+  - Scan Execution contract: 1.0.0;
+  - Intelligence/Materialization Adapter contract: 1.0.0;
+  - Persistence/Runtime Integration contract: 1.0.0.
+
+Post-promotion gates:
+  - Windows regression, vet, three shuffled runs, full race, coverage, and
+    golden vectors: PASS;
+  - Ubuntu contract, five shuffled runs, full regression, vet, targeted/full
+    race, and benchmarks: PASS;
+  - data races: ZERO;
+  - neutral dependency and listener/command audits: PASS.
+
+Release qualification:
+  - Kubernetes one-worker Windows and eight-worker Ubuntu completion remains
+    pending larger race-capable hardware;
+  - accepted as a reference-workstation validation limitation, not an observed
+    software correctness defect;
+  - qualification remains visible in release notes and can close only through
+    append-only evidence.
+
+Next governance:
+  - Phase 4.1 transport design is eligible for separate review but not started;
+  - no REST/gRPC implementation, UI, authentication, AI, repository execution,
+    or new intelligence capability is authorized by this release.

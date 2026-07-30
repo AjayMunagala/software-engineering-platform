@@ -1,6 +1,6 @@
 # Repository Service Conformance Harness
 
-This package validates observable behavior of candidate Repository Service
+This package validates observable behavior of stable Repository Service
 implementations without importing engines, persistence, PostgreSQL, runtime,
 or transports.
 

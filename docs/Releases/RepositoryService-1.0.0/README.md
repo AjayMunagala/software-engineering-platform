@@ -1,16 +1,14 @@
-# Repository Service 1.0.0 Release Candidate
+# Repository Service 1.0.0
 
 ## State
 
-- Candidate implementation: `0.1.0`
-- Proposed stable version: `1.0.0`
+- Version: `1.0.0`
+- Release date: 2026-07-30
 - Stabilization evidence: complete
-- Final engineering acceptance: pending
-- Release tags: not created
+- Final engineering acceptance: accepted
+- Release tag: `repository-service/v1.0.0`
 
-This package is review evidence, not a release announcement. Promotion occurs
-only after the Phase 4.0.8 evidence and open qualification receive explicit
-engineering acceptance.
+This package documents the accepted first stable Repository Service release.
 
 ## Included candidate capabilities
 
@@ -43,9 +41,8 @@ engineering acceptance.
 - [Release notes](RELEASE_NOTES.md)
 - [Operator checklist](../../Operations/REPOSITORY_SERVICE_RELEASE_CHECKLIST.md)
 
-## Proposed tags
+## Release tag
 
 - `repository-service/v1.0.0`
 
-The tag may be created only after final acceptance and must point to the final
-reviewed version-promotion commit.
+The annotated tag points to the reviewed version-promotion commit.

@@ -1,44 +1,44 @@
-# Repository Service 1.0 Candidate API Snapshot
+# Repository Service 1.0 API Snapshot
 
 ## State
 
-- Candidate source revision: `2f31c2273f36e81d18e17e7280d9b019c3c27d6c`
-- Candidate contract version: `0.1.0`
-- Proposed stable version: `1.0.0`
+- Stabilization evidence revision: `ad4ddffe3e6025f36e4d999cb7cff79c8dfff054`
+- Stable contract version: `1.0.0`
+- Release revision: target of `repository-service/v1.0.0`
 - Go tool used for review: `go1.26.2`
 
-The normative proposed surface is documented in
+The normative frozen surface is documented in
 `../../API/REPOSITORY_SERVICE_V1_RELEASE_CANDIDATE.md`. It contains three
 narrow capability interfaces and one convenience composition. Lifecycle,
 scan, and conformance packages expose implementation construction/testing
 capabilities without leaking PostgreSQL, runtime-pool, engine, filesystem, or
 transport types.
 
-## Candidate source hashes
+## Stable source hashes
 
 ```text
 backend/service/repository/config.go 67ebad8756b31e37e9ebf710b5ffd6228e7e2ce8e076b9b80581ca6d8b977e08
 backend/service/repository/errors.go 2c99e23673872cc8519f982fef345d279758023628e726606bda8044f0344826
-backend/service/repository/implementation.go 1ce41dfd0cb85e7dcbc6cfdb379890a1d5049c8b1bb059e1ff45cb3a16342165
-backend/service/repository/interface.go cda9ae8f4c0f1b9dd19d5e343eade94e5efd1aa921678cc3a350665cb1988474
+backend/service/repository/implementation.go 3c455ab5a3e6c3c090fadb9e785e12870456da77072ae1d068d87d8b8cb42652
+backend/service/repository/interface.go 9046bd02fc04ba523162d2debf27181a90a1cb5f37b2eb5f8458f65c612159a4
 backend/service/repository/model.go 561cdcaba62c085a43093cfb5e1e8ef06ed5eab2e5cd92a87942dcd0a784899a
 backend/service/repository/conformance/config.go 208a248d462a022a522b2775a0dd3b8f079a2fd8e1d9d2e80b179a802d595bbd
 backend/service/repository/conformance/errors.go aeda74b4ae8d5608439fd4dbc96a0eaee88658c253d3946f05f2f70d7216e539
 backend/service/repository/conformance/implementation.go d05c46664c7465146798bb7a615e353b3e8854cc766f308011582532cd2cd39b
-backend/service/repository/conformance/interface.go f087979cdbdbba4a1d306db42182a9ba65fcba561d63fc78f7c0507f58e175fb
-backend/service/repository/conformance/model.go c61c3bcc12e23b4a5a6cd29a385324dfa742ec62a293cddeaf1b3c3453b73a02
+backend/service/repository/conformance/interface.go 474b2359620663dac33c1b8122f7df34752d3165e35f59b88f510305bdc0e81b
+backend/service/repository/conformance/model.go 5e0c41f9ff58a7c9411f5483465bb0df22c61b518981d774d7dc23b3ef84f63f
 backend/service/repository/lifecycle/config.go 8ec4c67c05318f5bb3469bd51a2258cc9bb13fe80e2ed833e6a08792772bf622
 backend/service/repository/lifecycle/errors.go 1a7089940bde4a9c1109918318bad439822eac79d2e353505c701fa6fff8b92f
 backend/service/repository/lifecycle/implementation.go 08dcb02d71d2d44a0deefe5c878b136f50f5fba63a258ed134d29df41c497160
-backend/service/repository/lifecycle/interface.go 65b9573dbbc752566bb54702a324139241ab01ef6efae97c79108d8dac77867e
+backend/service/repository/lifecycle/interface.go be076f6a820a127790bdb04e6a814ab53450e15bd9582405426415fdbf05b478
 backend/service/repository/lifecycle/model.go c7feed0b20858e9cd18e6daaa0b5503a35a691fd94ec491dedce149522dd0dee
 backend/service/repository/scan/config.go 940777648e29f617d4ae0082bc102b80628f50847e54e6eb6d769c57fc0b78b0
 backend/service/repository/scan/errors.go 621ee1277d6ad20194af3e125b5b16917d264234dbe8cfb6057073e5cfa89a6d
 backend/service/repository/scan/implementation.go 4f225403f22e3b7eaca0cac30a680d04d5b6ce456704591f0207829c1217b115
-backend/service/repository/scan/interface.go a9efde2b083b6262a1e54fdadd6e4cb1c148d36b1d3d49e9a987147bd4cc1587
+backend/service/repository/scan/interface.go 96495266287293e2513299b8080e5ef2fcf6cc78f2859c0b540e5c04427f2195
 backend/service/repository/scan/model.go 0cd942ffbe927fcbd939b3367153227820be842a5f9a69f15278e584a4267384
 ```
 
-The future version-promotion commit necessarily changes version constants and
-their source hashes. Engineering must review only those intended diffs, rerun
-the versioned gates, and record the final hashes before tagging.
+These SHA-256 values identify the Windows working-tree bytes validated after
+the approved version promotion. The release tag identifies the canonical Git
+tree across platforms.

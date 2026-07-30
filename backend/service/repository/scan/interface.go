@@ -15,7 +15,7 @@ import (
 	"github.com/AjayMunagala/software-engineering-platform/backend/service/repository"
 )
 
-const ContractVersion = "0.1.0"
+const ContractVersion = "1.0.0"
 
 // Store owns atomic scan mutation, idempotency, publication, scope, and query
 // semantics. Implementations must consume payload streams during Publish and

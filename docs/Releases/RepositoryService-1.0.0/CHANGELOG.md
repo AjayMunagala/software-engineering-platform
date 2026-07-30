@@ -1,6 +1,6 @@
 # Repository Service Changelog
 
-## 1.0.0 - Proposed
+## 1.0.0 - 2026-07-30
 
 ### Candidate capabilities
 

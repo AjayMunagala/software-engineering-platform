@@ -23,7 +23,7 @@ type Contract struct {
 	profiles *ProfileRegistry
 }
 
-// New creates the Phase 4.0.2 candidate contract. It performs no I/O.
+// New creates the stable Repository Service contract. It performs no I/O.
 func New(configs ...Config) (*Contract, error) {
 	if len(configs) > 1 {
 		return nil, fmt.Errorf("%w: at most one configuration is accepted", ErrInvalidConfig)

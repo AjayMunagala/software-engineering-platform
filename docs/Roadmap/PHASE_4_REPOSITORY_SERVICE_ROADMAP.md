@@ -11,9 +11,10 @@
 - Phase 4.0.6 persistence and runtime integration design: accepted with recommendations on 2026-07-28
 - Phase 4.0.6 persistence and runtime integration: accepted and frozen on 2026-07-29; implementation commit `abdb395` pushed
 - Phase 4.0.7 real-repository validation: accepted on 2026-07-30 with one open larger-host Kubernetes qualification
-- Phase 4.0.8 stabilization: evidence complete; awaiting final acceptance
-- Phase 4.1 transports: unauthorized
-- Date: 2026-07-29
+- Phase 4.0.8 stabilization and Repository Service 1.0.0: accepted on 2026-07-30
+- Release tag: `repository-service/v1.0.0`
+- Phase 4.1 transport design: eligible for separate review; not started
+- Date: 2026-07-30
 
 ## Goal
 
@@ -228,10 +229,10 @@ PostgreSQL recovery, exact Git-version evidence, and explicit Kubernetes
 classification are recorded. All ordinary matrices pass, while Kubernetes
 one-worker Windows and Ubuntu runs exceed safe memory ceilings. Engineering
 accepted that resource finding as an environmental release qualification on
-2026-07-30. Phase 4.0.8 design is accepted; stabilization evidence is complete
-and awaiting final engineering acceptance.
+2026-07-30. Phase 4.0.8 and the larger-host qualification are accepted.
+Repository Service is frozen at `1.0.0`.
 
-## Phase 4.0.8 — Stabilization and Service Contract 1.0.0 (final review)
+## Phase 4.0.8 — Stabilization and Service Contract 1.0.0 ✅
 
 The design package was approved with recommendations on 2026-07-30:
 
@@ -240,10 +241,9 @@ The design package was approved with recommendations on 2026-07-30:
 - `docs/Decisions/0019-repository-service-stabilization-and-release.md`;
 - `docs/Validation/REPOSITORY_SERVICE_STABILIZATION_VALIDATION_PLAN.md`.
 
-ADR 0019 is accepted. Stabilization execution and evidence are complete. The
-current implementation remains candidate `0.1.0`; version promotion, its final
-versioned validation, release commit, and tags remain unauthorized pending
-final engineering acceptance.
+ADR 0019, stabilization evidence, qualification disposition, final versioned
+validation, and release are accepted. The implementation is frozen at `1.0.0`
+and the annotated `repository-service/v1.0.0` tag identifies the release.
 
 Perform:
 
@@ -258,10 +258,10 @@ Perform:
 
 Only compatible defect fixes are allowed on the future `1.0.x` line.
 
-## Phase 4.1 — Transport APIs (gated)
+## Phase 4.1 — Transport APIs (design eligible; not started)
 
-REST/gRPC design may begin only after Repository Service `1.0.0` is frozen.
-Transport work must not change service semantics.
+REST/gRPC design may now be proposed through a separate review. Transport work
+must not change frozen service semantics. No implementation is authorized yet.
 
 ## Explicitly deferred
 

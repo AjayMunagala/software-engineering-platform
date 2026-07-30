@@ -13,6 +13,10 @@
 - Phase 4.0.5 intelligence and materialization adapters: accepted on 2026-07-28
 - Phase 4.0.6 persistence/runtime integration refinements: accepted with recommendations on 2026-07-28
 
+Historical candidate contract. Superseded by the frozen Repository Service
+`1.0.0` contract in `REPOSITORY_SERVICE_V1_RELEASE_CANDIDATE.md` on
+2026-07-30.
+
 This document defines Go service semantics. It is not an HTTP, gRPC, CLI, or
 authorization contract.
 

@@ -79,8 +79,8 @@
   recommendations on 2026-07-29; accepted on 2026-07-30 with completion of the
   Kubernetes one-worker Windows and Ubuntu matrix retained as an open release
   qualification. Phase 4.0.8 design is accepted; stabilization evidence is
-  complete and awaiting final engineering acceptance. Version promotion and
-  tags remain unauthorized.
+  accepted. Repository Service `1.0.0` is frozen under the annotated
+  `repository-service/v1.0.0` tag with the larger-host qualification retained.
 - Phase 4.1: REST/gRPC query APIs remain gated.
 
 PostgreSQL remains downstream from immutable artifacts and is not an engine
@@ -88,7 +88,7 @@ dependency.
 
 ## Phase 4 — Repository Services and Query Access
 
-### Phase 4.0 — Repository Service Layer (Phase 4.0.8 final review)
+### Phase 4.0 — Repository Service Layer (Repository Service 1.0.0 released)
 
 - Define storage-neutral repository service interfaces.
 - Coordinate repository and scan lifecycle through application services.
@@ -107,14 +107,15 @@ dependency.
   commit `abdb395` is pushed to `main`. Phase 4.0.7 design is accepted with
   recommendations and accepted on 2026-07-30 with a larger-host Kubernetes
   release qualification. Phase 4.0.8 design and ADR 0019 are accepted.
-  Stabilization validation and the release package are complete and await
-  final engineering acceptance. The candidate remains `0.1.0`; version
-  promotion, tags, and later milestones remain unauthorized.
+  Stabilization validation, the release package, and the larger-host
+  qualification were accepted on 2026-07-30. Repository Service is frozen at
+  `1.0.0` under `repository-service/v1.0.0`. Later milestones remain separately
+  gated.
 
 Detailed milestones are defined in
 `docs/Roadmap/PHASE_4_REPOSITORY_SERVICE_ROADMAP.md`.
 
-### Phase 4.1 — Query APIs (Gated)
+### Phase 4.1 — Query APIs (Design eligible; not started)
 
 - Design REST/gRPC only after the service-layer contract is accepted.
 

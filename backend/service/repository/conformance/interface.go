@@ -44,7 +44,7 @@ func (function ScanFactoryFunc) OpenScan(ctx context.Context) (ScanFixture, Clea
 	return function(ctx)
 }
 
-// Run executes the complete candidate conformance suite.
+// Run executes the complete stable conformance suite.
 func Run(t *testing.T, factory Factory, configs ...Config) {
 	t.Helper()
 	suite, err := New(configs...)

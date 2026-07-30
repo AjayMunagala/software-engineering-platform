@@ -10,8 +10,8 @@ import (
 	"io"
 )
 
-// ContractVersion identifies the current candidate service contract.
-const ContractVersion = "0.1.0"
+// ContractVersion identifies the stable Repository Service contract.
+const ContractVersion = "1.0.0"
 
 // RepositoryLifecycleService coordinates repository registration and archival.
 type RepositoryLifecycleService interface {

@@ -5,7 +5,8 @@
 - Phase: 4.0.8 design
 - Status: Approved with recommendations on 2026-07-30
 - Production stabilization: authorized
-- Version promotion and release tags: unauthorized
+- Release decision: accepted on 2026-07-30
+- Version promotion and annotated release tag: authorized
 - Date: 2026-07-30
 
 ## Responsibility
@@ -75,9 +76,9 @@ The following existing contracts are candidates for the `1.0.0` freeze:
 - `repository-go/v1` and its exact profile digest;
 - `canonical-json/1.0.0` and the released artifact codec mappings.
 
-The implementation remains `0.1.0` until engineering accepts this design and
-later accepts the stabilization evidence. This document does not promote any
-version.
+Engineering accepted the stabilization evidence and open qualification on
+2026-07-30. The approved release action promotes the implementation to
+`1.0.0` without changing the frozen service behavior.
 
 ## Compatibility policy
 
@@ -195,6 +196,6 @@ Phase 4.0.8 is complete only when:
 
 ## Still gated
 
-Phase 4.1 transport design and every later implementation phase remain
-unauthorized until Repository Service `1.0.0` is explicitly accepted and
-released.
+Phase 4.1 transport design becomes eligible only after the accepted
+Repository Service `1.0.0` commit and tag are published. No transport
+implementation is authorized by this release.

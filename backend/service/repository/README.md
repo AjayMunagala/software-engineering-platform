@@ -1,6 +1,6 @@
-# Repository Service Contract 0.1.0
+# Repository Service Contract 1.0.0
 
-This package is the transport-neutral Phase 4.0.2 candidate contract.
+This package is the stable transport-neutral Repository Service contract.
 
 It contains:
 
@@ -15,9 +15,8 @@ It deliberately contains no implementation of repository lifecycle, scan
 orchestration, engines, materialization, persistence, PostgreSQL, SQL, pgx,
 runtime pools, HTTP/gRPC, authentication, UI, queues, workers, or AI.
 
-The contract remains at `0.1.0`. Breaking changes are permitted only before the
-future `1.0.0` freeze and must be justified by accepted conformance or
-integration evidence.
+The `1.x` line preserves existing public behavior. New optional capabilities
+require new narrow interfaces; breaking changes require a new major version.
 
 ## Source handle warning
 

@@ -1,4 +1,4 @@
-# Repository Service 1.0.0 Proposed Release Notes
+# Repository Service 1.0.0 Release Notes
 
 Repository Service `1.0.0` is the proposed first stable application-service
 contract over the released repository intelligence, Go language intelligence,
@@ -14,5 +14,5 @@ cross-platform races, PostgreSQL recovery, coverage, fuzzing, performance,
 scope/privacy boundaries, and release audits. See `KNOWN_LIMITATIONS.md` for
 the open larger-host Kubernetes qualification.
 
-These notes remain proposed until final engineering acceptance and version
-promotion.
+Engineering accepted the release with the larger-host Kubernetes qualification
+retained as a transparent validation limitation.

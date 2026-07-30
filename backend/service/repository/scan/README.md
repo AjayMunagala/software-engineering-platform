@@ -1,4 +1,4 @@
-# Scan Execution Core 0.1.0
+# Scan Execution Core 1.0.0
 
 This package implements the synchronous scan coordinator introduced in Phase
 4.0.4. Production intelligence and materialization behavior may satisfy its
@@ -21,5 +21,5 @@ Persistence Port adapter, PostgreSQL, SQL, pgx, runtime package, filesystem,
 network, command, listener, authentication, UI, or AI implementation. Those
 concerns remain behind its narrow interfaces.
 
-The contract remains `0.1.0` until later adapter, integration, validation, and
-stabilization milestones are accepted.
+The contract is frozen at `1.0.0`. The `1.x` line accepts compatible bug fixes
+only and does not add methods to frozen interfaces.
