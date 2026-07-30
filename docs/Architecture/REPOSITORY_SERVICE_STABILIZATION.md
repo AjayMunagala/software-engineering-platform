@@ -3,8 +3,8 @@
 ## Status
 
 - Phase: 4.0.8 design
-- Status: Proposed for engineering review
-- Production stabilization: unauthorized pending design acceptance
+- Status: Approved with recommendations on 2026-07-30
+- Production stabilization: authorized
 - Version promotion and release tags: unauthorized
 - Date: 2026-07-30
 
@@ -158,6 +158,25 @@ After design acceptance, only these changes are permitted:
 Every observable-output-preserving optimization must prove identical
 authoritative artifact bytes, digests, dependency graphs, diagnostics,
 statistics, omission counts, and error semantics for affected fixtures.
+
+## Mandatory release gates
+
+The following are mandatory: public API and compatibility approval; committed
+golden vectors; conformance, regression, vet, shuffle, Windows/Ubuntu race,
+coverage, deterministic, integration, security, privacy, and documentation
+validation; no unresolved critical/high defect; a complete release package;
+and explicit engineering acceptance before promotion.
+
+Only a defect that violates an accepted contract or a mandatory gate may
+change production code during stabilization. Any API change or new capability
+returns to a separate design phase.
+
+## Optional improvements
+
+Additional performance tuning below accepted targets, new benchmarks, extra
+fixtures, and larger-host qualification evidence are optional improvements.
+They may be appended when they preserve contracts and outputs. They cannot be
+reported as completed mandatory evidence unless actually executed.
 
 ## Exit gate
 

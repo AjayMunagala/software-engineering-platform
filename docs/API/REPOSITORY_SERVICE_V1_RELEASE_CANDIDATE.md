@@ -3,7 +3,7 @@
 ## Status
 
 - Phase: 4.0.8 design
-- Status: Proposed freeze surface
+- Status: Approved freeze candidate on 2026-07-30
 - Current implementation version: `0.1.0`
 - Proposed version after final acceptance: `1.0.0`
 - Version promotion: unauthorized

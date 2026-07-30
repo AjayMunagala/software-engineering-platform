@@ -2,11 +2,15 @@
 
 ## Status
 
-Proposed
+Accepted
 
 ## Date
 
 2026-07-30
+
+Accepted after Phase 4.0.8 design review on 2026-07-30. Acceptance authorizes
+stabilization execution only. Version promotion and release tags remain gated
+by the completed evidence review.
 
 ## Context
 

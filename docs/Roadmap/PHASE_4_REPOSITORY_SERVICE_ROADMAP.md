@@ -11,7 +11,7 @@
 - Phase 4.0.6 persistence and runtime integration design: accepted with recommendations on 2026-07-28
 - Phase 4.0.6 persistence and runtime integration: accepted and frozen on 2026-07-29; implementation commit `abdb395` pushed
 - Phase 4.0.7 real-repository validation: accepted on 2026-07-30 with one open larger-host Kubernetes qualification
-- Phase 4.0.8 stabilization: design authorized; implementation unauthorized
+- Phase 4.0.8 stabilization: evidence complete; awaiting final acceptance
 - Phase 4.1 transports: unauthorized
 - Date: 2026-07-29
 
@@ -228,21 +228,22 @@ PostgreSQL recovery, exact Git-version evidence, and explicit Kubernetes
 classification are recorded. All ordinary matrices pass, while Kubernetes
 one-worker Windows and Ubuntu runs exceed safe memory ceilings. Engineering
 accepted that resource finding as an environmental release qualification on
-2026-07-30. Phase 4.0.8 design is authorized; implementation remains
-unauthorized pending design review.
+2026-07-30. Phase 4.0.8 design is accepted; stabilization evidence is complete
+and awaiting final engineering acceptance.
 
-## Phase 4.0.8 — Stabilization and Service Contract 1.0.0 (design review)
+## Phase 4.0.8 — Stabilization and Service Contract 1.0.0 (final review)
 
-The design package is prepared for engineering review:
+The design package was approved with recommendations on 2026-07-30:
 
 - `docs/Architecture/REPOSITORY_SERVICE_STABILIZATION.md`;
 - `docs/API/REPOSITORY_SERVICE_V1_RELEASE_CANDIDATE.md`;
 - `docs/Decisions/0019-repository-service-stabilization-and-release.md`;
 - `docs/Validation/REPOSITORY_SERVICE_STABILIZATION_VALIDATION_PLAN.md`.
 
-The current implementation remains candidate `0.1.0`. Stabilization execution,
-ADR 0019 acceptance, version promotion, release commits, and tags remain
-unauthorized until their explicit gates.
+ADR 0019 is accepted. Stabilization execution and evidence are complete. The
+current implementation remains candidate `0.1.0`; version promotion, its final
+versioned validation, release commit, and tags remain unauthorized pending
+final engineering acceptance.
 
 Perform:
 

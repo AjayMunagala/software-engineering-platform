@@ -1,0 +1,76 @@
+{
+  "schema_version": "repository-service-stabilization-results/v1",
+  "date": "2026-07-30",
+  "candidate_revision": "2f31c2273f36e81d18e17e7280d9b019c3c27d6c",
+  "candidate_version": "0.1.0",
+  "proposed_version": "1.0.0",
+  "status": "awaiting-final-engineering-acceptance",
+  "production_changes": 0,
+  "quality": {
+    "windows_regression": "pass",
+    "ubuntu_regression": "pass",
+    "shuffle": "pass",
+    "vet": "pass",
+    "windows_race": "pass",
+    "ubuntu_race": "pass",
+    "data_races": 0,
+    "golden_vectors": "pass",
+    "fuzz_reported_executions_minimum": 573627
+  },
+  "coverage_percent": {
+    "contract": 94.8,
+    "conformance": 85.0,
+    "lifecycle": 85.4,
+    "scan": 88.6,
+    "adapters": 86.4,
+    "integration": 85.2
+  },
+  "fresh_production_composition": {
+    "fixture": "sindresorhus/p-limit",
+    "revision": "42599ebbbb1228a5bdab381fcf8f4ac20eb8d551",
+    "artifacts": 7,
+    "normalized_sha256": "ab6097257f194bb62c15455b3eeb31544aebd924753463e93ec10a92dbeb4c59",
+    "scan_ms": 471.6438,
+    "peak_heap_bytes": 9345352,
+    "postgresql_recovery": "pass",
+    "recovery_publication_sha256": "7adc0a61a9ea9732fa02fa8fa43244d6cf1a12399589c8ce8486c0e077df46ba"
+  },
+  "benchmarks": {
+    "windows": {
+      "artifact_identity_ns": [1968, 2307],
+      "scan_execute_independent_ns": [50361, 57380],
+      "materialization_10000_entries_ns": [76079462, 102511608],
+      "physical_artifact_id_ns": [1552, 1732],
+      "manifest_ten_artifacts_ns": [17698, 21288],
+      "integration_translation_ten_artifacts_ns": [36369, 42344]
+    },
+    "ubuntu": {
+      "artifact_identity_ns": [1036, 1141],
+      "scan_execute_independent_ns": [33440, 45799],
+      "materialization_10000_entries_ns": [10916953, 12935113],
+      "physical_artifact_id_ns": [891, 994],
+      "manifest_ten_artifacts_ns": [8811, 11152],
+      "integration_translation_ten_artifacts_ns": [18102, 20688]
+    }
+  },
+  "audits": {
+    "neutral_dependencies": "pass",
+    "listener_and_command": "pass",
+    "secrets": "pass",
+    "production_tree_unchanged": true
+  },
+  "release_qualification": {
+    "state": "open",
+    "classification": "host_resource_limitation",
+    "pending": [
+      "Kubernetes Windows one-worker completion on a larger race-capable host",
+      "Kubernetes Ubuntu eight-worker completion on a larger race-capable host"
+    ],
+    "observed_software_defect": false
+  },
+  "release_actions": {
+    "version_promoted": false,
+    "tags_created": false,
+    "final_acceptance_required": true
+  }
+}

@@ -3,8 +3,8 @@
 ## Status
 
 - Phase: 4.0.8 design
-- Status: Proposed for engineering review
-- Stabilization execution: unauthorized pending design acceptance
+- Status: Approved with recommendations on 2026-07-30
+- Stabilization execution: authorized
 - Version promotion and release tags: unauthorized
 - Date: 2026-07-30
 
@@ -22,8 +22,20 @@ Engineering reviews these documents together:
 - `docs/Decisions/0019-repository-service-stabilization-and-release.md`;
 - this validation plan.
 
-No stabilization code, version change, or release tag is authorized until this
-package is accepted.
+The design package is accepted. Stabilization execution is authorized. Version
+promotion and release tags remain unauthorized until final evidence review.
+
+## Mandatory versus optional evidence
+
+Every API, golden-vector, functional/integration, quality, determinism,
+security/boundary, documentation, and release-package gate below is mandatory.
+Critical/high defects must be resolved. A mandatory gate may be qualified only
+through an explicit final engineering decision.
+
+Extra fixtures, performance improvements below approved targets, and
+larger-host evidence that closes an already recorded environmental
+qualification are optional additions. Optional work must not change the public
+contract or add product behavior.
 
 ## Mandatory validation order
 

@@ -78,8 +78,9 @@
 - Phase 4.0.7: real-repository validation design and ADR 0018 accepted with
   recommendations on 2026-07-29; accepted on 2026-07-30 with completion of the
   Kubernetes one-worker Windows and Ubuntu matrix retained as an open release
-  qualification. Phase 4.0.8 design is authorized; implementation remains
-  unauthorized pending review.
+  qualification. Phase 4.0.8 design is accepted; stabilization evidence is
+  complete and awaiting final engineering acceptance. Version promotion and
+  tags remain unauthorized.
 - Phase 4.1: REST/gRPC query APIs remain gated.
 
 PostgreSQL remains downstream from immutable artifacts and is not an engine
@@ -87,7 +88,7 @@ dependency.
 
 ## Phase 4 — Repository Services and Query Access
 
-### Phase 4.0 — Repository Service Layer (Phase 4.0.8 design review)
+### Phase 4.0 — Repository Service Layer (Phase 4.0.8 final review)
 
 - Define storage-neutral repository service interfaces.
 - Coordinate repository and scan lifecycle through application services.
@@ -105,10 +106,10 @@ dependency.
   validation passed under the frozen golden-vector contracts. Implementation
   commit `abdb395` is pushed to `main`. Phase 4.0.7 design is accepted with
   recommendations and accepted on 2026-07-30 with a larger-host Kubernetes
-  release qualification. The Phase 4.0.8 architecture, release-candidate API,
-  ADR 0019, and validation plan are prepared for engineering review. The
-  candidate remains `0.1.0`; stabilization implementation, version promotion,
-  tags, and later milestones remain unauthorized pending their gates.
+  release qualification. Phase 4.0.8 design and ADR 0019 are accepted.
+  Stabilization validation and the release package are complete and await
+  final engineering acceptance. The candidate remains `0.1.0`; version
+  promotion, tags, and later milestones remain unauthorized.
 
 Detailed milestones are defined in
 `docs/Roadmap/PHASE_4_REPOSITORY_SERVICE_ROADMAP.md`.

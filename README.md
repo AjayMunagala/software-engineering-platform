@@ -52,9 +52,10 @@ were accepted with recommendations on 2026-07-29. Validation execution is
 accepted on 2026-07-30 with one open release qualification. Every ordinary
 corpus matrix passes; Kubernetes completes deterministically with eight workers
 on Windows, while its one-worker Windows and Ubuntu completion remains pending
-on a larger race-capable host. The Phase 4.0.8 stabilization design package is
-prepared for engineering review; implementation, version promotion, release
-tags, and every later milestone remain unauthorized pending review.
+on a larger race-capable host. The Phase 4.0.8 stabilization design was
+approved with recommendations on 2026-07-30. Stabilization evidence and the
+release-candidate package are complete and pushed for final review. Version
+promotion, release tags, and every later milestone remain unauthorized.
 Intelligence engines remain database-independent.
 
 ## Run RIE
@@ -132,6 +133,10 @@ The command emits the versioned JSON schema `1.0.0`.
 - [Repository Service 1.0 release-candidate contract](docs/API/REPOSITORY_SERVICE_V1_RELEASE_CANDIDATE.md)
 - [ADR 0019 - Repository Service stabilization and release](docs/Decisions/0019-repository-service-stabilization-and-release.md)
 - [Phase 4.0.8 stabilization validation plan](docs/Validation/REPOSITORY_SERVICE_STABILIZATION_VALIDATION_PLAN.md)
+- [Phase 4.0.8 stabilization validation report](docs/Validation/REPOSITORY_SERVICE_STABILIZATION_VALIDATION_REPORT.md)
+- [Phase 4.0.8 machine-readable results](docs/Validation/REPOSITORY_SERVICE_STABILIZATION_RESULTS.json)
+- [Repository Service 1.0 release-candidate package](docs/Releases/RepositoryService-1.0.0/README.md)
+- [Repository Service release checklist](docs/Operations/REPOSITORY_SERVICE_RELEASE_CHECKLIST.md)
 - [Complete project tests, metrics, and remaining work](PROJECT_TESTS_METRICS_AND_REMAINING_WORK.txt)
 
 ## Next milestone
@@ -145,6 +150,7 @@ production implementation remains gated. Phase 4.0.1 spike evidence is
 accepted, and Phase 4.0.2 through Phase 4.0.5 are accepted. Phase 4.0.6 is
 accepted and frozen after passing its implementation and validation gates.
 Phase 4.0.7 is accepted with a larger-host Kubernetes release qualification.
-Phase 4.0.8 design is prepared for review, but stabilization implementation,
-the `1.0.0` promotion, release tags, HTTP health endpoints, REST/gRPC, UI, LLM,
-patch generation, and repository mutation remain unauthorized.
+Phase 4.0.8 design is accepted and stabilization evidence is complete. Final
+engineering acceptance is pending. The `1.0.0` promotion, release tags, HTTP
+health endpoints, REST/gRPC, UI, LLM, patch generation, and repository mutation
+remain unauthorized.

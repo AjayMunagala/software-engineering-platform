@@ -1413,9 +1413,9 @@ Detailed evidence:
 
 Status on 2026-07-30:
   - Phase 4.0.7: ACCEPTED WITH ONE OPEN RELEASE QUALIFICATION;
-  - Phase 4.0.8 design package: PREPARED FOR ENGINEERING REVIEW;
-  - ADR 0019: PROPOSED;
-  - stabilization implementation: UNAUTHORIZED;
+  - Phase 4.0.8 design package: ACCEPTED WITH RECOMMENDATIONS;
+  - ADR 0019: ACCEPTED;
+  - stabilization implementation: COMPLETE;
   - Repository Service version: 0.1.0 candidate;
   - 1.0.0 promotion and annotated tags: UNAUTHORIZED.
 
@@ -1458,3 +1458,50 @@ Design documents:
   docs/API/REPOSITORY_SERVICE_V1_RELEASE_CANDIDATE.md
   docs/Decisions/0019-repository-service-stabilization-and-release.md
   docs/Validation/REPOSITORY_SERVICE_STABILIZATION_VALIDATION_PLAN.md
+
+======================================================================
+25. PHASE 4.0.8 STABILIZATION EVIDENCE
+======================================================================
+
+Status on 2026-07-30:
+  - stabilization execution: COMPLETE;
+  - mandatory locally executable gates: PASS;
+  - production defects found: ZERO;
+  - production changes made: ZERO;
+  - final engineering acceptance: PENDING;
+  - Repository Service version: 0.1.0 candidate;
+  - version promotion and tags: UNAUTHORIZED.
+
+Fresh validation:
+  - Windows and Ubuntu full backend regression: PASS;
+  - Windows three shuffled full-backend runs: PASS;
+  - Ubuntu five shuffled contract runs: PASS;
+  - Windows and Ubuntu vet: PASS;
+  - Windows full race: PASS, zero races;
+  - Ubuntu targeted/full race: PASS, zero races;
+  - golden vectors: PASS on Windows and Ubuntu;
+  - six package coverage values: 94.8%, 85.0%, 85.4%, 88.6%, 86.4%, 85.2%;
+  - ten fuzz targets: PASS, at least 573,627 explicitly reported executions;
+  - listener/command, neutral-dependency, secret, and production-tree audits:
+    PASS.
+
+Fresh production composition:
+  - pinned p-limit revision: 42599ebbbb1228a5bdab381fcf8f4ac20eb8d551;
+  - exact artifacts: 7;
+  - normalized SHA-256:
+    ab6097257f194bb62c15455b3eeb31544aebd924753463e93ec10a92dbeb4c59;
+  - scan: 471.644 ms;
+  - peak Go heap: 9,345,352 bytes;
+  - PostgreSQL immediate-stop/restart recovery: PASS.
+
+Open qualification:
+  - Kubernetes Windows one-worker and Ubuntu eight-worker completion remain
+    pending larger race-capable hardware;
+  - completed evidence contains no observed software defect;
+  - final engineering review must accept, close, or block on the qualification.
+
+Review package:
+  docs/Validation/REPOSITORY_SERVICE_STABILIZATION_VALIDATION_REPORT.md
+  docs/Validation/REPOSITORY_SERVICE_STABILIZATION_RESULTS.json
+  docs/Releases/RepositoryService-1.0.0/README.md
+  docs/Operations/REPOSITORY_SERVICE_RELEASE_CHECKLIST.md
