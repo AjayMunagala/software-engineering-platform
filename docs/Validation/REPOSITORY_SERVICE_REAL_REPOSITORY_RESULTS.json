@@ -1,7 +1,7 @@
 {
   "schema_version": "phase-4.0.7-results/v1",
   "date": "2026-07-29",
-  "status": "engineering-review-required",
+  "status": "accepted-with-release-qualification",
   "source_revision": "79c5125",
   "successful_scans": 30,
   "unique_tracked_files": 35725,
@@ -19,5 +19,5 @@
   ],
   "recovery": {"postgresql_immediate_stop_restart": "pass", "artifacts": 7, "exact_exports": true},
   "quality": {"regression":"pass","vet":"pass","shuffle":"pass","windows_race":"pass","ubuntu_race":"pass","data_races":0,"integration_coverage_percent":85.2,"new_fuzz_executions":25308},
-  "release_gate": {"phase_4_0_7_accepted":false,"phase_4_0_8_authorized":false,"blocker":"Kubernetes one-worker and Ubuntu runs exceed safe host memory ceilings"}
+  "release_gate": {"phase_4_0_7_accepted":true,"accepted_on":"2026-07-30","phase_4_0_8_design_authorized":true,"phase_4_0_8_implementation_authorized":false,"open_qualification":"Complete the Kubernetes one-worker Windows and eight-worker Ubuntu matrix on a larger race-capable host"}
 }

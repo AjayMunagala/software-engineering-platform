@@ -4,9 +4,10 @@
 
 - Phase: 4.0.7 design
 - Status: Approved with recommendations on 2026-07-29
-- Execution: complete on available host; engineering review required
-- Acceptance: pending Kubernetes resource-gate disposition
-- Phase 4.0.8: unauthorized
+- Execution: complete on available host
+- Acceptance: accepted with one open release qualification on 2026-07-30
+- Phase 4.0.8 design: authorized
+- Phase 4.0.8 implementation: unauthorized pending design review
 - Date: 2026-07-29
 
 ## Purpose
@@ -26,7 +27,9 @@ Engineering reviews these documents together:
 
 Engineering approved this package on 2026-07-29. Validation-owned harness work,
 pinned preflight fetches, execution, and compatible defect fixes are authorized.
-Phase 4.0.8 remains unauthorized.
+Engineering accepted the resulting evidence on 2026-07-30. Phase 4.0.8 design
+is authorized; stabilization implementation remains unauthorized pending its
+design review.
 
 ## Required environments
 
@@ -238,5 +241,7 @@ Phase 4.0.7 may be accepted only when:
 - the validation report and machine-readable results are committed and pushed;
 - engineering explicitly accepts the evidence.
 
-Only that later acceptance may authorize Phase 4.0.8 stabilization. This design
-does not authorize Phase 4.0.8.
+Engineering granted that acceptance on 2026-07-30 while retaining the
+larger-host Kubernetes matrix as an open release qualification. Phase 4.0.8
+design is authorized. Stabilization implementation, API freeze, version
+promotion, and release tagging remain unauthorized pending design review.

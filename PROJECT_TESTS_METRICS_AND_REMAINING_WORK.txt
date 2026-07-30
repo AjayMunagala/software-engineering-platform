@@ -1355,12 +1355,14 @@ Design package:
 23. PHASE 4.0.7 REAL-REPOSITORY VALIDATION EVIDENCE
 ======================================================================
 
-Status on 2026-07-29:
+Status on 2026-07-30:
   - validation harness and available-host execution: COMPLETE;
   - ordinary corpus matrices: PASS;
   - interrupted PostgreSQL recovery: PASS;
-  - Phase 4.0.7 engineering acceptance: PENDING;
-  - Phase 4.0.8: UNAUTHORIZED.
+  - Phase 4.0.7 engineering acceptance: ACCEPTED WITH ONE OPEN RELEASE
+    QUALIFICATION on 2026-07-30;
+  - Phase 4.0.8 design: AUTHORIZED;
+  - Phase 4.0.8 implementation: UNAUTHORIZED pending design review.
 
 Corpus and execution:
   - 35,725 unique tracked entries;
@@ -1394,11 +1396,12 @@ Quality gates:
   - secret, dependency, listener, network, command, path, and mutation audits:
     PASS.
 
-Remaining decision:
-  - run Kubernetes on a larger race-capable host, authorize a bounded memory
-    stabilization investigation, or explicitly accept the measured resource
-    limitation;
-  - do not start Phase 4.0.8 until engineering accepts Phase 4.0.7.
+Open release qualification:
+  - complete the Kubernetes one-worker Windows and eight-worker Ubuntu matrix
+    when a larger race-capable host becomes available;
+  - engineering classified the missing evidence as an environmental limitation,
+    not an observed Repository Service defect;
+  - Phase 4.0.8 design may begin, but implementation remains review-gated.
 
 Detailed evidence:
   docs/Validation/REPOSITORY_SERVICE_REAL_REPOSITORY_VALIDATION_REPORT.md

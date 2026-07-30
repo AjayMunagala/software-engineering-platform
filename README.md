@@ -49,11 +49,11 @@ The UUID/manifest golden-vector contracts are frozen. Local implementation and
 validation pass, review candidate `abdb395` is pushed to `main`, and engineering
 accepted and froze the milestone on 2026-07-29. Phase 4.0.7 design and ADR 0018
 were accepted with recommendations on 2026-07-29. Validation execution is
-implemented and its evidence is ready for engineering review. Every ordinary
+accepted on 2026-07-30 with one open release qualification. Every ordinary
 corpus matrix passes; Kubernetes completes deterministically with eight workers
-on Windows but exceeds safe memory ceilings in the required one-worker Windows
-and Ubuntu passes. Phase 4.0.7 is therefore not yet accepted. Phase 4.0.8 and
-every later milestone remain unauthorized.
+on Windows, while its one-worker Windows and Ubuntu completion remains pending
+on a larger race-capable host. Phase 4.0.8 design is authorized; implementation
+and every later milestone remain unauthorized pending review.
 Intelligence engines remain database-independent.
 
 ## Run RIE
@@ -139,8 +139,7 @@ only authorized next milestone. The Phase 4.0 design package is accepted, but
 production implementation remains gated. Phase 4.0.1 spike evidence is
 accepted, and Phase 4.0.2 through Phase 4.0.5 are accepted. Phase 4.0.6 is
 accepted and frozen after passing its implementation and validation gates.
-Phase 4.0.7 design is accepted and validation execution is complete, with a
-Kubernetes memory-ceiling finding awaiting engineering disposition. Phase
-4.0.7 is not yet accepted. Phase 4.0.8, HTTP health endpoints,
+Phase 4.0.7 is accepted with a larger-host Kubernetes release qualification.
+Phase 4.0.8 design is authorized, but implementation, HTTP health endpoints,
 REST/gRPC, UI, LLM, patch generation, and repository mutation remain
 unauthorized.

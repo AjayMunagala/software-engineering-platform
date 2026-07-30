@@ -76,10 +76,10 @@
   2026-07-29 after its design, golden-vector, implementation, and validation
   gates passed; implementation commit `abdb395` is on `main`.
 - Phase 4.0.7: real-repository validation design and ADR 0018 accepted with
-  recommendations on 2026-07-29; implementation and available-host validation
-  complete. Kubernetes one-worker Windows and Ubuntu passes are blocked by
-  safe memory ceilings, so engineering acceptance is pending and Phase 4.0.8
-  remains unauthorized.
+  recommendations on 2026-07-29; accepted on 2026-07-30 with completion of the
+  Kubernetes one-worker Windows and Ubuntu matrix retained as an open release
+  qualification. Phase 4.0.8 design is authorized; implementation remains
+  unauthorized pending review.
 - Phase 4.1: REST/gRPC query APIs remain gated.
 
 PostgreSQL remains downstream from immutable artifacts and is not an engine
@@ -87,7 +87,7 @@ dependency.
 
 ## Phase 4 — Repository Services and Query Access
 
-### Phase 4.0 — Repository Service Layer (Phase 4.0.7 review candidate)
+### Phase 4.0 — Repository Service Layer (Phase 4.0.8 design authorized)
 
 - Define storage-neutral repository service interfaces.
 - Coordinate repository and scan lifecycle through application services.
@@ -104,9 +104,9 @@ dependency.
   Phase 4.0.6 is accepted and frozen after its production implementation and
   validation passed under the frozen golden-vector contracts. Implementation
   commit `abdb395` is pushed to `main`. Phase 4.0.7 design is accepted with
-  recommendations. Its validation implementation and evidence are complete,
-  but Kubernetes resource gates require engineering disposition. Phase 4.0.7
-  is not accepted, and Phase 4.0.8 and later milestones remain unauthorized.
+  recommendations and accepted on 2026-07-30 with a larger-host Kubernetes
+  release qualification. Phase 4.0.8 design is authorized. Its implementation
+  and later milestones remain unauthorized pending their respective gates.
 
 Detailed milestones are defined in
 `docs/Roadmap/PHASE_4_REPOSITORY_SERVICE_ROADMAP.md`.

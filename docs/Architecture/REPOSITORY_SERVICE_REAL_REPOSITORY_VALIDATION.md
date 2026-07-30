@@ -5,7 +5,7 @@
 - Phase: 4.0.7 design
 - Status: Approved with recommendations on 2026-07-29
 - Implementation/validation execution: complete on available host
-- Acceptance: pending Kubernetes resource-gate disposition
+- Acceptance: accepted with one open release qualification on 2026-07-30
 - Date: 2026-07-29
 
 ## One-sentence responsibility
@@ -269,4 +269,6 @@ test, and re-run of affected cases plus the full required quality gates.
 Engineering approved this design with non-blocking recommendations on
 2026-07-29 and authorized Phase 4.0.7 validation execution. The three
 recommendations are incorporated as mandatory evidence in the validation
-package. Phase 4.0.8 remains separately gated.
+package. Engineering accepted Phase 4.0.7 on 2026-07-30 with the larger-host
+Kubernetes matrix retained as an open release qualification. Phase 4.0.8
+design is authorized; implementation remains separately gated.

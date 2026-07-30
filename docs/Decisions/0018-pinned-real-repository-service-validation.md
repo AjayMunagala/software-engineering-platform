@@ -112,3 +112,11 @@ Engineering accepted this ADR with recommendations on 2026-07-29 after review
 with the architecture, fixture manifest, and validation plan. Acceptance
 authorizes Phase 4.0.7 validation execution only. Phase 4.0.8 remains
 unauthorized.
+
+## Implementation acceptance
+
+Engineering accepted Phase 4.0.7 on 2026-07-30 with one open release
+qualification: complete the Kubernetes one-worker Windows and eight-worker
+Ubuntu matrix when a larger race-capable host is available. No software defect
+was observed, so Repository Service redesign is not required. Phase 4.0.8
+design is authorized; its implementation remains separately gated.

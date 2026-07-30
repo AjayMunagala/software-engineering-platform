@@ -5,15 +5,16 @@
 - Phase: 4.0.7
 - Evidence date: 2026-07-29
 - Implementation: complete
-- Validation status: engineering review required
-- Phase 4.0.7 acceptance: **not yet granted**
-- Phase 4.0.8: **unauthorized**
+- Validation status: accepted with one open release qualification
+- Phase 4.0.7 acceptance: **granted on 2026-07-30**
+- Phase 4.0.8 design: **authorized**
+- Phase 4.0.8 implementation: **unauthorized pending design review**
 
 The production Repository Service path is correct and deterministic for every
-completed case. One release gate remains open: Kubernetes completes twice with
-eight workers on Windows, but one-worker Windows and eight-worker Ubuntu runs
-exceed this host's safe memory ceilings. The harness cancels those runs instead
-of threatening system stability. No correctness failure, panic, data race,
+completed case. Engineering accepted Phase 4.0.7 because the incomplete
+Kubernetes matrix is caused by validation-host memory limits rather than an
+observed software defect. Completing that matrix on larger hardware remains an
+explicit release qualification. No correctness failure, panic, data race,
 partial publication, or payload-integrity failure was observed.
 
 ## Tested revision and environments
@@ -131,10 +132,10 @@ below the same 6 GiB safety ceiling. Raising the ceiling on an 8 GiB host would
 risk system stability and was rejected. This is classified as a release-gate
 resource limitation, not a correctness defect.
 
-Engineering must either approve evidence from a larger race-capable host or
-authorize a bounded memory-stabilization investigation. Until then, worker and
-cross-platform Kubernetes determinism remain unproven and Phase 4.0.7 cannot be
-marked accepted.
+Worker and cross-platform Kubernetes determinism remain unproven on this host.
+Engineering accepted this as an environmental release qualification and did
+not require Repository Service redesign. The missing matrix evidence should be
+appended when a larger race-capable host becomes available.
 
 ## Quality gates
 
@@ -172,14 +173,17 @@ No production defect was found. Validation-only defects found and corrected:
    memory ceiling; terminal classification now gives measured memory/timeout
    evidence priority.
 
-## Engineering decision requested
+## Engineering acceptance
 
-The validation harness, completed evidence, and report are ready for review.
-The requested decision is one of:
+Engineering accepted Phase 4.0.7 on 2026-07-30 with one open release
+qualification:
 
-1. authorize a larger-host Kubernetes completion run;
-2. authorize a bounded Kubernetes memory-stabilization investigation; or
-3. explicitly accept the resource limitation as non-blocking.
-
-This report does **not** accept Phase 4.0.7, freeze Repository Service 1.0.0,
-or authorize Phase 4.0.8.
+- completed-corpus correctness, determinism, recovery, scope, privacy, race,
+  coverage, fuzz, and benchmark evidence is accepted;
+- Kubernetes one-worker Windows and eight-worker Ubuntu completion remains
+  required when suitable hardware becomes available;
+- the qualification is environmental and is not evidence of a Repository
+  Service defect;
+- Phase 4.0.8 design is authorized;
+- Phase 4.0.8 implementation, API freeze, version promotion, and release tags
+  remain unauthorized until the stabilization design is reviewed.
