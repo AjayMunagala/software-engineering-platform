@@ -231,7 +231,18 @@ accepted that resource finding as an environmental release qualification on
 2026-07-30. Phase 4.0.8 design is authorized; implementation remains
 unauthorized pending design review.
 
-## Phase 4.0.8 — Stabilization and Service Contract 1.0.0 (design authorized)
+## Phase 4.0.8 — Stabilization and Service Contract 1.0.0 (design review)
+
+The design package is prepared for engineering review:
+
+- `docs/Architecture/REPOSITORY_SERVICE_STABILIZATION.md`;
+- `docs/API/REPOSITORY_SERVICE_V1_RELEASE_CANDIDATE.md`;
+- `docs/Decisions/0019-repository-service-stabilization-and-release.md`;
+- `docs/Validation/REPOSITORY_SERVICE_STABILIZATION_VALIDATION_PLAN.md`.
+
+The current implementation remains candidate `0.1.0`. Stabilization execution,
+ADR 0019 acceptance, version promotion, release commits, and tags remain
+unauthorized until their explicit gates.
 
 Perform:
 

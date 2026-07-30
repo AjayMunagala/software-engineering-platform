@@ -87,7 +87,7 @@ dependency.
 
 ## Phase 4 — Repository Services and Query Access
 
-### Phase 4.0 — Repository Service Layer (Phase 4.0.8 design authorized)
+### Phase 4.0 — Repository Service Layer (Phase 4.0.8 design review)
 
 - Define storage-neutral repository service interfaces.
 - Coordinate repository and scan lifecycle through application services.
@@ -105,8 +105,10 @@ dependency.
   validation passed under the frozen golden-vector contracts. Implementation
   commit `abdb395` is pushed to `main`. Phase 4.0.7 design is accepted with
   recommendations and accepted on 2026-07-30 with a larger-host Kubernetes
-  release qualification. Phase 4.0.8 design is authorized. Its implementation
-  and later milestones remain unauthorized pending their respective gates.
+  release qualification. The Phase 4.0.8 architecture, release-candidate API,
+  ADR 0019, and validation plan are prepared for engineering review. The
+  candidate remains `0.1.0`; stabilization implementation, version promotion,
+  tags, and later milestones remain unauthorized pending their gates.
 
 Detailed milestones are defined in
 `docs/Roadmap/PHASE_4_REPOSITORY_SERVICE_ROADMAP.md`.

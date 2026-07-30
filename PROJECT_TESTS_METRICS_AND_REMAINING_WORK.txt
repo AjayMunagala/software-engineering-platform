@@ -1406,3 +1406,55 @@ Open release qualification:
 Detailed evidence:
   docs/Validation/REPOSITORY_SERVICE_REAL_REPOSITORY_VALIDATION_REPORT.md
   docs/Validation/REPOSITORY_SERVICE_REAL_REPOSITORY_RESULTS.json
+
+======================================================================
+24. PHASE 4.0.8 REPOSITORY SERVICE STABILIZATION DESIGN
+======================================================================
+
+Status on 2026-07-30:
+  - Phase 4.0.7: ACCEPTED WITH ONE OPEN RELEASE QUALIFICATION;
+  - Phase 4.0.8 design package: PREPARED FOR ENGINEERING REVIEW;
+  - ADR 0019: PROPOSED;
+  - stabilization implementation: UNAUTHORIZED;
+  - Repository Service version: 0.1.0 candidate;
+  - 1.0.0 promotion and annotated tags: UNAUTHORIZED.
+
+Design responsibility:
+  Stabilize, audit, validate, and package the existing Repository Service
+  candidate without adding service behavior.
+
+Proposed freeze targets:
+  - the existing lifecycle, scan, and artifact operations through three narrow
+    capability interfaces and their convenience composition;
+  - immutable values, validation rules, error kinds, pagination, ordering,
+    idempotency, cancellation, single-flight, publication, and export behavior;
+  - repository-service-artifact-id/v1;
+  - repository-service-storage-artifact-id/v1;
+  - repository-service-manifest/v1;
+  - repository-service-profile/v1;
+  - repository-go/v1 and its exact digest;
+  - canonical-json/1.0.0 released codec mappings.
+
+Required evidence after design acceptance:
+  - public API snapshot and compatibility review;
+  - golden-vector verification on Windows and Ubuntu;
+  - conformance-first regression, vet, shuffle, race, coverage, fuzz, and
+    integration validation;
+  - deterministic, performance, memory, security, dependency, privacy, and
+    documentation audits;
+  - changelog, release notes, supported feature matrix, benchmark summary,
+    known limitations, qualification register, and operator checklist;
+  - explicit final engineering acceptance before version promotion or tags.
+
+Kubernetes qualification:
+  - Windows one-worker and Ubuntu completion remain pending a larger
+    race-capable host;
+  - the finding remains environmental, is not converted into a pass, and must
+    receive explicit disposition at the final release gate;
+  - later larger-host evidence is append-only.
+
+Design documents:
+  docs/Architecture/REPOSITORY_SERVICE_STABILIZATION.md
+  docs/API/REPOSITORY_SERVICE_V1_RELEASE_CANDIDATE.md
+  docs/Decisions/0019-repository-service-stabilization-and-release.md
+  docs/Validation/REPOSITORY_SERVICE_STABILIZATION_VALIDATION_PLAN.md
