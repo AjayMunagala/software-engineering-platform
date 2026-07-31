@@ -1545,3 +1545,68 @@ Next governance:
   - Phase 4.1 transport design is eligible for separate review but not started;
   - no REST/gRPC implementation, UI, authentication, AI, repository execution,
     or new intelligence capability is authorized by this release.
+
+======================================================================
+27. PHASE 5.0 DEPENDENCY INTELLIGENCE ENGINE DESIGN
+======================================================================
+
+Status on 2026-07-31:
+  - Repository Service 1.0.0: RELEASED AND FROZEN;
+  - Phase 5.0 design package: COMPLETE REVIEW CANDIDATE;
+  - ADR 0020: PROPOSED;
+  - Phase 5.0.1 design spike: UNAUTHORIZED pending design review;
+  - production implementation: UNAUTHORIZED.
+
+Design responsibility:
+  Deterministically derive structural module, package, and file dependency
+  graphs from released immutable artifacts without rereading source, executing
+  repository tools, using the network, or guessing unresolved targets.
+
+Candidate artifact:
+  - name: dependency-inventory;
+  - version: 0.1.0;
+  - technology-neutral node, containment, edge, SCC, cycle, diagnostic, and
+    statistics model;
+  - first adapter consumes released Go artifacts;
+  - candidate stable-ID schemes require design-spike golden vectors before
+    production implementation.
+
+Candidate capabilities:
+  - module dependency graph;
+  - package import graph;
+  - proof-backed file dependency graph;
+  - explicit local, standard-library, external, unresolved, ambiguous, and
+    stale states;
+  - deterministic strongly connected components and bounded cycle findings;
+  - direct dependencies, reverse dependents, and bounded impact traversal;
+  - immutable canonical artifact with exact provenance.
+
+Complexity and safety:
+  - graph construction and SCC work: O(V + E), excluding canonical sorting;
+  - no all-pairs transitive closure;
+  - no enumeration of every simple cycle;
+  - deterministic limits, omissions, ordering, cancellation, and diagnostics;
+  - no filesystem, source parsing, network, execution, database, transport,
+    LLM, code generation, patching, or repository mutation.
+
+Proposed spike performance evidence:
+  - 100,000 nodes and 1,000,000 direct edges;
+  - build plus SCC under 30 seconds on the approved reference CI runner;
+  - bounded 100,000-node/1,000,000-edge impact query under 5 seconds;
+  - memory and cancellation gates validated or revised before implementation.
+
+Design documents:
+  docs/Architecture/DEPENDENCY_INTELLIGENCE_ENGINE.md
+  docs/Architecture/DEPENDENCY_INTELLIGENCE_ARTIFACTS.md
+  docs/API/DEPENDENCY_INTELLIGENCE_ENGINE_CANDIDATE_API.md
+  docs/Decisions/0020-dependency-intelligence-engine.md
+  docs/Architecture/DEPENDENCY_INTELLIGENCE_VALIDATION_ARCHITECTURE.md
+  docs/Validation/DEPENDENCY_INTELLIGENCE_ENGINE_VALIDATION_PLAN.md
+  docs/Roadmap/PHASE_5_DEPENDENCY_INTELLIGENCE_ROADMAP.md
+
+Remaining governance:
+  - engineering review of the complete Phase 5.0 design package;
+  - if accepted, authorize only Phase 5.0.1 design spike;
+  - freeze identity golden vectors and measured limits through spike evidence;
+  - separately authorize every production milestone;
+  - keep Repository Service 1.0.x limited to compatible maintenance.

@@ -125,10 +125,32 @@ Detailed milestones are defined in
 - Add separately approved Git, logs, database-schema, configuration,
   dependency, architecture, documentation, and testing intelligence.
 
-## Phase 5 — Evidence-Based Assistance
+## Phase 5 - Dependency Intelligence Engine (Design review candidate)
+
+- Phase 5.0 is design-only.
+- Define a language-neutral immutable dependency artifact and Go-backed first
+  adapter over released Repository/Go Language artifacts.
+- Model module, package, and file dependency graphs, containment, explicit
+  resolution states, SCCs, cycles, and bounded impact traversal.
+- Preserve exact provenance and cross-platform deterministic bytes.
+- Do not reread source, execute repositories, use the network, infer
+  architecture policy, introduce AI, or modify released 1.0 contracts.
+- ADR 0020 remains Proposed; the design package does not authorize the design
+  spike or production implementation.
+
+Detailed milestones are defined in
+`docs/Roadmap/PHASE_5_DEPENDENCY_INTELLIGENCE_ROADMAP.md`.
+
+## Phase 6 - Architecture Intelligence Engine
+
+- Infer separately approved layers, boundaries, modules, services, and
+  architecture smells from released evidence.
+- Keep observed dependency truth separate from architecture policy.
+
+## Phase 7 - Evidence-Based Assistance
 
 - Add planning, root-cause reasoning, minimal patch proposals, and validation workflows.
 
-## Phase 6 — Durable Knowledge and Governed Automation
+## Phase 8 - Durable Knowledge and Governed Automation
 
 - Add memory, multi-repository analysis, and carefully governed automation.

@@ -60,6 +60,12 @@ Repository Service **1.0.0** is frozen and released under the annotated
 authorization.
 Intelligence engines remain database-independent.
 
+Phase 5.0 now defines the **Dependency Intelligence Engine** as a design-only
+review candidate. It will derive deterministic module, package, and file
+dependency graphs, strongly connected components, cycles, and bounded impact
+evidence from released immutable artifacts. No implementation is authorized
+until the design package and subsequent design spike are separately reviewed.
+
 ## Run RIE
 
 ```powershell
@@ -139,21 +145,22 @@ The command emits the versioned JSON schema `1.0.0`.
 - [Phase 4.0.8 machine-readable results](docs/Validation/REPOSITORY_SERVICE_STABILIZATION_RESULTS.json)
 - [Repository Service 1.0 release-candidate package](docs/Releases/RepositoryService-1.0.0/README.md)
 - [Repository Service release checklist](docs/Operations/REPOSITORY_SERVICE_RELEASE_CHECKLIST.md)
+- [Dependency Intelligence architecture](docs/Architecture/DEPENDENCY_INTELLIGENCE_ENGINE.md)
+- [Dependency Intelligence artifact specification](docs/Architecture/DEPENDENCY_INTELLIGENCE_ARTIFACTS.md)
+- [Dependency Intelligence candidate API](docs/API/DEPENDENCY_INTELLIGENCE_ENGINE_CANDIDATE_API.md)
+- [ADR 0020 - Dependency Intelligence Engine](docs/Decisions/0020-dependency-intelligence-engine.md)
+- [Phase 5 Dependency Intelligence roadmap](docs/Roadmap/PHASE_5_DEPENDENCY_INTELLIGENCE_ROADMAP.md)
+- [Dependency Intelligence validation architecture](docs/Architecture/DEPENDENCY_INTELLIGENCE_VALIDATION_ARCHITECTURE.md)
+- [Dependency Intelligence validation plan](docs/Validation/DEPENDENCY_INTELLIGENCE_ENGINE_VALIDATION_PLAN.md)
 - [Complete project tests, metrics, and remaining work](PROJECT_TESTS_METRICS_AND_REMAINING_WORK.txt)
 
 ## Next milestone
 
-Phases 3.4.1 through 3.4.4 are accepted. Persistence Port and PostgreSQL
-Adapter **1.0.0** are frozen. Phases 3.5.1 through 3.5.3 are accepted.
-Phase 3.5.4 Runtime Integration & Release Freeze is accepted and Runtime
-Infrastructure **1.0.0** is frozen. Phase 4.0 Repository Service Layer is the
-only authorized next milestone. The Phase 4.0 design package is accepted, but
-production implementation remains gated. Phase 4.0.1 spike evidence is
-accepted, and Phase 4.0.2 through Phase 4.0.5 are accepted. Phase 4.0.6 is
-accepted and frozen after passing its implementation and validation gates.
-Phase 4.0.7 is accepted with a larger-host Kubernetes release qualification.
-Phase 4.0.8 is accepted and Repository Service **1.0.0** is frozen. The
-Kubernetes larger-host qualification remains documented and append-only. Phase
-4.1 transport design is now eligible for a separate review, but HTTP health
-endpoints, REST/gRPC implementation, UI, LLM, patch generation, and repository
-mutation remain unauthorized.
+Persistence Port, PostgreSQL Adapter, Runtime Infrastructure, and Repository
+Service are frozen at **1.0.0**. The Kubernetes larger-host qualification
+remains documented and append-only. The current project direction is Phase 5.0
+Dependency Intelligence design. The design package is ready for review; ADR
+0020 is Proposed and neither the design spike nor production implementation is
+authorized. Phase 4.1 transport, HTTP health endpoints, REST/gRPC
+implementation, UI, LLM, patch generation, and repository mutation remain
+unauthorized.

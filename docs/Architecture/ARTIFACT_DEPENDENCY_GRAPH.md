@@ -93,3 +93,32 @@ Released immutable artifacts
 ```
 
 Removing persistence must not change the artifact graph or engine output.
+
+## Phase 4 released Repository Service
+
+Repository Service `1.0.0` coordinates production and persistence of released
+artifacts. It is not an artifact producer in this dependency graph and is not
+an engine input. New intelligence engines consume the released typed artifacts
+directly through application orchestration.
+
+## Phase 5.0 Dependency Intelligence candidate
+
+Dependency Intelligence is a downstream sibling consumer. The first adapter is
+Go-backed, while its output model is language-neutral.
+
+```text
+RepositorySnapshot 1.0.0 -----------+
+GoLanguageInventory 1.0.0 ----------+
+GoPackageIdentityInventory 1.0.0 ---+--> Go Dependency Adapter
+GoSemanticInventory 1.0.0 ----------+          |
+                                                v
+                                  DependencyInventory 0.1.0 candidate
+```
+
+The adapter consumes the lowest frozen facts it needs. It does not consume
+`RepositoryMetadata`, `RepositoryIntelligenceSummary`, mutable `RunContext`,
+Repository Service responses, persisted projections, or raw source files.
+
+Future language adapters are siblings and normalize their released identity
+and semantic facts into the same language-neutral dependency artifact. Adding
+an adapter does not change an existing language artifact.
