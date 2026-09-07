@@ -5,7 +5,7 @@
 - Phase: 5.0 design
 - Artifact: `dependency-inventory`
 - Candidate version: `0.1.0`
-- Stable-ID schemes: design candidates, not frozen
+- Stable-ID schemes: spike-validated candidates awaiting engineering freeze
 
 ## Design goals
 
@@ -180,10 +180,14 @@ type DependencyCycle struct {
     ComponentID    string              `json:"component_id"`
     NodeIDs        []string            `json:"node_ids"`
     Classification CycleClassification `json:"classification"`
+    Rule           string              `json:"rule"`
 }
 ```
 
-The artifact records SCC membership, not every possible cyclic path, because
+The neutral core emits structural/informational classifications. A
+language-specific `language_invalid` classification requires an explicit,
+versioned adapter rule such as `go-import-cycle`; it is never inferred from
+graph shape alone. The artifact records SCC membership, not every possible cyclic path, because
 the number of simple cycles can grow exponentially. A canonical witness cycle
 may be added only if the design spike proves bounded deterministic behavior.
 
@@ -219,8 +223,10 @@ Candidate schemes:
 
 Each ID is derived from a domain-separated canonical byte sequence containing
 only stable logical identity, never display text, slice position, host path,
-worker count, timestamps, or database keys. Phase 5.0.1 must freeze golden
-vectors before production implementation.
+worker count, timestamps, or database keys. Phase 5.0.1 established unsigned
+64-bit big-endian UTF-8 byte-length-prefixed segments and the candidate vectors
+in `docs/API/DEPENDENCY_INTELLIGENCE_GOLDEN_VECTORS.md`. Engineering acceptance
+must freeze them before production implementation.
 
 Changing a frozen identity algorithm requires a new scheme version, parallel
 publication during migration, and explicit consumer migration guidance.

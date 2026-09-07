@@ -1550,11 +1550,11 @@ Next governance:
 27. PHASE 5.0 DEPENDENCY INTELLIGENCE ENGINE DESIGN
 ======================================================================
 
-Status on 2026-07-31:
+Status updated on 2026-09-07:
   - Repository Service 1.0.0: RELEASED AND FROZEN;
-  - Phase 5.0 design package: COMPLETE REVIEW CANDIDATE;
+  - Phase 5.0 design package: ACCEPTED;
   - ADR 0020: PROPOSED;
-  - Phase 5.0.1 design spike: UNAUTHORIZED pending design review;
+  - Phase 5.0.1 design spike: COMPLETE REVIEW CANDIDATE;
   - production implementation: UNAUTHORIZED.
 
 Design responsibility:
@@ -1605,8 +1605,68 @@ Design documents:
   docs/Roadmap/PHASE_5_DEPENDENCY_INTELLIGENCE_ROADMAP.md
 
 Remaining governance:
-  - engineering review of the complete Phase 5.0 design package;
-  - if accepted, authorize only Phase 5.0.1 design spike;
-  - freeze identity golden vectors and measured limits through spike evidence;
+  - engineering review of the Phase 5.0.1 spike evidence;
+  - if accepted, promote ADR 0020 and authorize only Phase 5.0.2;
+  - freeze candidate identity golden vectors and measured limits;
   - separately authorize every production milestone;
   - keep Repository Service 1.0.x limited to compatible maintenance.
+
+======================================================================
+28. PHASE 5.0.1 DEPENDENCY INTELLIGENCE DESIGN SPIKE
+======================================================================
+
+Status on 2026-09-07:
+  - Phase 5.0 design: ACCEPTED;
+  - Phase 5.0.1 spike implementation and local validation: COMPLETE;
+  - engineering acceptance: PENDING;
+  - ADR 0020: PROPOSED pending evidence review;
+  - Phase 5.0.2 production implementation: UNAUTHORIZED.
+
+Validated decisions:
+  - released RepositorySnapshot, GoLanguageInventory,
+    GoPackageIdentityInventory, and GoSemanticInventory are sufficient inputs;
+  - released inputs remain byte-for-byte unchanged after normalization;
+  - domain-separated uint64-big-endian UTF-8 length-prefixed SHA-256 IDs;
+  - canonical node, edge, SCC, cycle, and whole-result golden vectors;
+  - deterministic duplicate aggregation and canonical omission;
+  - one-worker/eight-worker and shuffled-input equality;
+  - O(V+E) SCC partition without all-simple-cycle enumeration;
+  - explicit language-rule provenance for invalid cycle classification;
+  - bounded forward/reverse breadth-first impact traversal;
+  - unresolved/ambiguous facts never become resolved local SCC edges;
+  - cancellation at a maximum 1,024-edge checkpoint unit.
+
+Windows evidence:
+  - functional tests, ten shuffled runs, vet: PASS;
+  - race test: PASS, zero races;
+  - statement coverage: 85.4%;
+  - 100,000 nodes / 1,000,000 edges build plus SCC: 5.373 s benchmark;
+  - explicit scale run: 6.954 s, peak heap 1,572,774,464 bytes;
+  - 100,000-node / 999,945-edge impact: 201.67 ms;
+  - cancellation at 1,024 edges: 2.17 ms average.
+
+Ubuntu 24.04.4 WSL evidence:
+  - functional tests, ten shuffled runs, vet: PASS;
+  - race test: PASS, zero races;
+  - statement coverage: 85.4%;
+  - 100,000 nodes / 1,000,000 edges build plus SCC: 8.429 s benchmark;
+  - explicit scale run: 7.181 s, peak heap 1,516,811,456 bytes;
+  - 100,000-node / 999,945-edge impact: 281.83 ms;
+  - cancellation at 1,024 edges: 3.07 ms average.
+
+Measured refinement:
+  - replace the ambiguous 1.5x object-graph memory ratio with a candidate
+    two-GiB peak-live-heap gate for the exact synthetic 100k/1m fixture;
+  - continue recording total allocations and optimize compact keys during
+    Phase 5.0.2 before release stabilization.
+
+Spike artifacts:
+  experiments/phase-5.0.1-dependency-spike/
+  docs/API/DEPENDENCY_INTELLIGENCE_GOLDEN_VECTORS.md
+  docs/Validation/DEPENDENCY_INTELLIGENCE_DESIGN_SPIKE_REPORT.md
+
+Next governance:
+  - review and accept or reject the Phase 5.0.1 evidence;
+  - only upon acceptance, promote ADR 0020 and freeze candidate vectors;
+  - authorize only Phase 5.0.2 Neutral Graph Artifact and Core;
+  - keep Phase 5.0.3 and later milestones unauthorized.

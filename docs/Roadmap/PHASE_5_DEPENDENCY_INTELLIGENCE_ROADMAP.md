@@ -3,10 +3,11 @@
 ## Status
 
 - Repository Service `1.0.0`: released and frozen
-- Phase 5.0 design: complete review candidate
+- Phase 5.0 design: accepted on 2026-09-07
 - ADR 0020: Proposed
-- Phase 5.0.1 and production implementation: not authorized
-- Date: 2026-07-31
+- Phase 5.0.1 design spike: complete review candidate
+- Phase 5.0.2 and production implementation: not authorized
+- Date: 2026-09-07
 
 ## Goal
 
@@ -63,6 +64,11 @@ Validate risky assumptions with disposable spike code only:
 Exit gate: spike report accepted, ADR 0020 accepted, golden vectors frozen, and
 Phase 5.0.2 explicitly authorized. Spike code must not become a production
 dependency accidentally.
+
+Local evidence is recorded in
+`docs/Validation/DEPENDENCY_INTELLIGENCE_DESIGN_SPIKE_REPORT.md`. The isolated
+harness and evidence are complete and await engineering acceptance. Completion
+does not authorize Phase 5.0.2.
 
 ## Phase 5.0.2 - Neutral graph artifact and core
 

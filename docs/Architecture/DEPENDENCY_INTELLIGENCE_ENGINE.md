@@ -3,7 +3,7 @@
 ## Status
 
 - Phase: 5.0 design
-- Design status: review candidate
+- Design status: accepted on 2026-09-07
 - Production implementation: not authorized
 - Candidate contract: `0.1.0`
 
@@ -95,6 +95,11 @@ file targets.
 File cycles inside one Go package are normal structural facts. They must not be
 reported as architectural defects. Cycle findings therefore include graph kind
 and policy classification rather than a generic warning.
+
+The neutral graph core does not hardcode language validity rules. A language
+adapter may attach a versioned classification rule (for example,
+`go-import-cycle`) when its released facts prove that a package cycle violates
+that language's rules.
 
 ### Containment
 

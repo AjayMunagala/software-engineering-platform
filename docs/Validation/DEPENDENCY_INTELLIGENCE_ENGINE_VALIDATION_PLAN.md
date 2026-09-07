@@ -113,18 +113,18 @@ Reference CI runner, warm operating-system cache, at most eight workers:
 
 - 100,000 nodes and 1,000,000 direct edges: build plus SCC analysis under
   30 seconds;
-- peak live Go heap no greater than 1.5 times normalized input-plus-output
-  bytes for the synthetic graph gate, excluding the already materialized
-  prerequisite artifacts;
+- candidate peak live Go heap below 2 GiB for the exact 100,000-node,
+  1,000,000-edge synthetic gate, including its typed graph input and output;
 - bounded impact of 100,000 reached nodes and 1,000,000 traversed edges under
   5 seconds;
 - cancellation observed within one bounded unit and normally within 250 ms on
   the reference runner;
 - no superlinear graph work other than canonical sorting.
 
-The Phase 5.0.1 spike must validate or revise these targets before they become
-release gates. Cold filesystem time is irrelevant because DIE performs no
-filesystem I/O.
+The Phase 5.0.1 spike revised the ambiguous input/output ratio into the
+measurable two-GiB candidate ceiling above. Engineering acceptance is required
+before it becomes an implementation gate. Cold filesystem time is irrelevant
+because DIE performs no filesystem I/O.
 
 ## Benchmarks
 

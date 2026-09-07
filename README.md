@@ -60,11 +60,12 @@ Repository Service **1.0.0** is frozen and released under the annotated
 authorization.
 Intelligence engines remain database-independent.
 
-Phase 5.0 now defines the **Dependency Intelligence Engine** as a design-only
-review candidate. It will derive deterministic module, package, and file
+Phase 5.0 defines the accepted **Dependency Intelligence Engine** architecture.
+The Phase 5.0.1 design spike is complete and awaiting engineering review. It
+validates deterministic module, package, and file
 dependency graphs, strongly connected components, cycles, and bounded impact
-evidence from released immutable artifacts. No implementation is authorized
-until the design package and subsequent design spike are separately reviewed.
+evidence from released immutable artifacts. Production implementation remains
+unauthorized.
 
 ## Run RIE
 
@@ -148,19 +149,21 @@ The command emits the versioned JSON schema `1.0.0`.
 - [Dependency Intelligence architecture](docs/Architecture/DEPENDENCY_INTELLIGENCE_ENGINE.md)
 - [Dependency Intelligence artifact specification](docs/Architecture/DEPENDENCY_INTELLIGENCE_ARTIFACTS.md)
 - [Dependency Intelligence candidate API](docs/API/DEPENDENCY_INTELLIGENCE_ENGINE_CANDIDATE_API.md)
+- [Dependency Intelligence candidate golden vectors](docs/API/DEPENDENCY_INTELLIGENCE_GOLDEN_VECTORS.md)
 - [ADR 0020 - Dependency Intelligence Engine](docs/Decisions/0020-dependency-intelligence-engine.md)
 - [Phase 5 Dependency Intelligence roadmap](docs/Roadmap/PHASE_5_DEPENDENCY_INTELLIGENCE_ROADMAP.md)
 - [Dependency Intelligence validation architecture](docs/Architecture/DEPENDENCY_INTELLIGENCE_VALIDATION_ARCHITECTURE.md)
 - [Dependency Intelligence validation plan](docs/Validation/DEPENDENCY_INTELLIGENCE_ENGINE_VALIDATION_PLAN.md)
+- [Phase 5.0.1 Dependency Intelligence design-spike report](docs/Validation/DEPENDENCY_INTELLIGENCE_DESIGN_SPIKE_REPORT.md)
 - [Complete project tests, metrics, and remaining work](PROJECT_TESTS_METRICS_AND_REMAINING_WORK.txt)
 
 ## Next milestone
 
 Persistence Port, PostgreSQL Adapter, Runtime Infrastructure, and Repository
 Service are frozen at **1.0.0**. The Kubernetes larger-host qualification
-remains documented and append-only. The current project direction is Phase 5.0
-Dependency Intelligence design. The design package is ready for review; ADR
-0020 is Proposed and neither the design spike nor production implementation is
-authorized. Phase 4.1 transport, HTTP health endpoints, REST/gRPC
-implementation, UI, LLM, patch generation, and repository mutation remain
-unauthorized.
+remains documented and append-only. Phase 5.0 Dependency Intelligence design
+is accepted. The Phase 5.0.1 design spike and its candidate golden vectors are
+complete and ready for engineering review. ADR 0020 remains Proposed, Phase
+5.0.2 is not authorized, and no production Dependency Intelligence package
+exists. Phase 4.1 transport, HTTP health endpoints, REST/gRPC implementation,
+UI, LLM, patch generation, and repository mutation remain unauthorized.

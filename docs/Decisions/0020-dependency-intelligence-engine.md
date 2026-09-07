@@ -8,6 +8,10 @@ Proposed
 
 2026-07-31
 
+Phase 5.0 design was accepted on 2026-09-07 and authorized only the bounded
+Phase 5.0.1 design spike. The spike is complete and awaiting evidence review;
+this ADR intentionally remains `Proposed` until that review.
+
 ## Context
 
 Repository Intelligence 1.0.0 identifies repository facts. Go Language

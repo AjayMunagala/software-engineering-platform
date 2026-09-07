@@ -7,6 +7,7 @@
 - Artifact version: `0.1.0`
 - Production implementation: not authorized
 - Transport: none
+- Phase 5.0.1 spike: complete; engineering acceptance pending
 
 This is a Go contract candidate. It is not an HTTP, gRPC, persistence, runtime,
 or authorization API.
@@ -86,26 +87,27 @@ limits are bounded by implementation constants and validated before analysis.
 ## Immutable artifact access
 
 ```go
-type DependencyInventory interface {
-    ArtifactName() string
-    ArtifactVersion() string
-    Metadata() ArtifactMetadata
-    SourceArtifacts() []rie.ArtifactReference
-    Nodes() []DependencyNode
-    Containment() []ContainmentEdge
-    Dependencies() []DependencyEdge
-    StrongComponents() []StrongComponent
-    Cycles() []DependencyCycle
-    Diagnostics() []Diagnostic
-    Statistics() DependencyStatistics
-    View() DependencyInventoryView
+type DependencyInventory struct {
+    // private immutable fields
 }
+
+func (DependencyInventory) ArtifactName() string
+func (DependencyInventory) ArtifactVersion() string
+func (DependencyInventory) Metadata() ArtifactMetadata
+func (DependencyInventory) SourceArtifacts() []rie.ArtifactReference
+func (DependencyInventory) Nodes() []DependencyNode
+func (DependencyInventory) Containment() []ContainmentEdge
+func (DependencyInventory) Dependencies() []DependencyEdge
+func (DependencyInventory) StrongComponents() []StrongComponent
+func (DependencyInventory) Cycles() []DependencyCycle
+func (DependencyInventory) Diagnostics() []Diagnostic
+func (DependencyInventory) Statistics() DependencyStatistics
+func (DependencyInventory) View() DependencyInventoryView
 ```
 
-The actual Go implementation may use a concrete immutable value rather than an
-interface if the design spike shows that it better matches existing artifact
-patterns. Observable behavior is the contract. Every accessor returns a
-defensive copy.
+The Phase 5.0.1 spike confirmed that a concrete immutable value matches the
+released artifact conventions without weakening consumer isolation.
+Observable behavior is the contract. Every accessor returns a defensive copy.
 
 ## Query capability
 
@@ -193,3 +195,7 @@ serialize and persist the returned immutable artifact after analysis.
 Phase 5.0.1 may refine signatures using measured spike evidence. Production
 implementation begins only after the architecture package and spike evidence
 are accepted together. The public API remains `0.1.0` until stabilization.
+
+Candidate stable-ID canonical bytes and cross-platform vectors are specified
+in `DEPENDENCY_INTELLIGENCE_GOLDEN_VECTORS.md`. They remain review candidates
+until the Phase 5.0.1 evidence is accepted.

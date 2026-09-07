@@ -125,9 +125,9 @@ Detailed milestones are defined in
 - Add separately approved Git, logs, database-schema, configuration,
   dependency, architecture, documentation, and testing intelligence.
 
-## Phase 5 - Dependency Intelligence Engine (Design review candidate)
+## Phase 5 - Dependency Intelligence Engine (Design accepted; spike in review)
 
-- Phase 5.0 is design-only.
+- Phase 5.0 design was accepted on 2026-09-07.
 - Define a language-neutral immutable dependency artifact and Go-backed first
   adapter over released Repository/Go Language artifacts.
 - Model module, package, and file dependency graphs, containment, explicit
@@ -135,8 +135,9 @@ Detailed milestones are defined in
 - Preserve exact provenance and cross-platform deterministic bytes.
 - Do not reread source, execute repositories, use the network, infer
   architecture policy, introduce AI, or modify released 1.0 contracts.
-- ADR 0020 remains Proposed; the design package does not authorize the design
-  spike or production implementation.
+- Phase 5.0.1 design-spike implementation and local evidence are complete.
+- ADR 0020 remains Proposed pending spike review; Phase 5.0.2 production
+  implementation is not authorized.
 
 Detailed milestones are defined in
 `docs/Roadmap/PHASE_5_DEPENDENCY_INTELLIGENCE_ROADMAP.md`.
