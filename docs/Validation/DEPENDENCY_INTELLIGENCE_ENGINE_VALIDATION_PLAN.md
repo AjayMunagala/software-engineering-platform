@@ -4,7 +4,7 @@
 
 - Phase: 5.0 design
 - Applies to candidate: `0.1.0`
-- Execution: not authorized until the relevant milestone is approved
+- Execution: Phase 5.0.2 core validation authorized; later stages remain gated
 
 ## Purpose
 
@@ -122,9 +122,10 @@ Reference CI runner, warm operating-system cache, at most eight workers:
 - no superlinear graph work other than canonical sorting.
 
 The Phase 5.0.1 spike revised the ambiguous input/output ratio into the
-measurable two-GiB candidate ceiling above. Engineering acceptance is required
-before it becomes an implementation gate. Cold filesystem time is irrelevant
-because DIE performs no filesystem I/O.
+measurable two-GiB candidate ceiling above. Engineering accepted that gate on
+2026-09-08. `MaxNodes` is a mandatory hard production bound: exceeding it must
+return `limit_exceeded` without publishing a partial graph. Cold filesystem
+time is irrelevant because DIE performs no filesystem I/O.
 
 ## Benchmarks
 

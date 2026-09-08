@@ -125,7 +125,7 @@ Detailed milestones are defined in
 - Add separately approved Git, logs, database-schema, configuration,
   dependency, architecture, documentation, and testing intelligence.
 
-## Phase 5 - Dependency Intelligence Engine (Design accepted; spike in review)
+## Phase 5 - Dependency Intelligence Engine (Phase 5.0.2 authorized)
 
 - Phase 5.0 design was accepted on 2026-09-07.
 - Define a language-neutral immutable dependency artifact and Go-backed first
@@ -135,9 +135,13 @@ Detailed milestones are defined in
 - Preserve exact provenance and cross-platform deterministic bytes.
 - Do not reread source, execute repositories, use the network, infer
   architecture policy, introduce AI, or modify released 1.0 contracts.
-- Phase 5.0.1 design-spike implementation and local evidence are complete.
-- ADR 0020 remains Proposed pending spike review; Phase 5.0.2 production
-  implementation is not authorized.
+- Phase 5.0.1 design-spike evidence was engineering accepted on 2026-09-08.
+- ADR 0020 is Accepted; the validated node/edge/SCC/cycle vectors and exact
+  synthetic two-GiB peak-live-heap gate are frozen.
+- Phase 5.0.2 neutral graph artifact and core is authorized with mandatory
+  `MaxNodes` enforcement and containment golden vectors before publication.
+- Phase 5.0.3 and later milestones, including production release, remain
+  unauthorized.
 
 Detailed milestones are defined in
 `docs/Roadmap/PHASE_5_DEPENDENCY_INTELLIGENCE_ROADMAP.md`.

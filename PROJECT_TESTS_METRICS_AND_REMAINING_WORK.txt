@@ -1550,12 +1550,13 @@ Next governance:
 27. PHASE 5.0 DEPENDENCY INTELLIGENCE ENGINE DESIGN
 ======================================================================
 
-Status updated on 2026-09-07:
+Status updated on 2026-09-08:
   - Repository Service 1.0.0: RELEASED AND FROZEN;
   - Phase 5.0 design package: ACCEPTED;
-  - ADR 0020: PROPOSED;
-  - Phase 5.0.1 design spike: COMPLETE REVIEW CANDIDATE;
-  - production implementation: UNAUTHORIZED.
+  - ADR 0020: ACCEPTED;
+  - Phase 5.0.1 design spike: ENGINEERING ACCEPTED;
+  - Phase 5.0.2 neutral graph artifact and core: AUTHORIZED;
+  - Phase 5.0.3 and production release: UNAUTHORIZED.
 
 Design responsibility:
   Deterministically derive structural module, package, and file dependency
@@ -1605,9 +1606,9 @@ Design documents:
   docs/Roadmap/PHASE_5_DEPENDENCY_INTELLIGENCE_ROADMAP.md
 
 Remaining governance:
-  - engineering review of the Phase 5.0.1 spike evidence;
-  - if accepted, promote ADR 0020 and authorize only Phase 5.0.2;
-  - freeze candidate identity golden vectors and measured limits;
+  - implement and validate only Phase 5.0.2;
+  - enforce MaxNodes as a production hard limit;
+  - freeze containment identity vectors before containment publication;
   - separately authorize every production milestone;
   - keep Repository Service 1.0.x limited to compatible maintenance.
 
@@ -1615,12 +1616,13 @@ Remaining governance:
 28. PHASE 5.0.1 DEPENDENCY INTELLIGENCE DESIGN SPIKE
 ======================================================================
 
-Status on 2026-09-07:
+Status on 2026-09-08:
   - Phase 5.0 design: ACCEPTED;
   - Phase 5.0.1 spike implementation and local validation: COMPLETE;
-  - engineering acceptance: PENDING;
-  - ADR 0020: PROPOSED pending evidence review;
-  - Phase 5.0.2 production implementation: UNAUTHORIZED.
+  - engineering acceptance: GRANTED;
+  - ADR 0020: ACCEPTED;
+  - Phase 5.0.2 neutral graph artifact and core: AUTHORIZED;
+  - Phase 5.0.3 and later: UNAUTHORIZED.
 
 Validated decisions:
   - released RepositorySnapshot, GoLanguageInventory,
@@ -1666,7 +1668,6 @@ Spike artifacts:
   docs/Validation/DEPENDENCY_INTELLIGENCE_DESIGN_SPIKE_REPORT.md
 
 Next governance:
-  - review and accept or reject the Phase 5.0.1 evidence;
-  - only upon acceptance, promote ADR 0020 and freeze candidate vectors;
-  - authorize only Phase 5.0.2 Neutral Graph Artifact and Core;
+  - implement and validate only Phase 5.0.2 Neutral Graph Artifact and Core;
+  - enforce MaxNodes and freeze containment vectors before publication;
   - keep Phase 5.0.3 and later milestones unauthorized.

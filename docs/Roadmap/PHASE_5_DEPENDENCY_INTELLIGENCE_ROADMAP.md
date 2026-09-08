@@ -4,10 +4,12 @@
 
 - Repository Service `1.0.0`: released and frozen
 - Phase 5.0 design: accepted on 2026-09-07
-- ADR 0020: Proposed
-- Phase 5.0.1 design spike: complete review candidate
-- Phase 5.0.2 and production implementation: not authorized
-- Date: 2026-09-07
+- ADR 0020: Accepted on 2026-09-08
+- Phase 5.0.1 design spike: engineering accepted on 2026-09-08
+- Phase 5.0.2 neutral graph artifact and core: authorized
+- Phase 5.0.3 and later: not authorized
+- Production release: not authorized
+- Date: 2026-09-08
 
 ## Goal
 
@@ -67,8 +69,9 @@ dependency accidentally.
 
 Local evidence is recorded in
 `docs/Validation/DEPENDENCY_INTELLIGENCE_DESIGN_SPIKE_REPORT.md`. The isolated
-harness and evidence are complete and await engineering acceptance. Completion
-does not authorize Phase 5.0.2.
+harness and evidence were engineering accepted on 2026-09-08. The accepted
+node, edge, SCC, and cycle vectors are frozen, and the measured two-GiB
+peak-live-heap gate applies to the exact synthetic scale fixture.
 
 ## Phase 5.0.2 - Neutral graph artifact and core
 
@@ -80,6 +83,12 @@ Implement only:
 - core normalization/aggregation;
 - reusable conformance harness;
 - unit, property, fuzz, race, and benchmark tests.
+
+`MaxNodes` is a mandatory production invariant and must be enforced and tested.
+Containment may not be published until the canonical
+`dependency-containment-id/v1` identity and golden vectors are frozen during
+this milestone. The 100,000-node/1,000,000-edge fixture has a candidate
+two-GiB peak-live-Go-heap gate; total allocations must also be reported.
 
 No Go adapter, persistence, runtime, service, transport, or UI integration.
 
@@ -151,5 +160,5 @@ limits. Fix only compatible defects and record known limitations.
 ## Governance
 
 Every milestone is separately gated: design, review, implementation,
-validation, engineering acceptance, then commit/release. Phase 5.0 design does
-not authorize implementation.
+validation, engineering acceptance, then commit/release. Only Phase 5.0.2 is
+currently authorized. Phase 5.0.3 and production release remain unauthorized.

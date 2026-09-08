@@ -5,7 +5,7 @@
 - Phase: 5.0 design
 - Artifact: `dependency-inventory`
 - Candidate version: `0.1.0`
-- Stable-ID schemes: spike-validated candidates awaiting engineering freeze
+- Stable-ID schemes: node/edge/SCC/cycle frozen; containment pending Phase 5.0.2 vector
 
 ## Design goals
 
@@ -220,6 +220,11 @@ Candidate schemes:
 - `dependency-containment-id/v1`;
 - `dependency-scc-id/v1`;
 - `dependency-cycle-id/v1`.
+
+The node, edge, SCC, and cycle schemes were frozen by the accepted Phase 5.0.1
+evidence. Containment publication is prohibited until Phase 5.0.2 freezes its
+ordered logical fields and cross-platform `dependency-containment-id/v1`
+golden vectors.
 
 Each ID is derived from a domain-separated canonical byte sequence containing
 only stable logical identity, never display text, slice position, host path,

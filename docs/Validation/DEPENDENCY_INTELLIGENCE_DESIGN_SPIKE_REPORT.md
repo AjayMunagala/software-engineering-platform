@@ -2,12 +2,14 @@
 
 ## Status
 
-- Date: 2026-09-07
+- Date: 2026-09-08
 - Spike implementation: complete
-- Review status: pending engineering acceptance
-- ADR 0020: `Proposed`
-- Phase 5.0.2 production implementation: not authorized
-- Commit status: review candidate
+- Review status: engineering accepted
+- ADR 0020: `Accepted`
+- Phase 5.0.2 neutral graph artifact and core: authorized
+- Phase 5.0.3 and later: not authorized
+- Production release: not authorized
+- Evidence commit: `289f51d881da29ad8b5f128574b4d01106a99272`
 
 ## Purpose
 
@@ -96,7 +98,7 @@ Canonical cyclic-fixture JSON SHA-256:
 5ee754fe619d0920f2473e06a04f6bd1372b768c565c82c65281c7b2e922b6dc
 ```
 
-Recommendation: accept these as Phase 5 production golden-vector conditions.
+Decision: these are accepted as Phase 5 production golden-vector conditions.
 Containment ID vectors must be added with the Phase 5.0.2 model before any
 containment artifact is published.
 
@@ -236,11 +238,13 @@ the subsystem boundary.
 
 ## Recommendation
 
-Submit this report, golden vectors, design refinements, and isolated harness for
-engineering review. If accepted:
+The engineering review accepted this report, the golden vectors, design
+refinements, and isolated harness on 2026-09-08. The resulting state is:
 
-1. promote ADR 0020 from `Proposed` to `Accepted`;
-2. freeze the candidate stable-ID encoding and current vectors;
-3. adopt the measurable two-GiB synthetic peak-heap gate;
-4. authorize only Phase 5.0.2 - Neutral Graph Artifact and Core;
-5. keep Phase 5.0.3 and later milestones unauthorized.
+1. ADR 0020 is `Accepted`;
+2. the node, edge, SCC, and cycle stable-ID encoding/vectors are frozen;
+3. the measurable two-GiB synthetic peak-heap gate is adopted;
+4. production `MaxNodes` enforcement is mandatory;
+5. containment publication requires a frozen Phase 5.0.2 golden vector;
+6. only Phase 5.0.2 - Neutral Graph Artifact and Core is authorized;
+7. Phase 5.0.3 and later milestones remain unauthorized.

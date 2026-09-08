@@ -2,14 +2,14 @@
 
 ## Status
 
-- Phase: 5.0.1 design spike
-- Contract: candidate for engineering acceptance
-- ID schemes: proposed `v1`
-- Production implementation: not authorized
+- Phase: 5.0.1 design spike, engineering accepted 2026-09-08
+- Contract: frozen for the listed node, edge, SCC, and cycle vectors
+- ID schemes: frozen `v1` for the listed schemes
+- Production release: not authorized
 
-These vectors remove ambiguity from the candidate ID representation. They
-become frozen production acceptance conditions only after the design-spike
-evidence is reviewed and accepted.
+These vectors remove ambiguity from the candidate ID representation. The
+design-spike evidence was accepted on 2026-09-08, so the listed node, edge,
+SCC, and cycle values are frozen production acceptance conditions.
 
 ## Canonical segment encoding
 

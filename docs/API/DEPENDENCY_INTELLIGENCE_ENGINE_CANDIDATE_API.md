@@ -5,9 +5,10 @@
 - Phase: 5.0 design
 - Contract version: `0.1.0`
 - Artifact version: `0.1.0`
-- Production implementation: not authorized
+- Phase 5.0.2 neutral core implementation: authorized
+- Phase 5.0.3 and production release: not authorized
 - Transport: none
-- Phase 5.0.1 spike: complete; engineering acceptance pending
+- Phase 5.0.1 spike: engineering accepted 2026-09-08
 
 This is a Go contract candidate. It is not an HTTP, gRPC, persistence, runtime,
 or authorization API.
@@ -83,6 +84,10 @@ func New(Config) (Engine, error)
 
 Zero values select documented defaults. Workers are capped at eight. Safety
 limits are bounded by implementation constants and validated before analysis.
+`MaxNodes` is a mandatory production input bound: the core must enforce it
+before publishing any graph and return `limit_exceeded` rather than silently
+inheriting the spike's unbounded-node behavior. Any deterministic omission
+policy for other bounded collections must publish exact omission counts.
 
 ## Immutable artifact access
 
@@ -196,6 +201,7 @@ Phase 5.0.1 may refine signatures using measured spike evidence. Production
 implementation begins only after the architecture package and spike evidence
 are accepted together. The public API remains `0.1.0` until stabilization.
 
-Candidate stable-ID canonical bytes and cross-platform vectors are specified
-in `DEPENDENCY_INTELLIGENCE_GOLDEN_VECTORS.md`. They remain review candidates
-until the Phase 5.0.1 evidence is accepted.
+Stable-ID canonical bytes and the accepted cross-platform node, edge, SCC, and
+cycle vectors are specified in
+`DEPENDENCY_INTELLIGENCE_GOLDEN_VECTORS.md`. Containment may not be published
+until its Phase 5.0.2 canonical identity and golden vectors are frozen.

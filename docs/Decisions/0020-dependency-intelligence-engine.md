@@ -2,15 +2,15 @@
 
 ## Status
 
-Proposed
+Accepted
 
 ## Date
 
 2026-07-31
 
-Phase 5.0 design was accepted on 2026-09-07 and authorized only the bounded
-Phase 5.0.1 design spike. The spike is complete and awaiting evidence review;
-this ADR intentionally remains `Proposed` until that review.
+Phase 5.0 design was accepted on 2026-09-07. The Phase 5.0.1 design-spike
+evidence was accepted on 2026-09-08. This acceptance authorizes only Phase
+5.0.2; Phase 5.0.3 and production release remain separately gated.
 
 ## Context
 
@@ -25,7 +25,7 @@ on higher semantic artifacts. Placing it inside Go LIE would freeze graph and
 impact policy into a language-specific contract. Re-parsing source or invoking
 build tools would duplicate accepted ownership and weaken determinism.
 
-## Proposed decision
+## Decision
 
 1. Create Dependency Intelligence as a separate downstream engine family.
 2. Make Phase 5.0 design-only and keep production implementation gated.
@@ -46,6 +46,12 @@ build tools would duplicate accepted ownership and weaken determinism.
     production implementation.
 11. Keep RIE, Go LIE, Persistence, Runtime, and Repository Service 1.0
     contracts unchanged.
+12. Treat `MaxNodes` as a mandatory production safety invariant; production
+    normalization must never inherit the spike's unbounded-node behavior.
+13. Use a two-GiB peak-live-Go-heap candidate gate for the exact 100,000-node,
+    1,000,000-edge synthetic fixture and continue reporting total allocations.
+14. Do not publish containment records until `dependency-containment-id/v1`
+    canonical fields and cross-platform golden vectors are frozen.
 
 ## Rationale
 
@@ -96,7 +102,8 @@ harder to explain. Bounded traversal over direct adjacency is sufficient.
 
 ## Acceptance gate
 
-This ADR may become `Accepted` only after the complete Phase 5.0 design package
-is reviewed. Acceptance authorizes Phase 5.0.1 Design Spike only. Production
-implementation and later milestones require their own explicit evidence review
-and authorization.
+The Phase 5.0 design package and Phase 5.0.1 evidence have been reviewed and
+accepted. The validated node, edge, SCC, and cycle vectors are frozen. Phase
+5.0.2 is authorized subject to the node-limit and containment-vector rules
+above. Phase 5.0.3 and later milestones require separate evidence review and
+explicit authorization.

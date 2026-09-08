@@ -61,11 +61,11 @@ authorization.
 Intelligence engines remain database-independent.
 
 Phase 5.0 defines the accepted **Dependency Intelligence Engine** architecture.
-The Phase 5.0.1 design spike is complete and awaiting engineering review. It
-validates deterministic module, package, and file
+The Phase 5.0.1 design spike was engineering accepted on 2026-09-08. It
+validated deterministic module, package, and file
 dependency graphs, strongly connected components, cycles, and bounded impact
-evidence from released immutable artifacts. Production implementation remains
-unauthorized.
+evidence from released immutable artifacts. Only Phase 5.0.2, the neutral
+graph artifact and core, is authorized; Phase 5.0.3 and release remain gated.
 
 ## Run RIE
 
@@ -162,8 +162,9 @@ The command emits the versioned JSON schema `1.0.0`.
 Persistence Port, PostgreSQL Adapter, Runtime Infrastructure, and Repository
 Service are frozen at **1.0.0**. The Kubernetes larger-host qualification
 remains documented and append-only. Phase 5.0 Dependency Intelligence design
-is accepted. The Phase 5.0.1 design spike and its candidate golden vectors are
-complete and ready for engineering review. ADR 0020 remains Proposed, Phase
-5.0.2 is not authorized, and no production Dependency Intelligence package
-exists. Phase 4.1 transport, HTTP health endpoints, REST/gRPC implementation,
+is accepted. The Phase 5.0.1 spike is accepted, ADR 0020 is Accepted, and its
+node/edge/SCC/cycle vectors and two-GiB synthetic heap gate are frozen. Phase
+5.0.2 is authorized with mandatory `MaxNodes` enforcement and containment-ID
+vectors before containment publication. Phase 5.0.3 and release remain
+unauthorized. Phase 4.1 transport, HTTP health endpoints, REST/gRPC implementation,
 UI, LLM, patch generation, and repository mutation remain unauthorized.
