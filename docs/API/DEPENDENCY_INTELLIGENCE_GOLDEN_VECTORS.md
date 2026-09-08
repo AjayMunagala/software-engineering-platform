@@ -3,13 +3,13 @@
 ## Status
 
 - Phase: 5.0.1 design spike, engineering accepted 2026-09-08
-- Contract: frozen for the listed node, edge, SCC, and cycle vectors
-- ID schemes: frozen `v1` for the listed schemes
+- Contract: frozen for the listed node, edge, containment, SCC, and cycle vectors
+- ID schemes: frozen `v1` for all five listed schemes
 - Production release: not authorized
 
 These vectors remove ambiguity from the candidate ID representation. The
 design-spike evidence was accepted on 2026-09-08, so the listed node, edge,
-SCC, and cycle values are frozen production acceptance conditions.
+containment, SCC, and cycle values are frozen production acceptance conditions.
 
 ## Canonical segment encoding
 
@@ -36,12 +36,12 @@ Repository paths are slash-normalized and repository-relative before encoding.
 |---|---|
 | `dependency-node-id/v1` | node kind, language, qualified name, repository path, resolution |
 | `dependency-edge-id/v1` | graph kind, dependency kind, source node ID, target node ID, resolution |
+| `dependency-containment-id/v1` | containment kind, parent node ID, child node ID |
 | `dependency-scc-id/v1` | graph kind, canonically sorted member node IDs |
 | `dependency-cycle-id/v1` | graph kind, SCC ID |
 
-Containment identity remains scheduled for the Phase 5.0.2 model milestone; it
-must use the same segment encoding and receive separate golden vectors before
-publication.
+Containment identity was frozen during Phase 5.0.2 before production
+containment publication.
 
 ## Golden vectors
 
@@ -66,6 +66,20 @@ Edge output using the node above, target
 
 ```text
 dependency-edge-id/v1:sha256:bf8b464f5cbb5551b28068da1445e8e45359e2586f860ede189d9ac68b4c8ad1
+```
+
+Containment input:
+
+```text
+kind=module_contains_package
+parent_id=dependency-node-id/v1:sha256:parent
+child_id=dependency-node-id/v1:sha256:child
+```
+
+Containment output:
+
+```text
+dependency-containment-id/v1:sha256:3b47d635724cdb8ab06ff0319c2ded1e67d1289fc6a92df92a02a0c29f0c4334
 ```
 
 Package SCC with sorted member IDs `a` and `β`:

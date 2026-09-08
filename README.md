@@ -64,8 +64,9 @@ Phase 5.0 defines the accepted **Dependency Intelligence Engine** architecture.
 The Phase 5.0.1 design spike was engineering accepted on 2026-09-08. It
 validated deterministic module, package, and file
 dependency graphs, strongly connected components, cycles, and bounded impact
-evidence from released immutable artifacts. Only Phase 5.0.2, the neutral
-graph artifact and core, is authorized; Phase 5.0.3 and release remain gated.
+evidence from released immutable artifacts. Phase 5.0.2, the neutral graph
+artifact and core, is a completed review candidate; Phase 5.0.3 and release
+remain gated.
 
 ## Run RIE
 
@@ -155,6 +156,7 @@ The command emits the versioned JSON schema `1.0.0`.
 - [Dependency Intelligence validation architecture](docs/Architecture/DEPENDENCY_INTELLIGENCE_VALIDATION_ARCHITECTURE.md)
 - [Dependency Intelligence validation plan](docs/Validation/DEPENDENCY_INTELLIGENCE_ENGINE_VALIDATION_PLAN.md)
 - [Phase 5.0.1 Dependency Intelligence design-spike report](docs/Validation/DEPENDENCY_INTELLIGENCE_DESIGN_SPIKE_REPORT.md)
+- [Phase 5.0.2 neutral graph core validation](docs/Validation/DEPENDENCY_INTELLIGENCE_CORE_VALIDATION_REPORT.md)
 - [Complete project tests, metrics, and remaining work](PROJECT_TESTS_METRICS_AND_REMAINING_WORK.txt)
 
 ## Next milestone
@@ -164,7 +166,7 @@ Service are frozen at **1.0.0**. The Kubernetes larger-host qualification
 remains documented and append-only. Phase 5.0 Dependency Intelligence design
 is accepted. The Phase 5.0.1 spike is accepted, ADR 0020 is Accepted, and its
 node/edge/SCC/cycle vectors and two-GiB synthetic heap gate are frozen. Phase
-5.0.2 is authorized with mandatory `MaxNodes` enforcement and containment-ID
-vectors before containment publication. Phase 5.0.3 and release remain
+5.0.2 implementation and local validation are complete with mandatory
+`MaxNodes` enforcement and a frozen containment-ID vector. Phase 5.0.3 and release remain
 unauthorized. Phase 4.1 transport, HTTP health endpoints, REST/gRPC implementation,
 UI, LLM, patch generation, and repository mutation remain unauthorized.

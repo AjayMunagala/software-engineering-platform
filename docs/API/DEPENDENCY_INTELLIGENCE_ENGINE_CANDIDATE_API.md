@@ -5,7 +5,7 @@
 - Phase: 5.0 design
 - Contract version: `0.1.0`
 - Artifact version: `0.1.0`
-- Phase 5.0.2 neutral core implementation: authorized
+- Phase 5.0.2 neutral core implementation: complete review candidate
 - Phase 5.0.3 and production release: not authorized
 - Transport: none
 - Phase 5.0.1 spike: engineering accepted 2026-09-08

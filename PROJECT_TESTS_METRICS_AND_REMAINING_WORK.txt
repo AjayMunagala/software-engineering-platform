@@ -1671,3 +1671,53 @@ Next governance:
   - implement and validate only Phase 5.0.2 Neutral Graph Artifact and Core;
   - enforce MaxNodes and freeze containment vectors before publication;
   - keep Phase 5.0.3 and later milestones unauthorized.
+
+======================================================================
+29. PHASE 5.0.2 NEUTRAL GRAPH ARTIFACT AND CORE
+======================================================================
+
+Status on 2026-09-08:
+  - implementation and local validation: COMPLETE REVIEW CANDIDATE;
+  - engineering acceptance: PENDING;
+  - Phase 5.0.3 and production release: UNAUTHORIZED.
+
+Production packages:
+  backend/die/
+  backend/die/conformance/
+
+Implemented:
+  - immutable DependencyInventory 0.1.0 and detached JSON view;
+  - neutral node, containment, dependency, evidence, diagnostic, and
+    statistics models;
+  - deterministic normalization, ordering, duplicate aggregation, occurrence
+    counts, and omission counts;
+  - hard MaxNodes failure before artifact publication;
+  - bounded edges, containment, evidence, and diagnostics;
+  - stable error kinds/codes and cancellation semantics;
+  - reusable adapter-neutral conformance harness;
+  - no Go adapter or platform integration.
+
+Frozen Phase 5.0.2 containment vector:
+  dependency-containment-id/v1:sha256:
+  3b47d635724cdb8ab06ff0319c2ded1e67d1289fc6a92df92a02a0c29f0c4334
+
+Quality evidence:
+  - Windows and Ubuntu functional tests/vet/race: PASS, zero races;
+  - full backend regression on Windows and Ubuntu: PASS;
+  - core coverage: 88.3%;
+  - conformance coverage: 86.2%;
+  - bounded fuzzing: 919,477 executions, zero panics.
+
+100,000-node / 1,000,000-edge evidence:
+  - Windows benchmark: 3.027 s, 1,451,668,928 B/op, 14,708,786 allocs/op;
+  - Ubuntu benchmark: 3.681 s, 1,451,702,280 B/op, 14,708,758 allocs/op;
+  - Windows sampled scale: 4.191 s, peak heap 1,026,210,664 bytes;
+  - Ubuntu sampled scale: 4.573 s, peak heap 1,029,284,928 bytes;
+  - both hosts pass the 30-second and two-GiB candidate gates;
+  - allocation bytes improved from about 2.77 GB in the spike to 1.45 GB.
+
+Remaining governance:
+  - engineering review of the committed Phase 5.0.2 evidence;
+  - Phase 5.0.3 requires explicit acceptance and authorization;
+  - SCC/cycle algorithms, Go adapter, integration, validation, and release
+    remain separately gated.

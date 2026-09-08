@@ -2,10 +2,10 @@
 
 ## Status
 
-- Phase: 5.0 design
+- Phase: 5.0.2 neutral artifact implementation
 - Artifact: `dependency-inventory`
 - Candidate version: `0.1.0`
-- Stable-ID schemes: node/edge/SCC/cycle frozen; containment pending Phase 5.0.2 vector
+- Stable-ID schemes: node/edge/containment/SCC/cycle frozen
 
 ## Design goals
 
@@ -222,16 +222,15 @@ Candidate schemes:
 - `dependency-cycle-id/v1`.
 
 The node, edge, SCC, and cycle schemes were frozen by the accepted Phase 5.0.1
-evidence. Containment publication is prohibited until Phase 5.0.2 freezes its
-ordered logical fields and cross-platform `dependency-containment-id/v1`
-golden vectors.
+evidence. Phase 5.0.2 froze containment as `kind`, `parent node ID`, and `child
+node ID` with its cross-platform `dependency-containment-id/v1` golden vector
+before publishing containment records.
 
 Each ID is derived from a domain-separated canonical byte sequence containing
 only stable logical identity, never display text, slice position, host path,
 worker count, timestamps, or database keys. Phase 5.0.1 established unsigned
 64-bit big-endian UTF-8 byte-length-prefixed segments and the candidate vectors
-in `docs/API/DEPENDENCY_INTELLIGENCE_GOLDEN_VECTORS.md`. Engineering acceptance
-must freeze them before production implementation.
+in `docs/API/DEPENDENCY_INTELLIGENCE_GOLDEN_VECTORS.md`.
 
 Changing a frozen identity algorithm requires a new scheme version, parallel
 publication during migration, and explicit consumer migration guidance.

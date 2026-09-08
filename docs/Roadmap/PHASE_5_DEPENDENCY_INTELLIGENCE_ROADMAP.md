@@ -6,7 +6,7 @@
 - Phase 5.0 design: accepted on 2026-09-07
 - ADR 0020: Accepted on 2026-09-08
 - Phase 5.0.1 design spike: engineering accepted on 2026-09-08
-- Phase 5.0.2 neutral graph artifact and core: authorized
+- Phase 5.0.2 neutral graph artifact and core: implementation complete, pending engineering acceptance
 - Phase 5.0.3 and later: not authorized
 - Production release: not authorized
 - Date: 2026-09-08
@@ -91,6 +91,9 @@ this milestone. The 100,000-node/1,000,000-edge fixture has a candidate
 two-GiB peak-live-Go-heap gate; total allocations must also be reported.
 
 No Go adapter, persistence, runtime, service, transport, or UI integration.
+
+Implementation and local validation are complete. This status does not
+authorize Phase 5.0.3; engineering acceptance remains required.
 
 ## Phase 5.0.3 - Go dependency adapter
 
