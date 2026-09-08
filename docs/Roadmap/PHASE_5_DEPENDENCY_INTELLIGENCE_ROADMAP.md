@@ -7,8 +7,9 @@
 - ADR 0020: Accepted on 2026-09-08
 - Phase 5.0.1 design spike: engineering accepted on 2026-09-08
 - Phase 5.0.2 neutral graph artifact and core: engineering accepted on 2026-09-08
-- Phase 5.0.3 design: prepared for engineering review
-- Phase 5.0.3 implementation and later milestones: not authorized
+- Phase 5.0.3 design: approved on 2026-09-08
+- Phase 5.0.3 implementation: authorized
+- Phase 5.0.4 and later milestones: not authorized
 - Production release: not authorized
 - Date: 2026-09-08
 
@@ -106,8 +107,11 @@ Design package (review candidate):
 - `docs/Decisions/0021-go-dependency-adapter.md` (Proposed);
 - `docs/Validation/GO_DEPENDENCY_ADAPTER_VALIDATION_PLAN.md`.
 
-No implementation has started. Explicit design approval is required before
-the implementation scope below may begin.
+Design commit `4b77de2034af7619704d8df5f5f65ef31b5dd552` was approved on
+2026-09-08. Only the implementation scope below is authorized. Boundary-name
+vectors are frozen in `docs/API/GO_DEPENDENCY_BOUNDARY_GOLDEN_VECTORS.md`
+before production encoding. ADR 0021 remains Proposed until implementation
+evidence receives engineering acceptance.
 
 Implement:
 
@@ -180,5 +184,5 @@ limits. Fix only compatible defects and record known limitations.
 
 Every milestone is separately gated: design, review, implementation,
 validation, engineering acceptance, then commit/release. Phase 5.0.2 is
-closed and accepted. No later milestone is currently authorized; Phase 5.0.3
+closed and accepted. Phase 5.0.3 implementation is authorized; Phase 5.0.4
 and production release remain unauthorized.

@@ -2,8 +2,9 @@
 
 ## Status
 
-Proposed, 2026-09-08. Design review only. Phase 5.0.3 implementation and every
-later milestone remain unauthorized. ADR 0020 remains Accepted.
+Proposed, 2026-09-08. Engineering approved the design and authorized Phase
+5.0.3 implementation. This ADR remains Proposed until implementation evidence
+is accepted. Every later milestone remains unauthorized. ADR 0020 is Accepted.
 
 ## Context
 
