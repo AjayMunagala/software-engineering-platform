@@ -1,7 +1,8 @@
 # Go Dependency Adapter Candidate API
 
-Implementation candidate `0.1.0`, 2026-09-08. Design approved; engineering
-acceptance of implementation evidence is pending.
+Implementation candidate `0.1.0`. Design and implementation evidence at
+`a0a1a779734b23a0f6c2a8f711130063822a9761` are engineering accepted.
+This is not a production release or authorization for Phase 5.0.4.
 This specification specializes the earlier engine API for Phase 5.0.3;
 `backend/die` stays the accepted neutral core.
 

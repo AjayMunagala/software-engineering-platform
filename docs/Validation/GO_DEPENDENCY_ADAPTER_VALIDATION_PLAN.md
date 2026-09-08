@@ -2,7 +2,8 @@
 
 Approved design plan, 2026-09-08. Phase 5.0.3 implementation and validation
 were explicitly authorized. Execution evidence is recorded separately in
-`GO_DEPENDENCY_ADAPTER_VALIDATION_REPORT.md`; implementation acceptance is pending.
+`GO_DEPENDENCY_ADAPTER_VALIDATION_REPORT.md`; implementation commit `a0a1a77`
+and its evidence are engineering accepted. Later milestones remain unauthorized.
 
 ## Order and controlled fixtures
 

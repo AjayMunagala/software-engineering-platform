@@ -1763,8 +1763,9 @@ Latest state (supersedes the earlier design-only entry), 2026-09-08:
   - design commit 4b77de2034af7619704d8df5f5f65ef31b5dd552: APPROVED;
   - independent boundary vectors committed FIRST in 7eb2a98;
   - implementation and local validation: COMPLETE;
-  - engineering acceptance: PENDING;
-  - candidate version: 0.1.0; ADR 0021: still PROPOSED;
+  - engineering acceptance: ACCEPTED at implementation commit
+    a0a1a779734b23a0f6c2a8f711130063822a9761;
+  - candidate version: 0.1.0 (not a release); ADR 0021: ACCEPTED;
   - Phase 5.0.4, algorithms, integration, and release: UNAUTHORIZED.
 
 Delivered:
@@ -1810,5 +1811,8 @@ Limitations:
 Full evidence and commands:
   docs/Validation/GO_DEPENDENCY_ADAPTER_VALIDATION_REPORT.md
 
-Next: engineering review of the committed GitHub implementation only.
-Do not begin Phase 5.0.4 or promote ADR 0021 without explicit acceptance.
+Engineering explicitly accepted the committed implementation and its evidence.
+This governance update records that acceptance; it adds no new test results.
+All recorded limitations and both direct-core hardening items remain unchanged.
+Phase 5.0.4 design is a separate future milestone, not started by this update.
+Do not begin Phase 5.0.4, algorithms, integration, or release without authorization.

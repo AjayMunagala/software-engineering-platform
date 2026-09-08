@@ -8,7 +8,8 @@
 - Phase 5.0.1 design spike: engineering accepted on 2026-09-08
 - Phase 5.0.2 neutral graph artifact and core: engineering accepted on 2026-09-08
 - Phase 5.0.3 design: approved on 2026-09-08
-- Phase 5.0.3 implementation: completed locally; engineering acceptance pending
+- Phase 5.0.3 implementation: engineering accepted at `a0a1a779734b23a0f6c2a8f711130063822a9761`
+- ADR 0021: Accepted; candidate version remains 0.1.0
 - Phase 5.0.4 and later milestones: not authorized
 - Production release: not authorized
 - Date: 2026-09-08
@@ -104,14 +105,14 @@ Approved design package:
 
 - `docs/Architecture/GO_DEPENDENCY_ADAPTER.md`;
 - `docs/API/GO_DEPENDENCY_ADAPTER_CANDIDATE_API.md`;
-- `docs/Decisions/0021-go-dependency-adapter.md` (Proposed);
+- `docs/Decisions/0021-go-dependency-adapter.md` (Accepted);
 - `docs/Validation/GO_DEPENDENCY_ADAPTER_VALIDATION_PLAN.md`.
 
 Design commit `4b77de2034af7619704d8df5f5f65ef31b5dd552` was approved on
 2026-09-08. Only the implementation scope below is authorized. Boundary-name
 vectors are frozen in `docs/API/GO_DEPENDENCY_BOUNDARY_GOLDEN_VECTORS.md`
-before production encoding. ADR 0021 remains Proposed until implementation
-evidence receives engineering acceptance.
+before production encoding in `7eb2a98`. Engineering has now accepted the
+implementation evidence and explicitly authorized ADR 0021 promotion.
 
 Implement:
 
@@ -124,10 +125,12 @@ Implement:
 
 The adapter does not parse files, manifests, or ASTs and does not run Go tools.
 
-The implementation and measured evidence are submitted in
+The accepted implementation and measured evidence are recorded in
 `docs/Validation/GO_DEPENDENCY_ADAPTER_VALIDATION_REPORT.md`. Candidate version
-remains 0.1.0, ADR 0021 remains Proposed, and engineering acceptance is pending.
-No later milestone or release is authorized by completion of these tests.
+remains 0.1.0; ADR 0021 is Accepted. The reviewed implementation commit is
+`a0a1a779734b23a0f6c2a8f711130063822a9761`. Both direct-core hardening items
+and all documented limitations remain open/recorded. No later milestone or
+release is authorized by this acceptance.
 
 ## Phase 5.0.4 - SCC, cycles, and impact
 
@@ -189,5 +192,5 @@ limits. Fix only compatible defects and record known limitations.
 
 Every milestone is separately gated: design, review, implementation,
 validation, engineering acceptance, then commit/release. Phase 5.0.2 is
-closed and accepted. Phase 5.0.3 implementation is authorized; Phase 5.0.4
+closed and accepted. Phase 5.0.3 is also closed and engineering accepted; Phase 5.0.4
 and production release remain unauthorized.

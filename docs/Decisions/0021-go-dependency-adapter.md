@@ -2,13 +2,15 @@
 
 ## Status
 
-Proposed, 2026-09-08. Engineering approved the design and authorized Phase
-5.0.3 implementation. This ADR remains Proposed until implementation evidence
-is accepted. Every later milestone remains unauthorized. ADR 0020 is Accepted.
+Accepted. Engineering accepted Phase 5.0.3 implementation commit
+`a0a1a779734b23a0f6c2a8f711130063822a9761` and its validation evidence,
+explicitly authorizing promotion of this ADR from Proposed to Accepted.
+The candidate remains 0.1.0, not a production release. Phase 5.0.4, SCC/cycle/
+impact algorithms, integration, and release remain unauthorized.
 
-Implementation evidence is now submitted in
-`docs/Validation/GO_DEPENDENCY_ADAPTER_VALIDATION_REPORT.md`. This submission
-does not promote this ADR or authorize Phase 5.0.4.
+Evidence: `docs/Validation/GO_DEPENDENCY_ADAPTER_VALIDATION_REPORT.md`.
+DIE-HARDEN-001 and DIE-HARDEN-002 remain open; the documented memory,
+cancellation, provenance, and performance limitations remain accepted limitations.
 
 ## Context
 
@@ -17,9 +19,9 @@ reference interpretation belongs in a separate adapter. The isolated spike
 proved feasibility but did not define production proof validation, limits, or
 complete handling of partial upstream facts.
 
-## Proposed decision
+## Decision
 
-1. Introduce `backend/die/golang` after approval. Consume four released 1.0.0
+1. Introduce `backend/die/golang`. Consume four released 1.0.0
    artifacts through public immutable accessors and call the neutral core once.
 2. Validate stored metadata, identity joins, snapshot membership, and available
    file digests. Document that name/version references cannot prove same-scan
@@ -51,7 +53,8 @@ artifact fields, storage contract, runtime dependency, or algorithm milestone.
 
 ## Acceptance gate
 
-Review the architecture, candidate API, and validation plan together. An
-explicit engineering decision must authorize implementation. Updating this
-document alone does not grant that authority. Implementation evidence must
-then pass its own review before Phase 5.0.3 is accepted.
+Satisfied by explicit engineering review of the committed implementation and
+validation evidence at `a0a1a779734b23a0f6c2a8f711130063822a9761`.
+Boundary vectors were independently frozen first in `7eb2a98`.
+This acceptance closes Phase 5.0.3 only. A separate Phase 5.0.4 design milestone
+and explicit authorization are required before any later work begins.

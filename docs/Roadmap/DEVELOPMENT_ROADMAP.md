@@ -143,8 +143,8 @@ Detailed milestones are defined in
   containment golden vector.
 - Bounded intermediate evidence accumulation and explicit nil-context handling
   are required release-hardening items.
-- Phase 5.0.3 design is approved; authorized implementation and local validation
-  are complete and submitted for engineering acceptance under Proposed ADR 0021.
+- Phase 5.0.3 implementation commit `a0a1a77` and its validation evidence are
+  engineering accepted; ADR 0021 is Accepted. Candidate 0.1.0 is not a release.
 - Phase 5.0.4 and later milestones, including production release, remain
   unauthorized. Direct-core hardening items remain open.
 

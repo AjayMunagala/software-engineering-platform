@@ -1,8 +1,11 @@
 # Phase 5.0.3 — Go Dependency Adapter Validation
 
 Date: 2026-09-08. Candidate version: **0.1.0**.
-Status: implementation evidence submitted for engineering acceptance.
-ADR 0021 remains **Proposed**. Phase 5.0.4 and production release are not authorized.
+Status: **Engineering accepted** for implementation commit
+[`a0a1a779734b23a0f6c2a8f711130063822a9761`](https://github.com/AjayMunagala/software-engineering-platform/commit/a0a1a779734b23a0f6c2a8f711130063822a9761).
+ADR 0021 is **Accepted**. Candidate 0.1.0 is not a production release.
+Phase 5.0.4, algorithms, integration, and release remain unauthorized.
+The measurements below are the original submitted evidence, not new test runs.
 
 ## Traceability and scope
 
@@ -12,7 +15,8 @@ The independent boundary vectors were frozen and pushed in
 [`7eb2a98271499f381dd60ca773ab1e6f02a11b01`](https://github.com/AjayMunagala/software-engineering-platform/commit/7eb2a98271499f381dd60ca773ab1e6f02a11b01)
 before production encoding. Expected hashes were computed using a standalone
 PowerShell/.NET byte encoder, not the Go implementation under test. The GitHub
-commit containing this report is the implementation review unit.
+implementation review unit is `a0a1a779734b23a0f6c2a8f711130063822a9761`;
+the subsequent governance commit records acceptance without changing that evidence.
 
 The new eight-file `backend/die/golang` package consumes released immutable
 artifacts, validates joins, translates Go facts, and invokes `die.Core.Normalize`.
@@ -177,7 +181,7 @@ Kubernetes qualification. Windows sampling overlapped other validation work.
 6. Module lookup walks declared ancestor roots instead of comparing every
    package against every module; the unused earlier ancestry helper was removed.
 
-## Limitations and review decision requested
+## Accepted limitations and governance decision
 
 - No cryptographic same-scan proof or present filesystem freshness is available.
 - Byte memory is not capped by count budgets; released clones precede size checks.
@@ -187,6 +191,9 @@ Kubernetes qualification. Windows sampling overlapped other validation work.
 - No production release, SCC/cycle/impact, language expansion, or platform
   integration was implemented or authorized.
 
-Request engineering acceptance of **Phase 5.0.3 only** based on the GitHub
-implementation commit. Do not promote ADR 0021 or progress the roadmap by
-assuming acceptance from this report.
+Engineering explicitly accepted **Phase 5.0.3 only** after reviewing the GitHub
+implementation commit and this evidence. ADR 0021 is promoted to Accepted.
+The limitations above are accepted, not blockers for this milestone; the two
+direct-core hardening obligations remain open. No new performance gate or
+release approval is implied. Phase 5.0.4 design is a separate future milestone;
+this governance update does not begin it.

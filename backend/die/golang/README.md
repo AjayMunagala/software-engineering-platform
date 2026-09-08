@@ -1,7 +1,8 @@
 # Go Dependency Adapter — candidate 0.1.0
 
 Phase 5.0.3 translates released immutable RIE/Go LIE artifacts into the accepted
-neutral graph core. Engineering acceptance is pending; this is not a release.
+neutral graph core. Implementation commit `a0a1a77` is engineering accepted;
+ADR 0021 is Accepted. Candidate 0.1.0 is not a production release.
 
 ## Use
 
