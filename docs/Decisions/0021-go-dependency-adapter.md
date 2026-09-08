@@ -6,6 +6,10 @@ Proposed, 2026-09-08. Engineering approved the design and authorized Phase
 5.0.3 implementation. This ADR remains Proposed until implementation evidence
 is accepted. Every later milestone remains unauthorized. ADR 0020 is Accepted.
 
+Implementation evidence is now submitted in
+`docs/Validation/GO_DEPENDENCY_ADAPTER_VALIDATION_REPORT.md`. This submission
+does not promote this ADR or authorize Phase 5.0.4.
+
 ## Context
 
 The accepted neutral core normalizes generic graph candidates. Go import and

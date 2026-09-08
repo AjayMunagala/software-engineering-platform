@@ -8,7 +8,7 @@
 - Phase 5.0.1 design spike: engineering accepted on 2026-09-08
 - Phase 5.0.2 neutral graph artifact and core: engineering accepted on 2026-09-08
 - Phase 5.0.3 design: approved on 2026-09-08
-- Phase 5.0.3 implementation: authorized
+- Phase 5.0.3 implementation: completed locally; engineering acceptance pending
 - Phase 5.0.4 and later milestones: not authorized
 - Production release: not authorized
 - Date: 2026-09-08
@@ -100,7 +100,7 @@ does not authorize Phase 5.0.3.
 
 ## Phase 5.0.3 - Go dependency adapter
 
-Design package (review candidate):
+Approved design package:
 
 - `docs/Architecture/GO_DEPENDENCY_ADAPTER.md`;
 - `docs/API/GO_DEPENDENCY_ADAPTER_CANDIDATE_API.md`;
@@ -123,6 +123,11 @@ Implement:
 - deterministic evidence translation.
 
 The adapter does not parse files, manifests, or ASTs and does not run Go tools.
+
+The implementation and measured evidence are submitted in
+`docs/Validation/GO_DEPENDENCY_ADAPTER_VALIDATION_REPORT.md`. Candidate version
+remains 0.1.0, ADR 0021 remains Proposed, and engineering acceptance is pending.
+No later milestone or release is authorized by completion of these tests.
 
 ## Phase 5.0.4 - SCC, cycles, and impact
 

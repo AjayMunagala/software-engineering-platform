@@ -143,10 +143,10 @@ Detailed milestones are defined in
   containment golden vector.
 - Bounded intermediate evidence accumulation and explicit nil-context handling
   are required release-hardening items.
-- Phase 5.0.3 and later milestones, including production release, remain
-  unauthorized.
-- Phase 5.0.3 design package is ready for review under Proposed ADR 0021.
-  Implementation awaits an explicit engineering design decision.
+- Phase 5.0.3 design is approved; authorized implementation and local validation
+  are complete and submitted for engineering acceptance under Proposed ADR 0021.
+- Phase 5.0.4 and later milestones, including production release, remain
+  unauthorized. Direct-core hardening items remain open.
 
 Detailed milestones are defined in
 `docs/Roadmap/PHASE_5_DEPENDENCY_INTELLIGENCE_ROADMAP.md`.

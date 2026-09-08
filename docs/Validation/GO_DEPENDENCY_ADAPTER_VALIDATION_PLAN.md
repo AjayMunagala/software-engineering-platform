@@ -1,7 +1,8 @@
 # Phase 5.0.3 Go Dependency Adapter Validation Plan
 
-Design review candidate, 2026-09-08. No execution evidence is claimed here.
-Implementation and validation execution await explicit design approval.
+Approved design plan, 2026-09-08. Phase 5.0.3 implementation and validation
+were explicitly authorized. Execution evidence is recorded separately in
+`GO_DEPENDENCY_ADAPTER_VALIDATION_REPORT.md`; implementation acceptance is pending.
 
 ## Order and controlled fixtures
 
@@ -68,5 +69,4 @@ closed without their separate tests and accepted implementation changes.
 After authorized implementation, publish a validation report with commands,
 results, defects, limitations, and commit URL. Request Phase 5.0.3 acceptance.
 No version promotion, release tag, or Phase 5.0.4 implementation follows
-automatically. This design commit contains no tests run or metrics for an
-adapter that has not yet been implemented.
+automatically. This plan is not itself an engineering acceptance decision.

@@ -65,11 +65,14 @@ The Phase 5.0.1 design spike was engineering accepted on 2026-09-08. It
 validated deterministic module, package, and file
 dependency graphs, strongly connected components, cycles, and bounded impact
 evidence from released immutable artifacts. Phase 5.0.2, the neutral graph
-artifact and core, was engineering accepted on 2026-09-08. Phase 5.0.3 and
-release remain unauthorized.
+artifact and core, was engineering accepted on 2026-09-08. Phase 5.0.3 design
+was approved and its implementation explicitly authorized. Release remains
+unauthorized.
 
-The Phase 5.0.3 Go Dependency Adapter design package is ready for engineering
-review. ADR 0021 is Proposed; adapter implementation has not started.
+The Phase 5.0.3 Go Dependency Adapter implementation and
+[validation evidence](docs/Validation/GO_DEPENDENCY_ADAPTER_VALIDATION_REPORT.md)
+are ready for engineering review. ADR 0021 remains Proposed and the candidate
+stays 0.1.0. Phase 5.0.4 and later remain unauthorized.
 
 ## Run RIE
 
@@ -176,6 +179,7 @@ is accepted. The Phase 5.0.1 spike is accepted, ADR 0020 is Accepted, and its
 node/edge/SCC/cycle vectors and two-GiB synthetic heap gate are frozen. Phase
 5.0.2 is accepted with mandatory `MaxNodes` enforcement and a frozen
 containment-ID vector. Intermediate evidence bounds and nil-context handling
-remain required release-hardening items. Phase 5.0.3 and release remain
+remain required direct-core release-hardening items. Phase 5.0.3 implementation
+acceptance is pending; Phase 5.0.4 and release remain
 unauthorized. Phase 4.1 transport, HTTP health endpoints, REST/gRPC implementation,
 UI, LLM, patch generation, and repository mutation remain unauthorized.

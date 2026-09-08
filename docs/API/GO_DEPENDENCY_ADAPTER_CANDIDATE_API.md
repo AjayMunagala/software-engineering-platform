@@ -1,12 +1,13 @@
 # Go Dependency Adapter Candidate API
 
-Design candidate `0.1.0`, 2026-09-08. Implementation is not authorized.
+Implementation candidate `0.1.0`, 2026-09-08. Design approved; engineering
+acceptance of implementation evidence is pending.
 This specification specializes the earlier engine API for Phase 5.0.3;
 `backend/die` stays the accepted neutral core.
 
 ## Proposed package and surface
 
-Package: `backend/die/golang` (not created by this design).
+Package: `backend/die/golang`.
 
 ```go
 type InputParams struct {
@@ -56,6 +57,8 @@ the initial translator is serial and deterministic.
 
 Records include every extracted file, package, module, context, proof,
 declaration, reference, binding, and diagnostic processed by the adapter;
+they also include snapshot entries, nested membership/candidate IDs and kinds,
+syntax imports, and generated containment/edge/diagnostic contributions.
 evidence includes all extracted proof/module/context evidence and generated
 graph evidence contributions. Arithmetic is checked for overflow. Budgets do
 not authorize source or evidence truncation before canonical normalization.
@@ -88,7 +91,9 @@ big-endian length-prefixed UTF-8 segments of domain, importing package ID,
 context ID (empty when unavailable), and import path, hashed as lowercase SHA-256
 and prefixed with that domain. Resolution also remains part of the frozen node
 ID. Commit Unicode, empty-context, and collision-separation vectors before
-emitting this boundary identity during authorized implementation.
+emitting this boundary identity during authorized implementation. That gate was
+completed in commit `7eb2a98271499f381dd60ca773ab1e6f02a11b01`; the independently
+computed vectors are in `GO_DEPENDENCY_BOUNDARY_GOLDEN_VECTORS.md`.
 
 The candidate stays `0.1.0`. SCC/cycle/impact APIs are outside this milestone.
 The two core hardening backlog items remain open until their own closure tests

@@ -2,10 +2,12 @@
 
 ## Status and review boundary
 
-Design review candidate, 2026-09-08. Phase 5.0.2 is accepted at
+Design approved, implementation review candidate, 2026-09-08. Phase 5.0.2 is accepted at
 `e8c78a2b762131bd679c007ea2d26b73c67bd475`; governance commit `5f32d905`
-records that acceptance. This package proposes Phase 5.0.3 only. Implementation,
-Phase 5.0.4 algorithms, integration, and production release remain unauthorized.
+records that acceptance. Phase 5.0.3 implementation was explicitly authorized;
+its evidence is in `docs/Validation/GO_DEPENDENCY_ADAPTER_VALIDATION_REPORT.md`.
+Engineering acceptance remains pending. Phase 5.0.4 algorithms, integration,
+and production release remain unauthorized.
 
 Review this document with `GO_DEPENDENCY_ADAPTER_CANDIDATE_API.md`, ADR 0021,
 and `GO_DEPENDENCY_ADAPTER_VALIDATION_PLAN.md`.

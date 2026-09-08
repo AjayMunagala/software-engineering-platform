@@ -1754,3 +1754,61 @@ Design decisions proposed:
 This documentation-only milestone has no adapter implementation or new
 execution metrics. The next step is engineering design review of its GitHub
 commit before any production Go adapter code is written.
+
+======================================================================
+31. PHASE 5.0.3 GO DEPENDENCY ADAPTER IMPLEMENTATION
+======================================================================
+
+Latest state (supersedes the earlier design-only entry), 2026-09-08:
+  - design commit 4b77de2034af7619704d8df5f5f65ef31b5dd552: APPROVED;
+  - independent boundary vectors committed FIRST in 7eb2a98;
+  - implementation and local validation: COMPLETE;
+  - engineering acceptance: PENDING;
+  - candidate version: 0.1.0; ADR 0021: still PROPOSED;
+  - Phase 5.0.4, algorithms, integration, and release: UNAUTHORIZED.
+
+Delivered:
+  - backend/die/golang, standard eight-file layout;
+  - immutable validated inputs and configuration;
+  - module/package/file translation from released artifacts;
+  - exact joins, digests, alias/location validation, explicit uncertainty;
+  - raw record/evidence and unique-node limits; cancellation checkpoints;
+  - no source reading, engine execution, network, database, or runtime wiring.
+
+Validation:
+  - neutral conformance PASS;
+  - Windows/Ubuntu backend regression and vet PASS;
+  - Windows/Ubuntu full race PASS, no races detected;
+  - final adapter race PASS on both platforms;
+  - statement coverage 95.2%; threshold 85%;
+  - shuffle and clean-process/one-eight-worker determinism PASS;
+  - fuzz executions: 74,328 identity/path + 101,289 proof/status/budget
+    = 175,617, PASS;
+  - canonical small fixture: 8 nodes / 7 edges, identical SHA-256:
+    6e6886d02d64ae4e3a98e467a21d2f444485c3ea171681f2b8ac259ab6eb7d3e.
+
+Adapter-only benchmark (released-engine setup excluded):
+  - Windows 100 imports: 5.06-5.65 ms;
+  - Windows 1,000 imports: 96.01-98.55 ms;
+  - Windows 10,000 imports: 1.031-1.161 s;
+  - Ubuntu 10,000 imports: 0.653-0.727 s;
+  - 10,000-file sampled peak live Go heap:
+    Windows 139,540,736 bytes; Ubuntu 125,169,032 bytes;
+  - sampled peak includes live prerequisites, is not RSS or a hard byte cap;
+  - about 498-504 MB total allocations, distinct from peak live memory;
+  - output at scale: 10,003 nodes / 10,001 edges / 1,000 diagnostics /
+    29,992 omitted evidence records.
+
+Limitations:
+  - name/version references cannot prove common-scan or on-disk freshness;
+  - released unresolved vendor contexts are not overridden;
+  - standard-library classification requires explicit upstream proof;
+  - released clones/core sorting have uninterruptible work units;
+  - direct-core DIE-HARDEN-001 and DIE-HARDEN-002 remain OPEN;
+  - performance numbers are characterization, not a new approved gate.
+
+Full evidence and commands:
+  docs/Validation/GO_DEPENDENCY_ADAPTER_VALIDATION_REPORT.md
+
+Next: engineering review of the committed GitHub implementation only.
+Do not begin Phase 5.0.4 or promote ADR 0021 without explicit acceptance.
