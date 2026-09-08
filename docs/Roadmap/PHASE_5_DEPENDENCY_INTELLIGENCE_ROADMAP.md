@@ -6,7 +6,7 @@
 - Phase 5.0 design: accepted on 2026-09-07
 - ADR 0020: Accepted on 2026-09-08
 - Phase 5.0.1 design spike: engineering accepted on 2026-09-08
-- Phase 5.0.2 neutral graph artifact and core: implementation complete, pending engineering acceptance
+- Phase 5.0.2 neutral graph artifact and core: engineering accepted on 2026-09-08
 - Phase 5.0.3 and later: not authorized
 - Production release: not authorized
 - Date: 2026-09-08
@@ -92,8 +92,9 @@ two-GiB peak-live-Go-heap gate; total allocations must also be reported.
 
 No Go adapter, persistence, runtime, service, transport, or UI integration.
 
-Implementation and local validation are complete. This status does not
-authorize Phase 5.0.3; engineering acceptance remains required.
+Implementation commit `e8c78a2b762131bd679c007ea2d26b73c67bd475` and its
+validation evidence were engineering accepted on 2026-09-08. This acceptance
+does not authorize Phase 5.0.3.
 
 ## Phase 5.0.3 - Go dependency adapter
 
@@ -142,6 +143,10 @@ limits. Fix only compatible defects and record known limitations.
 
 ## Phase 5.0.7 - Stabilization and 1.0.0 freeze
 
+- bound intermediate evidence accumulation so pathological adapters cannot
+  retain an effectively unlimited pre-cap collection;
+- reject a nil analysis context through the stable error model instead of
+  allowing a panic;
 - public API and immutable artifact review;
 - identity/canonical JSON freeze;
 - correctness, dependency, security, memory, and performance audit;
@@ -163,5 +168,6 @@ limits. Fix only compatible defects and record known limitations.
 ## Governance
 
 Every milestone is separately gated: design, review, implementation,
-validation, engineering acceptance, then commit/release. Only Phase 5.0.2 is
-currently authorized. Phase 5.0.3 and production release remain unauthorized.
+validation, engineering acceptance, then commit/release. Phase 5.0.2 is
+closed and accepted. No later milestone is currently authorized; Phase 5.0.3
+and production release remain unauthorized.

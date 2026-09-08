@@ -4,7 +4,7 @@
 
 - Phase: 5.0 design
 - Design status: accepted on 2026-09-07
-- Phase 5.0.2 neutral core: complete review candidate
+- Phase 5.0.2 neutral core: engineering accepted 2026-09-08
 - Phase 5.0.3 and production release: not authorized
 - Candidate contract: `0.1.0`
 

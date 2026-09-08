@@ -5,7 +5,7 @@
 - Phase: 5.0 design
 - Contract version: `0.1.0`
 - Artifact version: `0.1.0`
-- Phase 5.0.2 neutral core implementation: complete review candidate
+- Phase 5.0.2 neutral core implementation: engineering accepted 2026-09-08
 - Phase 5.0.3 and production release: not authorized
 - Transport: none
 - Phase 5.0.1 spike: engineering accepted 2026-09-08
@@ -203,5 +203,9 @@ are accepted together. The public API remains `0.1.0` until stabilization.
 
 Stable-ID canonical bytes and the accepted cross-platform node, edge, SCC, and
 cycle vectors are specified in
-`DEPENDENCY_INTELLIGENCE_GOLDEN_VECTORS.md`. Containment may not be published
-until its Phase 5.0.2 canonical identity and golden vectors are frozen.
+`DEPENDENCY_INTELLIGENCE_GOLDEN_VECTORS.md`. Phase 5.0.2 froze containment's
+canonical identity and golden vector before publishing containment records.
+
+Before the candidate may be promoted to `1.0.0`, implementation hardening must
+bound intermediate evidence accumulation as well as published evidence, and a
+nil `context.Context` must return a stable `invalid_input` error without panic.

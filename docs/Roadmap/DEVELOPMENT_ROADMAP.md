@@ -125,7 +125,7 @@ Detailed milestones are defined in
 - Add separately approved Git, logs, database-schema, configuration,
   dependency, architecture, documentation, and testing intelligence.
 
-## Phase 5 - Dependency Intelligence Engine (Phase 5.0.2 in engineering review)
+## Phase 5 - Dependency Intelligence Engine (Phase 5.0.2 accepted)
 
 - Phase 5.0 design was accepted on 2026-09-07.
 - Define a language-neutral immutable dependency artifact and Go-backed first
@@ -138,9 +138,11 @@ Detailed milestones are defined in
 - Phase 5.0.1 design-spike evidence was engineering accepted on 2026-09-08.
 - ADR 0020 is Accepted; the validated node/edge/SCC/cycle vectors and exact
   synthetic two-GiB peak-live-heap gate are frozen.
-- Phase 5.0.2 neutral graph artifact and core implementation and local
-  validation are complete, with mandatory `MaxNodes` enforcement and a frozen
-  containment golden vector. Engineering acceptance is pending.
+- Phase 5.0.2 neutral graph artifact and core commit `e8c78a2` was engineering
+  accepted on 2026-09-08, with mandatory `MaxNodes` enforcement and a frozen
+  containment golden vector.
+- Bounded intermediate evidence accumulation and explicit nil-context handling
+  are required release-hardening items.
 - Phase 5.0.3 and later milestones, including production release, remain
   unauthorized.
 

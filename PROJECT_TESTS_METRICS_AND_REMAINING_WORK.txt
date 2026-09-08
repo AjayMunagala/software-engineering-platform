@@ -1677,8 +1677,9 @@ Next governance:
 ======================================================================
 
 Status on 2026-09-08:
-  - implementation and local validation: COMPLETE REVIEW CANDIDATE;
-  - engineering acceptance: PENDING;
+  - implementation and local validation: COMPLETE;
+  - engineering acceptance: ACCEPTED;
+  - accepted commit: e8c78a2b762131bd679c007ea2d26b73c67bd475;
   - Phase 5.0.3 and production release: UNAUTHORIZED.
 
 Production packages:
@@ -1717,7 +1718,8 @@ Quality evidence:
   - allocation bytes improved from about 2.77 GB in the spike to 1.45 GB.
 
 Remaining governance:
-  - engineering review of the committed Phase 5.0.2 evidence;
-  - Phase 5.0.3 requires explicit acceptance and authorization;
+  - bound intermediate evidence accumulation before production release;
+  - handle nil context explicitly through the stable error model;
+  - Phase 5.0.3 requires a separate explicit authorization;
   - SCC/cycle algorithms, Go adapter, integration, validation, and release
     remain separately gated.

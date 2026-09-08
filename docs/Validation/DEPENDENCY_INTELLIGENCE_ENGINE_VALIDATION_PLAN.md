@@ -4,7 +4,7 @@
 
 - Phase: 5.0 design
 - Applies to candidate: `0.1.0`
-- Execution: Phase 5.0.2 core validation authorized; later stages remain gated
+- Execution: Phase 5.0.2 accepted; no later implementation stage authorized
 
 ## Purpose
 
@@ -153,6 +153,8 @@ peak live heap, diagnostics, and omissions.
 - serialization round trips preserve exact logical content;
 - path normalization never emits an absolute/escaping path;
 - arbitrary invalid inputs fail safely without panic;
+- nil context fails through the stable error model without panic;
+- pathological duplicate evidence cannot create unbounded intermediate state;
 - traversal limits always terminate.
 
 ## Security and dependency audits

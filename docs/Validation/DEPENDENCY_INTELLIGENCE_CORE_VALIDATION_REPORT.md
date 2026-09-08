@@ -3,8 +3,9 @@
 ## Status
 
 - Date: 2026-09-08
-- Implementation: complete review candidate
-- Engineering acceptance: pending
+- Implementation: engineering accepted
+- Engineering acceptance: granted on 2026-09-08
+- Accepted commit: `e8c78a2b762131bd679c007ea2d26b73c67bd475`
 - ADR 0020: Accepted
 - Phase 5.0.3: not authorized
 - Production release: not authorized
@@ -118,5 +119,20 @@ and redacted messages rather than implementation failures or input contents.
 
 Phase 5.0.2 implementation satisfies its local functional, immutability,
 determinism, safety, cross-platform, race, coverage, fuzz, and performance
-objectives. This report requests engineering acceptance only for Phase 5.0.2.
-Phase 5.0.3 and every later milestone remain unauthorized.
+objectives. Engineering accepted Phase 5.0.2 on 2026-09-08. Phase 5.0.3 and
+every later milestone remain unauthorized.
+
+## Accepted follow-up requirements
+
+The review identified two non-blocking requirements that must close before a
+production 1.0 release:
+
+1. bound intermediate evidence accumulation, which currently uses an
+   effectively unlimited normalization limit before applying the configured
+   publication cap;
+2. reject `nil` contexts explicitly through the stable error model before
+   dereferencing the context.
+
+These findings do not invalidate Phase 5.0.2 and do not authorize adding SCC,
+cycle, impact, Go-adapter, or integration behavior to the accepted neutral
+core milestone.

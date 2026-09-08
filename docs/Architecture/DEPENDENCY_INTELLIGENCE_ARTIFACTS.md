@@ -2,7 +2,7 @@
 
 ## Status
 
-- Phase: 5.0.2 neutral artifact implementation
+- Phase: 5.0.2 neutral artifact, engineering accepted 2026-09-08
 - Artifact: `dependency-inventory`
 - Candidate version: `0.1.0`
 - Stable-ID schemes: node/edge/containment/SCC/cycle frozen
