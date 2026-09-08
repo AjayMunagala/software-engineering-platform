@@ -1723,3 +1723,34 @@ Remaining governance:
   - Phase 5.0.3 requires a separate explicit authorization;
   - SCC/cycle algorithms, Go adapter, integration, validation, and release
     remain separately gated.
+
+======================================================================
+30. PHASE 5.0.3 GO DEPENDENCY ADAPTER DESIGN
+======================================================================
+
+Status on 2026-09-08:
+  - design package: READY FOR ENGINEERING REVIEW;
+  - ADR 0021: PROPOSED;
+  - implementation: NOT STARTED / NOT AUTHORIZED;
+  - Phase 5.0.4 and production release: NOT AUTHORIZED.
+
+Review inputs:
+  docs/Architecture/GO_DEPENDENCY_ADAPTER.md
+  docs/API/GO_DEPENDENCY_ADAPTER_CANDIDATE_API.md
+  docs/Decisions/0021-go-dependency-adapter.md
+  docs/Validation/GO_DEPENDENCY_ADAPTER_VALIDATION_PLAN.md
+
+Design decisions proposed:
+  - consume four released immutable RIE/Go LIE artifacts;
+  - validate stored metadata, proof joins, and available file digests;
+  - do not claim same-scan provenance from name/version references alone;
+  - normalize module/package/file facts through the accepted neutral core;
+  - distinguish partial resolution from explicit stale evidence;
+  - retain unknown targets without guessing;
+  - bound raw adapter records/evidence and reject nil context;
+  - keep both direct-core hardening requirements open;
+  - leave SCC/cycle/impact and platform integration gated.
+
+This documentation-only milestone has no adapter implementation or new
+execution metrics. The next step is engineering design review of its GitHub
+commit before any production Go adapter code is written.

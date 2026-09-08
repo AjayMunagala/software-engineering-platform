@@ -13,6 +13,12 @@
 This is a Go contract candidate. It is not an HTTP, gRPC, persistence, runtime,
 or authorization API.
 
+The original illustrative engine/input/configuration surface below describes
+the subsystem direction. For the Phase 5.0.3 review, the concrete Go adapter
+proposal is `GO_DEPENDENCY_ADAPTER_CANDIDATE_API.md`; the implemented neutral
+`die.Core` and `die.Config` remain the Phase 5.0.2 contracts. This distinction
+does not authorize adapter implementation.
+
 ## Contract identity
 
 ```go

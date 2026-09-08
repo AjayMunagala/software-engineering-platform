@@ -68,6 +68,9 @@ evidence from released immutable artifacts. Phase 5.0.2, the neutral graph
 artifact and core, was engineering accepted on 2026-09-08. Phase 5.0.3 and
 release remain unauthorized.
 
+The Phase 5.0.3 Go Dependency Adapter design package is ready for engineering
+review. ADR 0021 is Proposed; adapter implementation has not started.
+
 ## Run RIE
 
 ```powershell
@@ -158,6 +161,10 @@ The command emits the versioned JSON schema `1.0.0`.
 - [Phase 5.0.1 Dependency Intelligence design-spike report](docs/Validation/DEPENDENCY_INTELLIGENCE_DESIGN_SPIKE_REPORT.md)
 - [Phase 5.0.2 neutral graph core validation](docs/Validation/DEPENDENCY_INTELLIGENCE_CORE_VALIDATION_REPORT.md)
 - [Dependency Intelligence required hardening](docs/Roadmap/DEPENDENCY_INTELLIGENCE_TECHNICAL_DEBT.md)
+- [Phase 5.0.3 Go adapter architecture](docs/Architecture/GO_DEPENDENCY_ADAPTER.md)
+- [Go adapter candidate API](docs/API/GO_DEPENDENCY_ADAPTER_CANDIDATE_API.md)
+- [ADR 0021 - Go dependency translation](docs/Decisions/0021-go-dependency-adapter.md)
+- [Go adapter validation plan](docs/Validation/GO_DEPENDENCY_ADAPTER_VALIDATION_PLAN.md)
 - [Complete project tests, metrics, and remaining work](PROJECT_TESTS_METRICS_AND_REMAINING_WORK.txt)
 
 ## Next milestone

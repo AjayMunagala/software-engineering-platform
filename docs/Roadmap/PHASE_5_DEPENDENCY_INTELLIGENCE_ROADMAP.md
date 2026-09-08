@@ -7,7 +7,8 @@
 - ADR 0020: Accepted on 2026-09-08
 - Phase 5.0.1 design spike: engineering accepted on 2026-09-08
 - Phase 5.0.2 neutral graph artifact and core: engineering accepted on 2026-09-08
-- Phase 5.0.3 and later: not authorized
+- Phase 5.0.3 design: prepared for engineering review
+- Phase 5.0.3 implementation and later milestones: not authorized
 - Production release: not authorized
 - Date: 2026-09-08
 
@@ -97,6 +98,16 @@ validation evidence were engineering accepted on 2026-09-08. This acceptance
 does not authorize Phase 5.0.3.
 
 ## Phase 5.0.3 - Go dependency adapter
+
+Design package (review candidate):
+
+- `docs/Architecture/GO_DEPENDENCY_ADAPTER.md`;
+- `docs/API/GO_DEPENDENCY_ADAPTER_CANDIDATE_API.md`;
+- `docs/Decisions/0021-go-dependency-adapter.md` (Proposed);
+- `docs/Validation/GO_DEPENDENCY_ADAPTER_VALIDATION_PLAN.md`.
+
+No implementation has started. Explicit design approval is required before
+the implementation scope below may begin.
 
 Implement:
 

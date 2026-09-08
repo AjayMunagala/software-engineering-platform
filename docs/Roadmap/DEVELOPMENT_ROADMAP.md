@@ -145,6 +145,8 @@ Detailed milestones are defined in
   are required release-hardening items.
 - Phase 5.0.3 and later milestones, including production release, remain
   unauthorized.
+- Phase 5.0.3 design package is ready for review under Proposed ADR 0021.
+  Implementation awaits an explicit engineering design decision.
 
 Detailed milestones are defined in
 `docs/Roadmap/PHASE_5_DEPENDENCY_INTELLIGENCE_ROADMAP.md`.
