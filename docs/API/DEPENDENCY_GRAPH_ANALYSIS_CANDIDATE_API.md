@@ -1,6 +1,7 @@
 # Phase 5.0.4 — Graph Analysis Candidate API
 
-Design review candidate 0.1.0, 2026-09-09. No code or implementation tests authorized.
+Design approved, candidate 0.1.0, at commit `a2680da36cde620cf436b6ba1473b23f7c18e607`.
+No code or implementation tests authorized; implementation needs a separate decision.
 Proposed additions live in `backend/die`; accepted `Core` remains unchanged.
 
 ## Capabilities (proposed signatures)

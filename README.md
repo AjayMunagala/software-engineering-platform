@@ -73,9 +73,9 @@ The Phase 5.0.3 Go Dependency Adapter implementation and
 [validation evidence](docs/Validation/GO_DEPENDENCY_ADAPTER_VALIDATION_REPORT.md)
 at commit `a0a1a779734b23a0f6c2a8f711130063822a9761` are engineering accepted.
 ADR 0021 is Accepted and the candidate stays 0.1.0, not a production release.
-Phase 5.0.4 design preparation is authorized; its
-[design package](docs/Architecture/DEPENDENCY_GRAPH_ANALYSIS.md) is ready for review
-under Proposed ADR 0022. Implementation and later milestones remain unauthorized.
+The Phase 5.0.4 [design package](docs/Architecture/DEPENDENCY_GRAPH_ANALYSIS.md)
+at `a2680da` is approved; ADR 0022 is Design Approved. Implementation and later
+milestones remain unauthorized pending a separate explicit decision.
 
 ## Run RIE
 
@@ -183,6 +183,6 @@ node/edge/SCC/cycle vectors and two-GiB synthetic heap gate are frozen. Phase
 5.0.2 is accepted with mandatory `MaxNodes` enforcement and a frozen
 containment-ID vector. Intermediate evidence bounds and nil-context handling
 remain required direct-core release-hardening items. Phase 5.0.3 is engineering
-accepted; only Phase 5.0.4 design preparation is authorized. Implementation and release remain
+accepted; Phase 5.0.4 design is approved. Implementation and release remain
 unauthorized. Phase 4.1 transport, HTTP health endpoints, REST/gRPC implementation,
 UI, LLM, patch generation, and repository mutation remain unauthorized.

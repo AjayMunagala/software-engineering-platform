@@ -2,10 +2,11 @@
 
 ## Status
 
-Design preparation authorized, 2026-09-09. Design review pending. No implementation,
+Design approved at `a2680da36cde620cf436b6ba1473b23f7c18e607`. No implementation,
 implementation tests, experiment, release, or downstream work is authorized.
 Phase 5.0.3 is accepted at governance commit `7a04db8`; candidate remains 0.1.0.
-ADR 0022 is Proposed. DIE-HARDEN-001 and DIE-HARDEN-002 remain open.
+ADR 0022 is Design Approved, not implementation-accepted. Explicit implementation
+authorization is still required. DIE-HARDEN-001 and DIE-HARDEN-002 remain open.
 
 Review together with `DEPENDENCY_GRAPH_ANALYSIS_ARTIFACTS.md`,
 `docs/API/DEPENDENCY_GRAPH_ANALYSIS_CANDIDATE_API.md`, ADR 0022, and

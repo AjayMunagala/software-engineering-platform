@@ -2,7 +2,9 @@
 
 ## Status
 
-Proposed, 2026-09-09. Only Phase 5.0.4 design preparation is authorized.
+Design Approved. Engineering reviewed and approved design commit
+`a2680da36cde620cf436b6ba1473b23f7c18e607`. Implementation is eligible for
+separate authorization but is **not authorized** by this decision.
 Design approval and implementation authorization are separate gates. Phase 5.0.3
 and ADR 0021 remain accepted at governance commit `7a04db8`. Version remains
 candidate 0.1.0. No experiment, production implementation, or release authorized.
@@ -14,7 +16,7 @@ produces structural dependencies. Their output may be capped or uncertain and
 includes file-to-package import boundaries. Treating every edge as local adjacency
 or claiming full repository acyclicity would misrepresent those facts.
 
-## Proposed decision
+## Approved design decision
 
 1. Add opt-in Analyzer/QueryEngine capabilities in neutral `die`, not the Go
    adapter. Keep Normalize and all released 1.0.0 contracts unchanged.
@@ -47,7 +49,11 @@ Language-invalid classification awaits an authoritative rule/context contract.
 
 ## Acceptance gates
 
-Review architecture, API, artifact supplement, and validation plan together.
-Only explicit approval can make implementation eligible for separate authorization.
-Keep this ADR Proposed during design review. Later implementation evidence needs
-engineering acceptance before promotion. No automatic 5.0.5/integration/release.
+Design review is complete for the architecture, API, artifact supplement, and
+validation plan at the commit above. Request explicit Phase 5.0.4 implementation
+authorization before any implementation work. After authorization, independently
+freeze analysis-input digest and cursor golden vectors before production emits
+either. Reuse existing frozen SCC/cycle vectors; do not regenerate them.
+Later implementation evidence still requires engineering acceptance. This ADR's
+Design Approved status is not implementation acceptance or release approval.
+DIE-HARDEN-001/002 remain open. No automatic 5.0.5/integration/release.

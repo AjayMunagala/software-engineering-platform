@@ -1,6 +1,7 @@
 # Phase 5.0.4 — Candidate Artifact and Query Supplement
 
-Design only, 2026-09-09. Not implemented or approved. This supplement specializes
+Approved design only; not implemented. Approval covers commit `a2680da36cde620cf436b6ba1473b23f7c18e607`.
+Implementation remains unauthorized. This supplement specializes
 the Phase 5.0 illustrative models against the actual accepted `die` structs.
 
 ## Input and output
@@ -94,7 +95,7 @@ score, probability, or promise of exhaustive repository impact.
 
 ## Compatibility boundary
 
-All names/fields above are candidate proposals for review, not existing public
+All names/fields above are approved candidate designs, not existing public
 methods. `Core` and Go adapter interfaces remain unchanged. This supplement
 governs Phase 5.0.4 where the older illustrative subsystem API differs. Acceptance
 does not freeze 1.0.0, add persistence serialization, or close core hardening work.

@@ -1821,8 +1821,9 @@ Do not begin Phase 5.0.4, algorithms, integration, or release without authorizat
 32. PHASE 5.0.4 DESIGN PREPARATION — 2026-09-09
 ======================================================================
 
-Design preparation: AUTHORIZED. Design review: PENDING.
-ADR 0022: PROPOSED. Candidate remains 0.1.0.
+Design review: APPROVED at a2680da36cde620cf436b6ba1473b23f7c18e607.
+ADR 0022: DESIGN APPROVED. Candidate remains 0.1.0.
+Implementation: eligible for separate authorization, NOT AUTHORIZED.
 No production code, implementation tests, experiment, or release in this milestone.
 
 Design package:
@@ -1844,4 +1845,8 @@ Proposals:
 Validation of this submission: documentation consistency, local references,
 whitespace, and documentation-only Git scope. No tests or new performance metrics.
 Phase 5.0.3 acceptance remains 7a04db8. DIE-HARDEN-001/002 remain OPEN.
-Next: review the committed design; implementation requires explicit authorization.
+Mandatory prerequisite after future implementation authorization: independently
+freeze analysis-input digest and cursor vectors before production emits either.
+Reuse the existing frozen SCC/cycle vectors without regeneration.
+Next: request explicit Phase 5.0.4 implementation authorization. No implementation
+or vector generation is started by this documentation-only governance update.

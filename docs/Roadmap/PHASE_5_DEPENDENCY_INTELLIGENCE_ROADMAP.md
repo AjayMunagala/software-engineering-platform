@@ -10,7 +10,8 @@
 - Phase 5.0.3 design: approved on 2026-09-08
 - Phase 5.0.3 implementation: engineering accepted at `a0a1a779734b23a0f6c2a8f711130063822a9761`
 - ADR 0021: Accepted; candidate version remains 0.1.0
-- Phase 5.0.4 design preparation: authorized 2026-09-09; review pending
+- Phase 5.0.4 design: approved at `a2680da36cde620cf436b6ba1473b23f7c18e607`
+- ADR 0022: Design Approved; implementation authorization still required
 - Phase 5.0.4 implementation and later milestones: not authorized
 - Production release: not authorized
 - Date: 2026-09-08
@@ -135,15 +136,16 @@ release is authorized by this acceptance.
 
 ## Phase 5.0.4 - SCC, cycles, and impact
 
-Design preparation only is authorized. Review package:
+The design package at `a2680da36cde620cf436b6ba1473b23f7c18e607` is approved.
+Implementation is not authorized. Approved package:
 
 - `docs/Architecture/DEPENDENCY_GRAPH_ANALYSIS.md`;
 - `docs/Architecture/DEPENDENCY_GRAPH_ANALYSIS_ARTIFACTS.md`;
 - `docs/API/DEPENDENCY_GRAPH_ANALYSIS_CANDIDATE_API.md`;
-- `docs/Decisions/0022-dependency-graph-analysis.md` (Proposed);
+- `docs/Decisions/0022-dependency-graph-analysis.md` (Design Approved);
 - `docs/Validation/DEPENDENCY_GRAPH_ANALYSIS_VALIDATION_PLAN.md`.
 
-Proposed implementation scope, only after design review and explicit authorization:
+Implementation scope, only after separate explicit authorization:
 
 - deterministic SCC analysis;
 - bounded cycle classification;
@@ -202,5 +204,5 @@ limits. Fix only compatible defects and record known limitations.
 Every milestone is separately gated: design, review, implementation,
 validation, engineering acceptance, then commit/release. Phase 5.0.2 is
 closed and accepted. Phase 5.0.3 is also closed and engineering accepted. Only
-Phase 5.0.4 design preparation is authorized; its design is not yet approved.
+Phase 5.0.4 design is approved; request explicit implementation authorization next.
 Implementation, later milestones, and production release remain unauthorized.

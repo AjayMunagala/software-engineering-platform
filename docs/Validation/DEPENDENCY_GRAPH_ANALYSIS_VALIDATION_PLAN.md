@@ -1,7 +1,8 @@
 # Phase 5.0.4 — Validation Architecture and Plan
 
-Design only, 2026-09-09. No tests or algorithms are implemented/executed by this
-package. Execution requires explicit implementation authorization after review.
+Design approved at commit `a2680da36cde620cf436b6ba1473b23f7c18e607`.
+No tests or algorithms are implemented/executed by this package. Execution still
+requires explicit implementation authorization; design approval does not grant it.
 
 ## Layered evidence
 
