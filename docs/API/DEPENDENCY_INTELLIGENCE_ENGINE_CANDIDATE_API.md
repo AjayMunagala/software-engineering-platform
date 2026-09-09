@@ -6,7 +6,9 @@
 - Contract version: `0.1.0`
 - Artifact version: `0.1.0`
 - Phase 5.0.2 neutral core implementation: engineering accepted 2026-09-08
-- Phase 5.0.3 and production release: not authorized
+- Phase 5.0.3: engineering accepted; ADR 0021 Accepted
+- Phase 5.0.4: design preparation authorized, implementation unauthorized
+- Production release: not authorized
 - Transport: none
 - Phase 5.0.1 spike: engineering accepted 2026-09-08
 
@@ -17,7 +19,10 @@ The original illustrative engine/input/configuration surface below describes
 the subsystem direction. For the Phase 5.0.3 review, the concrete Go adapter
 proposal is `GO_DEPENDENCY_ADAPTER_CANDIDATE_API.md`; the implemented neutral
 `die.Core` and `die.Config` remain the Phase 5.0.2 contracts. This distinction
-does not authorize adapter implementation.
+does not replace the accepted adapter API. For Phase 5.0.4 the concrete proposal
+is `DEPENDENCY_GRAPH_ANALYSIS_CANDIDATE_API.md`, which supersedes the illustrative
+query/config/error surface below for that milestone. Its design is not yet approved
+and no algorithm implementation is authorized.
 
 ## Contract identity
 

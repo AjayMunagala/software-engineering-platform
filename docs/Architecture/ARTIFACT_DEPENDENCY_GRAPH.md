@@ -122,3 +122,12 @@ Repository Service responses, persisted projections, or raw source files.
 Future language adapters are siblings and normalize their released identity
 and semantic facts into the same language-neutral dependency artifact. Adding
 an adapter does not change an existing language artifact.
+
+### Phase 5.0.4 proposed analysis consumer (design only)
+
+The normalized DependencyInventory feeds an opt-in neutral Analyzer, which
+returns a new candidate inventory with SCC/cycle data and an optional analysis
+envelope. QueryEngine independently consumes the base inventory for direct pages
+and impact results. Neither capability feeds back into RIE, Go LIE, the Go adapter,
+or Core.Normalize; neither is yet implemented. Existing normalized output stays
+unchanged. See `DEPENDENCY_GRAPH_ANALYSIS.md` and its artifact supplement.

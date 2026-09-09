@@ -1816,3 +1816,32 @@ This governance update records that acceptance; it adds no new test results.
 All recorded limitations and both direct-core hardening items remain unchanged.
 Phase 5.0.4 design is a separate future milestone, not started by this update.
 Do not begin Phase 5.0.4, algorithms, integration, or release without authorization.
+
+======================================================================
+32. PHASE 5.0.4 DESIGN PREPARATION — 2026-09-09
+======================================================================
+
+Design preparation: AUTHORIZED. Design review: PENDING.
+ADR 0022: PROPOSED. Candidate remains 0.1.0.
+No production code, implementation tests, experiment, or release in this milestone.
+
+Design package:
+  docs/Architecture/DEPENDENCY_GRAPH_ANALYSIS.md
+  docs/Architecture/DEPENDENCY_GRAPH_ANALYSIS_ARTIFACTS.md
+  docs/API/DEPENDENCY_GRAPH_ANALYSIS_CANDIDATE_API.md
+  docs/Decisions/0022-dependency-graph-analysis.md
+  docs/Validation/DEPENDENCY_GRAPH_ANALYSIS_VALIDATION_PLAN.md
+
+Proposals:
+  - opt-in neutral analyzer; accepted core and Go adapter behavior unchanged;
+  - iterative local SCCs; structural summaries, not all-simple-cycle enumeration;
+  - explicit partial-topology metadata; no unsupported acyclicity claim;
+  - deterministic direct pages and bounded forward/reverse BFS;
+  - no guessed file-to-file imports or language-invalid classification;
+  - independent digest/cursor vectors required before future implementation;
+  - candidate-only optional analysis envelope; no released contract changes.
+
+Validation of this submission: documentation consistency, local references,
+whitespace, and documentation-only Git scope. No tests or new performance metrics.
+Phase 5.0.3 acceptance remains 7a04db8. DIE-HARDEN-001/002 remain OPEN.
+Next: review the committed design; implementation requires explicit authorization.

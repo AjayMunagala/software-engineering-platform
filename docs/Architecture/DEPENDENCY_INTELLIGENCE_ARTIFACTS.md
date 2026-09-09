@@ -9,6 +9,11 @@
 
 ## Design goals
 
+Phase 5.0.4 design preparation is authorized. The proposed supplement
+`DEPENDENCY_GRAPH_ANALYSIS_ARTIFACTS.md` explicitly maps SCC/cycle computation and
+query results onto the actual accepted candidate structs. Its optional analysis
+envelope is a proposed change, not an existing field or an approved implementation.
+
 The artifact is language-neutral, immutable, deterministic, evidence-backed,
 and suitable for future Dependency, Architecture, Reasoning, and Change Impact
 consumers without exposing parser or adapter internals.

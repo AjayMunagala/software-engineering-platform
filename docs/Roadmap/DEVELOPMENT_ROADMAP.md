@@ -145,8 +145,10 @@ Detailed milestones are defined in
   are required release-hardening items.
 - Phase 5.0.3 implementation commit `a0a1a77` and its validation evidence are
   engineering accepted; ADR 0021 is Accepted. Candidate 0.1.0 is not a release.
-- Phase 5.0.4 and later milestones, including production release, remain
-  unauthorized. Direct-core hardening items remain open.
+- Phase 5.0.4 design preparation is authorized; the SCC/cycle/impact design
+  package is ready for separate review under Proposed ADR 0022. Implementation
+  and later milestones, including release, remain unauthorized. Both direct-core
+  hardening items remain open.
 
 Detailed milestones are defined in
 `docs/Roadmap/PHASE_5_DEPENDENCY_INTELLIGENCE_ROADMAP.md`.
