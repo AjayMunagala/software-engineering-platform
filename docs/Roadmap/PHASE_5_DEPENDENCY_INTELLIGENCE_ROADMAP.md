@@ -11,8 +11,9 @@
 - Phase 5.0.3 implementation: engineering accepted at `a0a1a779734b23a0f6c2a8f711130063822a9761`
 - ADR 0021: Accepted; candidate version remains 0.1.0
 - Phase 5.0.4 design: approved at `a2680da36cde620cf436b6ba1473b23f7c18e607`
-- ADR 0022: Design Approved; implementation authorization still required
-- Phase 5.0.4 implementation and later milestones: not authorized
+- ADR 0022: Design Approved; implementation evidence acceptance pending
+- Phase 5.0.4 implementation: explicitly authorized, vectors first
+- Phase 5.0.5 and later milestones: not authorized
 - Production release: not authorized
 - Date: 2026-09-08
 

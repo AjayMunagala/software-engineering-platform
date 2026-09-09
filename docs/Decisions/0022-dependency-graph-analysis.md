@@ -4,10 +4,13 @@
 
 Design Approved. Engineering reviewed and approved design commit
 `a2680da36cde620cf436b6ba1473b23f7c18e607`. Implementation is eligible for
-separate authorization but is **not authorized** by this decision.
+separate authorization. Engineering subsequently explicitly authorized Phase
+5.0.4 implementation, beginning with independent digest/cursor vectors committed
+before production encoding. This ADR remains Design Approved pending implementation
+evidence acceptance; no later milestone or release is authorized.
 Design approval and implementation authorization are separate gates. Phase 5.0.3
 and ADR 0021 remain accepted at governance commit `7a04db8`. Version remains
-candidate 0.1.0. No experiment, production implementation, or release authorized.
+candidate 0.1.0. Only the approved Phase 5.0.4 implementation scope is authorized.
 
 ## Context
 
