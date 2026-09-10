@@ -8,8 +8,8 @@ Existing SCC/cycle vectors in `DEPENDENCY_INTELLIGENCE_GOLDEN_VECTORS.md` remain
 
 ## Digest encoding
 
-Write the 27-byte UTF-8 domain `dependency-analysis-input/v1`, preceded by its
-unsigned uint64 big-endian byte length (`000000000000001b`). Append the exact
+Write the 28-byte UTF-8 domain `dependency-analysis-input/v1`, preceded by its
+unsigned uint64 big-endian byte length (`000000000000001c`). Append the exact
 compact base JSON below and ONE LF byte (0a). SHA-256 the whole stream. Text form
 is `dependency-analysis-input/v1:sha256:` followed by lowercase digest hex.
 
@@ -68,3 +68,12 @@ WyJkZXBlbmRlbmN5LW5vZGUtcGFnZS92MSIsImRlcGVuZGVuY3ktYW5hbHlzaXMtaW5wdXQvdjE6c2hh
 
 Changing these expected bytes to fit future production code is not validation.
 Any discrepancy requires investigation against the approved canonical definition.
+
+### Prose erratum (2026-09-10)
+
+The initial document misstated the domain length as 27 / `1b`. Independent .NET
+recalculation confirms 28 UTF-8 bytes and prefix `1c` reproduce the already-frozen
+empty digest `27f88fcd...`; prefix `1b` instead gives
+`b51c0e1f00275dbcad7b2715e932863c4ef2e4bcea5e7a440a2c5d14b28607d9`.
+All frozen digest/cursor expected values are unchanged. This corrects the prose,
+not the approved length-prefixed algorithm or the independent vector outputs.
