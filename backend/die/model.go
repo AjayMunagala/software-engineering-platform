@@ -176,6 +176,7 @@ type DependencyInventoryView struct {
 	Cycles           []DependencyCycle    `json:"cycles"`
 	Diagnostics      []Diagnostic         `json:"diagnostics"`
 	Statistics       DependencyStatistics `json:"statistics"`
+	Analysis         *AnalysisMetadata    `json:"analysis,omitempty"`
 }
 
 type DependencyInventory struct{ view DependencyInventoryView }
@@ -260,6 +261,7 @@ func cloneStatistics(in DependencyStatistics) DependencyStatistics {
 	return in
 }
 func cloneView(in DependencyInventoryView) DependencyInventoryView {
+	in.Analysis = cloneAnalysis(in.Analysis)
 	in.SourceArtifacts = clone(in.SourceArtifacts)
 	in.Nodes = cloneNodes(in.Nodes)
 	in.Containment = cloneContainment(in.Containment)

@@ -1,8 +1,10 @@
 # Phase 5.0.4 — Validation Architecture and Plan
 
 Design approved at commit `a2680da36cde620cf436b6ba1473b23f7c18e607`.
-No tests or algorithms are implemented/executed by this package. Execution still
-requires explicit implementation authorization; design approval does not grant it.
+Implementation and validation were explicitly authorized after design approval
+recorded at `140457d`. Executed evidence is recorded separately in
+`DEPENDENCY_GRAPH_ANALYSIS_VALIDATION_REPORT.md`; this plan does not itself
+constitute implementation acceptance.
 
 ## Layered evidence
 

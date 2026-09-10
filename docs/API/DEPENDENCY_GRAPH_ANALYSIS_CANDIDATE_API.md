@@ -1,8 +1,9 @@
 # Phase 5.0.4 — Graph Analysis Candidate API
 
 Design approved, candidate 0.1.0, at commit `a2680da36cde620cf436b6ba1473b23f7c18e607`.
-No code or implementation tests authorized; implementation needs a separate decision.
-Proposed additions live in `backend/die`; accepted `Core` remains unchanged.
+Implementation explicitly authorized after design approval recorded at `140457d`.
+Candidate additions live in `backend/die`; accepted `Core` remains unchanged.
+Engineering acceptance of the implementation is pending.
 
 ## Capabilities (proposed signatures)
 
@@ -67,7 +68,9 @@ nodes <= input nodes and traversal edges <= input edges. Defaults are resolved
 before relational validation; callers reducing a parent cap must explicitly
 reduce dependent caps as needed. Document this rather than silently clamping.
 
-Accessor cloning precedes returned-length inspection, an inherited limitation.
+The same-package implementation validates counts through its private immutable
+backing view before allocation, without invoking cloning input accessors. Output
+publication still clones base collections; released accessors are unchanged.
 All expanded index/output counts must be checked before allocation/appending;
 no preallocation from unchecked lengths. Byte sizes of existing strings are not
 bounded by these count limits. No new hard-RAM promise is made.
@@ -78,8 +81,10 @@ each call can cost O(V+E) indexing plus canonical sort. Do not imply O(page size
 
 ## Results and errors
 
-NodePage, ImpactResult, AnalysisMetadata, and GraphAnalysis have private backing
-state, detached read accessors, and deterministic JSON views as specified in
+NodePage and ImpactResult have private backing state and detached View accessors.
+AnalysisMetadata and GraphAnalysis are detached view records copied from the
+inventory's private immutable backing by Analysis()/View(), including nested
+reason slices. Deterministic JSON views follow
 `docs/Architecture/DEPENDENCY_GRAPH_ANALYSIS_ARTIFACTS.md`. Empty arrays are `[]`.
 No mutable input setters or unvalidated public result constructors are needed.
 
@@ -95,5 +100,6 @@ no result. Explicit partial traversal is not an error.
 Analysis metadata distinguishes analyzed-empty from core-only inventory. Reanalysis
 uses base graph data, yielding identical results with the same config. Base source
 facts/evidence/IDs remain unchanged. Candidate schema additions and new golden
-vectors require approval before implementation; no production code accompanies
-this proposal.
+vectors require approval before implementation. Independent vectors were committed
+at `ab4628c` before encoder/cursor code; prose-only erratum `c0fdd00` changes no
+expected digest or cursor values. Candidate remains 0.1.0, not a stable release.

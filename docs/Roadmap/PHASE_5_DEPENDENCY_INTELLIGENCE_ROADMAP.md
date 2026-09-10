@@ -12,10 +12,10 @@
 - ADR 0021: Accepted; candidate version remains 0.1.0
 - Phase 5.0.4 design: approved at `a2680da36cde620cf436b6ba1473b23f7c18e607`
 - ADR 0022: Design Approved; implementation evidence acceptance pending
-- Phase 5.0.4 implementation: explicitly authorized, vectors first
+- Phase 5.0.4 implementation: submitted for engineering acceptance; vectors frozen first at `ab4628c`
 - Phase 5.0.5 and later milestones: not authorized
 - Production release: not authorized
-- Date: 2026-09-08
+- Date: 2026-09-10
 
 ## Goal
 
@@ -205,5 +205,6 @@ limits. Fix only compatible defects and record known limitations.
 Every milestone is separately gated: design, review, implementation,
 validation, engineering acceptance, then commit/release. Phase 5.0.2 is
 closed and accepted. Phase 5.0.3 is also closed and engineering accepted. Only
-Phase 5.0.4 design is approved; request explicit implementation authorization next.
-Implementation, later milestones, and production release remain unauthorized.
+Phase 5.0.4 design is approved and its implementation was explicitly authorized.
+Implementation evidence is submitted for acceptance; ADR 0022 remains Design
+Approved. Phase 5.0.5, later milestones, and production release remain unauthorized.

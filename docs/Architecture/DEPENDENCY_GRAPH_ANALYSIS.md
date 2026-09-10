@@ -2,11 +2,12 @@
 
 ## Status
 
-Design approved at `a2680da36cde620cf436b6ba1473b23f7c18e607`. No implementation,
-implementation tests, experiment, release, or downstream work is authorized.
+Design approved at `a2680da36cde620cf436b6ba1473b23f7c18e607` and recorded at
+`140457d`. Engineering subsequently authorized Phase 5.0.4 implementation only.
 Phase 5.0.3 is accepted at governance commit `7a04db8`; candidate remains 0.1.0.
 ADR 0022 is Design Approved, not implementation-accepted. Explicit implementation
-authorization is still required. DIE-HARDEN-001 and DIE-HARDEN-002 remain open.
+authorization was granted; implementation evidence still requires acceptance.
+DIE-HARDEN-001 and DIE-HARDEN-002 remain open.
 
 Review together with `DEPENDENCY_GRAPH_ANALYSIS_ARTIFACTS.md`,
 `docs/API/DEPENDENCY_GRAPH_ANALYSIS_CANDIDATE_API.md`, ADR 0022, and
@@ -135,6 +136,14 @@ at most every 1,024 indexed/scanned records, each SCC frame batch and BFS batch,
 around sorting/digesting, and before return. A clone or standard sort can remain
 an uninterruptible work unit; no new wall-clock guarantee is claimed. Cancellation
 returns an error and no artifact/page/result, even if some work finished.
+
+Implementation note: because analysis is owned by the same neutral `die` package,
+it reads the private immutable backing view without invoking cloning accessors.
+This permits count validation before index allocation and avoids an unnecessary
+full input clone. It never mutates that view. Returned inventory publication still
+defensively clones base data; standard sorts and individual JSON records remain
+uninterruptible units. SCC adjacency endpoint deduplication occurs while scanning
+the sorted edge records; original edge IDs remain available to queries.
 
 All error text is fixed and redacted using existing neutral error kinds. No paths,
 payload text, database handles, auth policy, network, tool execution, AI, codegen,

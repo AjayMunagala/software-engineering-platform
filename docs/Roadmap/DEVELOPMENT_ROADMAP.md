@@ -146,8 +146,9 @@ Detailed milestones are defined in
 - Phase 5.0.3 implementation commit `a0a1a77` and its validation evidence are
   engineering accepted; ADR 0021 is Accepted. Candidate 0.1.0 is not a release.
 - Phase 5.0.4 SCC/cycle/impact design commit `a2680da` is approved;
-  ADR 0022 is Design Approved. Separate implementation authorization is required. Implementation
-  and later milestones, including release, remain unauthorized. Both direct-core
+  ADR 0022 is Design Approved. Explicit implementation authorization was granted
+  after `140457d`; implementation and validation are submitted for acceptance.
+  Later milestones, including release, remain unauthorized. Both direct-core
   hardening items remain open.
 
 Detailed milestones are defined in

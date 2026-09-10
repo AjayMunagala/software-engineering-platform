@@ -1,0 +1,1250 @@
+{
+  "schema_version": "1.0.0",
+  "phase": "5.0.4",
+  "date": "2026-09-10",
+  "candidate_version": "0.1.0",
+  "engineering_acceptance": "pending",
+  "adr_0022": "Design Approved",
+  "release_authorized": false,
+  "phase_5_0_5_authorized": false,
+  "vector_commits": {
+    "independent_values": "ab4628c",
+    "prose_only_erratum": "c0fdd00"
+  },
+  "open_hardening": [
+    "DIE-HARDEN-001",
+    "DIE-HARDEN-002"
+  ],
+  "environment": {
+    "cpu": "Intel Core i5-12450H",
+    "gomaxprocs": 12,
+    "windows": "11 10.0.26200",
+    "windows_visible_ram_kib": 8090104,
+    "ubuntu": "24.04 WSL2",
+    "kernel": "6.18.33.2-microsoft-standard-WSL2",
+    "guest_ram_mib": 3770,
+    "guest_swap_mib": 1024,
+    "go": "1.26.2",
+    "git_windows": "2.54.0.windows.1",
+    "git_ubuntu": "2.43.0"
+  },
+  "quality": {
+    "windows": {
+      "regression": "pass",
+      "vet": "pass",
+      "full_race": "pass",
+      "full_shuffle_repeats": 3
+    },
+    "ubuntu": {
+      "regression": "pass",
+      "vet": "pass",
+      "full_race": "pass",
+      "full_shuffle_repeats": 3
+    },
+    "races_reported": 0,
+    "coverage": {
+      "platform": "Windows",
+      "die_percent": 93.9,
+      "conformance_percent": 86.2,
+      "go_adapter_percent": 95.2,
+      "new_analysis_covered_statements": 528,
+      "new_analysis_statements": 551,
+      "new_analysis_percent": 95.82577132486388
+    },
+    "fuzz": {
+      "duration_seconds_per_target": 20,
+      "workers": 2,
+      "windows_graph": 89550,
+      "windows_cursor": 10409,
+      "ubuntu_graph": 121200,
+      "ubuntu_cursor": 13000,
+      "windows_graph_variable_budget": 110590,
+      "ubuntu_graph_variable_budget": 69080,
+      "initial_campaign_total": 234159,
+      "final_graph_campaign_total": 179670,
+      "total_executions": 413829
+    },
+    "cancellation": {
+      "checkpoints": 207,
+      "windows_max_observed_return_latency_ns": 458900,
+      "ubuntu_max_observed_return_latency_ns": 9982,
+      "unconditional_latency_guarantee": false
+    }
+  },
+  "determinism": {
+    "synthetic": {
+      "nodes": 64,
+      "edges": 256,
+      "shuffles": 8,
+      "input_digest": "dependency-analysis-input/v1:sha256:05ac645adb2d16a6f9e0f7bed74b6fcb6f6568eca02ac8fd9111f101720dde97",
+      "combined_output_sha256": "0d22e53485a3996b062943a135808dbd9102b26edd468956ebf88dce4e28d7ef"
+    },
+    "adapter": {
+      "upstream_workers": [
+        1,
+        8
+      ],
+      "analysis_sha256": "3bb8931e0c1cdf70cb56b75ee919e2cd8470c097dc01bed1226268df1717e2d6"
+    },
+    "platforms": [
+      "Windows",
+      "Ubuntu"
+    ],
+    "analyzer_is_serial": true
+  },
+  "scale": {
+    "nodes": 100000,
+    "edges": 1000000,
+    "components": 1,
+    "cycles": 1,
+    "input_digest": "dependency-analysis-input/v1:sha256:b0bc2922b9879b3c9f18494f9e975857d132a6cbe3bea4db99387ccf49985c65",
+    "gc_policy": {
+      "gogc": 100,
+      "gomemlimit": "1536MiB",
+      "hard_memory_bound": false
+    },
+    "heap_sampler_interval_ms": 5,
+    "retained_input_included": true,
+    "preparation_excluded_from_analysis_timing": true,
+    "windows": {
+      "duration_ns": 6810243000,
+      "retained_input_heap_bytes": 277161464,
+      "sampled_peak_heap_bytes": 755367248,
+      "total_alloc_delta_bytes": 1893934464
+    },
+    "ubuntu": {
+      "duration_ns": 4786344373,
+      "retained_input_heap_bytes": 277139104,
+      "sampled_peak_heap_bytes": 711763352,
+      "total_alloc_delta_bytes": 1893720296
+    },
+    "ubuntu_rss_repeat": {
+      "duration_ns": 4799457430,
+      "retained_input_heap_bytes": 277139024,
+      "sampled_peak_heap_bytes": 704338760,
+      "total_alloc_delta_bytes": 1893942184,
+      "max_resident_set_size_kib": 1201328,
+      "rss_scope": "GNU time process-tree maximum including runner and prerequisite preparation; not analysis-only heap",
+      "swaps": 0
+    },
+    "unchanged_core_gate": {
+      "seconds_limit": 30,
+      "heap_bytes_limit": 2147483648,
+      "windows": {
+        "pass": true,
+        "duration_ns": 4395172400,
+        "sampled_peak_heap_bytes": 1020791112
+      },
+      "ubuntu": {
+        "pass": true,
+        "duration_ns": 4587171417,
+        "sampled_peak_heap_bytes": 1024105960
+      }
+    }
+  },
+  "benchmarks": {
+    "method": "three single-iteration samples per stage, prepared immutable inputs outside timing; same GOGC/GOMEMLIMIT as scale; characterization only",
+    "windows": [
+      {
+        "stage": "IndexAndDigest",
+        "nodes": 100,
+        "edges": 400,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 1255500,
+            "bytes_per_op": 763376,
+            "allocs_per_op": 6939
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 971900,
+            "bytes_per_op": 728392,
+            "allocs_per_op": 6514
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 875000,
+            "bytes_per_op": 728376,
+            "allocs_per_op": 6513
+          }
+        ]
+      },
+      {
+        "stage": "SCCAndPublication",
+        "nodes": 100,
+        "edges": 400,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 180100,
+            "bytes_per_op": 134568,
+            "allocs_per_op": 183
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 143800,
+            "bytes_per_op": 134568,
+            "allocs_per_op": 183
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 137800,
+            "bytes_per_op": 134568,
+            "allocs_per_op": 183
+          }
+        ]
+      },
+      {
+        "stage": "Analyze",
+        "nodes": 100,
+        "edges": 400,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 979300,
+            "bytes_per_op": 862944,
+            "allocs_per_op": 6696
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 979300,
+            "bytes_per_op": 862944,
+            "allocs_per_op": 6696
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 1811700,
+            "bytes_per_op": 862944,
+            "allocs_per_op": 6696
+          }
+        ]
+      },
+      {
+        "stage": "Direct",
+        "nodes": 100,
+        "edges": 400,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 867400,
+            "bytes_per_op": 730856,
+            "allocs_per_op": 6557
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 818400,
+            "bytes_per_op": 729360,
+            "allocs_per_op": 6524
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 829300,
+            "bytes_per_op": 729344,
+            "allocs_per_op": 6523
+          }
+        ]
+      },
+      {
+        "stage": "Impact",
+        "nodes": 100,
+        "edges": 400,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 912300,
+            "bytes_per_op": 782136,
+            "allocs_per_op": 6604
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 903600,
+            "bytes_per_op": 782136,
+            "allocs_per_op": 6604
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 909500,
+            "bytes_per_op": 783272,
+            "allocs_per_op": 6612
+          }
+        ]
+      },
+      {
+        "stage": "Fingerprint",
+        "nodes": 100,
+        "edges": 400,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 445800,
+            "bytes_per_op": 376680,
+            "allocs_per_op": 2056
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 497200,
+            "bytes_per_op": 376680,
+            "allocs_per_op": 2056
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 440500,
+            "bytes_per_op": 376680,
+            "allocs_per_op": 2056
+          }
+        ]
+      },
+      {
+        "stage": "OutputClone",
+        "nodes": 100,
+        "edges": 400,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 34700,
+            "bytes_per_op": 76544,
+            "allocs_per_op": 8
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 12000,
+            "bytes_per_op": 76544,
+            "allocs_per_op": 8
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 12200,
+            "bytes_per_op": 76544,
+            "allocs_per_op": 8
+          }
+        ]
+      },
+      {
+        "stage": "IndexAndDigest",
+        "nodes": 1000,
+        "edges": 4000,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 10422400,
+            "bytes_per_op": 7604392,
+            "allocs_per_op": 64201
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 9829600,
+            "bytes_per_op": 7603000,
+            "allocs_per_op": 64192
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 9912600,
+            "bytes_per_op": 7608096,
+            "allocs_per_op": 64199
+          }
+        ]
+      },
+      {
+        "stage": "SCCAndPublication",
+        "nodes": 1000,
+        "edges": 4000,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 1821000,
+            "bytes_per_op": 1439288,
+            "allocs_per_op": 1129
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 2290100,
+            "bytes_per_op": 1439288,
+            "allocs_per_op": 1129
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 1741000,
+            "bytes_per_op": 1439288,
+            "allocs_per_op": 1129
+          }
+        ]
+      },
+      {
+        "stage": "Analyze",
+        "nodes": 1000,
+        "edges": 4000,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 11246800,
+            "bytes_per_op": 9042256,
+            "allocs_per_op": 65319
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 11753700,
+            "bytes_per_op": 9042256,
+            "allocs_per_op": 65321
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 11686900,
+            "bytes_per_op": 9041056,
+            "allocs_per_op": 65312
+          }
+        ]
+      },
+      {
+        "stage": "Direct",
+        "nodes": 1000,
+        "edges": 4000,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 9521200,
+            "bytes_per_op": 7606400,
+            "allocs_per_op": 64218
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 16573700,
+            "bytes_per_op": 7605088,
+            "allocs_per_op": 64210
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 9813200,
+            "bytes_per_op": 7606320,
+            "allocs_per_op": 64219
+          }
+        ]
+      },
+      {
+        "stage": "Impact",
+        "nodes": 1000,
+        "edges": 4000,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 9588700,
+            "bytes_per_op": 7656776,
+            "allocs_per_op": 64283
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 9600100,
+            "bytes_per_op": 7658168,
+            "allocs_per_op": 64292
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 9487400,
+            "bytes_per_op": 7657880,
+            "allocs_per_op": 64291
+          }
+        ]
+      },
+      {
+        "stage": "Fingerprint",
+        "nodes": 1000,
+        "edges": 4000,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 4485900,
+            "bytes_per_op": 3727712,
+            "allocs_per_op": 20067
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 4534600,
+            "bytes_per_op": 3727712,
+            "allocs_per_op": 20067
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 4666500,
+            "bytes_per_op": 3725360,
+            "allocs_per_op": 20050
+          }
+        ]
+      },
+      {
+        "stage": "OutputClone",
+        "nodes": 1000,
+        "edges": 4000,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 161000,
+            "bytes_per_op": 738048,
+            "allocs_per_op": 8
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 65400,
+            "bytes_per_op": 738048,
+            "allocs_per_op": 8
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 59300,
+            "bytes_per_op": 738048,
+            "allocs_per_op": 8
+          }
+        ]
+      },
+      {
+        "stage": "IndexAndDigest",
+        "nodes": 10000,
+        "edges": 40000,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 105121300,
+            "bytes_per_op": 74166504,
+            "allocs_per_op": 640608
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 109706200,
+            "bytes_per_op": 74156520,
+            "allocs_per_op": 640599
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 100180700,
+            "bytes_per_op": 74155064,
+            "allocs_per_op": 640587
+          }
+        ]
+      },
+      {
+        "stage": "SCCAndPublication",
+        "nodes": 10000,
+        "edges": 40000,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 26221500,
+            "bytes_per_op": 14124120,
+            "allocs_per_op": 10331
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 30265000,
+            "bytes_per_op": 14124136,
+            "allocs_per_op": 10332
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 29349800,
+            "bytes_per_op": 14124120,
+            "allocs_per_op": 10331
+          }
+        ]
+      },
+      {
+        "stage": "Analyze",
+        "nodes": 10000,
+        "edges": 40000,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 138927000,
+            "bytes_per_op": 88281632,
+            "allocs_per_op": 650934
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 136230400,
+            "bytes_per_op": 88281744,
+            "allocs_per_op": 650935
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 140364600,
+            "bytes_per_op": 88282880,
+            "allocs_per_op": 650945
+          }
+        ]
+      },
+      {
+        "stage": "Direct",
+        "nodes": 10000,
+        "edges": 40000,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 117196700,
+            "bytes_per_op": 74158448,
+            "allocs_per_op": 640614
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 138490700,
+            "bytes_per_op": 74157232,
+            "allocs_per_op": 640606
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 108927600,
+            "bytes_per_op": 74159808,
+            "allocs_per_op": 640625
+          }
+        ]
+      },
+      {
+        "stage": "Impact",
+        "nodes": 10000,
+        "edges": 40000,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 121917200,
+            "bytes_per_op": 74209992,
+            "allocs_per_op": 640686
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 107831700,
+            "bytes_per_op": 74211240,
+            "allocs_per_op": 640695
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 107318400,
+            "bytes_per_op": 74213656,
+            "allocs_per_op": 640713
+          }
+        ]
+      },
+      {
+        "stage": "Fingerprint",
+        "nodes": 10000,
+        "edges": 40000,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 48642900,
+            "bytes_per_op": 37209544,
+            "allocs_per_op": 200069
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 48462500,
+            "bytes_per_op": 37210192,
+            "allocs_per_op": 200063
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 92771100,
+            "bytes_per_op": 37210760,
+            "allocs_per_op": 200078
+          }
+        ]
+      },
+      {
+        "stage": "OutputClone",
+        "nodes": 10000,
+        "edges": 40000,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 2547300,
+            "bytes_per_op": 7291648,
+            "allocs_per_op": 8
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 2076300,
+            "bytes_per_op": 7291648,
+            "allocs_per_op": 8
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 1949800,
+            "bytes_per_op": 7291648,
+            "allocs_per_op": 8
+          }
+        ]
+      }
+    ],
+    "ubuntu": [
+      {
+        "stage": "IndexAndDigest",
+        "nodes": 100,
+        "edges": 400,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 1259777,
+            "bytes_per_op": 763744,
+            "allocs_per_op": 6942
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 996011,
+            "bytes_per_op": 728376,
+            "allocs_per_op": 6513
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 908345,
+            "bytes_per_op": 728376,
+            "allocs_per_op": 6513
+          }
+        ]
+      },
+      {
+        "stage": "SCCAndPublication",
+        "nodes": 100,
+        "edges": 400,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 208512,
+            "bytes_per_op": 134568,
+            "allocs_per_op": 183
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 161460,
+            "bytes_per_op": 134568,
+            "allocs_per_op": 183
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 195422,
+            "bytes_per_op": 134568,
+            "allocs_per_op": 183
+          }
+        ]
+      },
+      {
+        "stage": "Analyze",
+        "nodes": 100,
+        "edges": 400,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 1403074,
+            "bytes_per_op": 861808,
+            "allocs_per_op": 6688
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 1552303,
+            "bytes_per_op": 861808,
+            "allocs_per_op": 6688
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 1008739,
+            "bytes_per_op": 862944,
+            "allocs_per_op": 6696
+          }
+        ]
+      },
+      {
+        "stage": "Direct",
+        "nodes": 100,
+        "edges": 400,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 864814,
+            "bytes_per_op": 730536,
+            "allocs_per_op": 6555
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 1329496,
+            "bytes_per_op": 730480,
+            "allocs_per_op": 6531
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 846927,
+            "bytes_per_op": 730480,
+            "allocs_per_op": 6531
+          }
+        ]
+      },
+      {
+        "stage": "Impact",
+        "nodes": 100,
+        "edges": 400,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 910936,
+            "bytes_per_op": 782136,
+            "allocs_per_op": 6604
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 917712,
+            "bytes_per_op": 782136,
+            "allocs_per_op": 6604
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 1436167,
+            "bytes_per_op": 783272,
+            "allocs_per_op": 6612
+          }
+        ]
+      },
+      {
+        "stage": "Fingerprint",
+        "nodes": 100,
+        "edges": 400,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 565893,
+            "bytes_per_op": 376680,
+            "allocs_per_op": 2056
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 698084,
+            "bytes_per_op": 375544,
+            "allocs_per_op": 2048
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 564179,
+            "bytes_per_op": 375544,
+            "allocs_per_op": 2048
+          }
+        ]
+      },
+      {
+        "stage": "OutputClone",
+        "nodes": 100,
+        "edges": 400,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 32310,
+            "bytes_per_op": 76544,
+            "allocs_per_op": 8
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 27569,
+            "bytes_per_op": 76544,
+            "allocs_per_op": 8
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 27945,
+            "bytes_per_op": 76544,
+            "allocs_per_op": 8
+          }
+        ]
+      },
+      {
+        "stage": "IndexAndDigest",
+        "nodes": 1000,
+        "edges": 4000,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 17269555,
+            "bytes_per_op": 7601784,
+            "allocs_per_op": 64184
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 15975712,
+            "bytes_per_op": 7601768,
+            "allocs_per_op": 64183
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 16842545,
+            "bytes_per_op": 7607312,
+            "allocs_per_op": 64191
+          }
+        ]
+      },
+      {
+        "stage": "SCCAndPublication",
+        "nodes": 1000,
+        "edges": 4000,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 5027312,
+            "bytes_per_op": 1439288,
+            "allocs_per_op": 1129
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 3688889,
+            "bytes_per_op": 1439288,
+            "allocs_per_op": 1129
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 3245608,
+            "bytes_per_op": 1439288,
+            "allocs_per_op": 1129
+          }
+        ]
+      },
+      {
+        "stage": "Analyze",
+        "nodes": 1000,
+        "edges": 4000,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 16505985,
+            "bytes_per_op": 9041056,
+            "allocs_per_op": 65312
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 14338931,
+            "bytes_per_op": 9042256,
+            "allocs_per_op": 65321
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 14256598,
+            "bytes_per_op": 9043472,
+            "allocs_per_op": 65326
+          }
+        ]
+      },
+      {
+        "stage": "Direct",
+        "nodes": 1000,
+        "edges": 4000,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 13164466,
+            "bytes_per_op": 7605232,
+            "allocs_per_op": 64211
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 11256869,
+            "bytes_per_op": 7606288,
+            "allocs_per_op": 64217
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 10851315,
+            "bytes_per_op": 7607520,
+            "allocs_per_op": 64225
+          }
+        ]
+      },
+      {
+        "stage": "Impact",
+        "nodes": 1000,
+        "edges": 4000,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 11210271,
+            "bytes_per_op": 7656664,
+            "allocs_per_op": 64282
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 12283491,
+            "bytes_per_op": 7658360,
+            "allocs_per_op": 64294
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 11701303,
+            "bytes_per_op": 7656096,
+            "allocs_per_op": 64289
+          }
+        ]
+      },
+      {
+        "stage": "Fingerprint",
+        "nodes": 1000,
+        "edges": 4000,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 5371190,
+            "bytes_per_op": 3728960,
+            "allocs_per_op": 20076
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 5387550,
+            "bytes_per_op": 3727728,
+            "allocs_per_op": 20067
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 5021487,
+            "bytes_per_op": 3727712,
+            "allocs_per_op": 20067
+          }
+        ]
+      },
+      {
+        "stage": "OutputClone",
+        "nodes": 1000,
+        "edges": 4000,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 493847,
+            "bytes_per_op": 738048,
+            "allocs_per_op": 8
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 98172,
+            "bytes_per_op": 738048,
+            "allocs_per_op": 8
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 104464,
+            "bytes_per_op": 738048,
+            "allocs_per_op": 8
+          }
+        ]
+      },
+      {
+        "stage": "IndexAndDigest",
+        "nodes": 10000,
+        "edges": 40000,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 141533361,
+            "bytes_per_op": 74158776,
+            "allocs_per_op": 640614
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 132825059,
+            "bytes_per_op": 74156568,
+            "allocs_per_op": 640598
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 167753398,
+            "bytes_per_op": 74156312,
+            "allocs_per_op": 640596
+          }
+        ]
+      },
+      {
+        "stage": "SCCAndPublication",
+        "nodes": 10000,
+        "edges": 40000,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 44789690,
+            "bytes_per_op": 14124120,
+            "allocs_per_op": 10331
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 36361051,
+            "bytes_per_op": 14124120,
+            "allocs_per_op": 10331
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 31305576,
+            "bytes_per_op": 14124120,
+            "allocs_per_op": 10331
+          }
+        ]
+      },
+      {
+        "stage": "Analyze",
+        "nodes": 10000,
+        "edges": 40000,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 149346199,
+            "bytes_per_op": 88279216,
+            "allocs_per_op": 650918
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 137506335,
+            "bytes_per_op": 88281792,
+            "allocs_per_op": 650938
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 146047638,
+            "bytes_per_op": 88280432,
+            "allocs_per_op": 650927
+          }
+        ]
+      },
+      {
+        "stage": "Direct",
+        "nodes": 10000,
+        "edges": 40000,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 123457618,
+            "bytes_per_op": 74157424,
+            "allocs_per_op": 640607
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 136343731,
+            "bytes_per_op": 74160848,
+            "allocs_per_op": 640632
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 124005430,
+            "bytes_per_op": 74159744,
+            "allocs_per_op": 640624
+          }
+        ]
+      },
+      {
+        "stage": "Impact",
+        "nodes": 10000,
+        "edges": 40000,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 124351309,
+            "bytes_per_op": 74212424,
+            "allocs_per_op": 640704
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 114335430,
+            "bytes_per_op": 74211240,
+            "allocs_per_op": 640695
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 115112107,
+            "bytes_per_op": 74211208,
+            "allocs_per_op": 640695
+          }
+        ]
+      },
+      {
+        "stage": "Fingerprint",
+        "nodes": 10000,
+        "edges": 40000,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 48629007,
+            "bytes_per_op": 37211344,
+            "allocs_per_op": 200071
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 61455332,
+            "bytes_per_op": 37212544,
+            "allocs_per_op": 200080
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 59263139,
+            "bytes_per_op": 37209704,
+            "allocs_per_op": 200071
+          }
+        ]
+      },
+      {
+        "stage": "OutputClone",
+        "nodes": 10000,
+        "edges": 40000,
+        "gomaxprocs": 12,
+        "samples": [
+          {
+            "iterations": 1,
+            "ns_per_op": 2549854,
+            "bytes_per_op": 7291648,
+            "allocs_per_op": 8
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 2135248,
+            "bytes_per_op": 7291648,
+            "allocs_per_op": 8
+          },
+          {
+            "iterations": 1,
+            "ns_per_op": 1949830,
+            "bytes_per_op": 7291648,
+            "allocs_per_op": 8
+          }
+        ]
+      }
+    ]
+  },
+  "exclusions": [
+    "No live PostgreSQL/runtime/persistence integration in this phase",
+    "Opt-in unrelated backend tests remain skipped by default suite",
+    "No production release or downstream authorization",
+    "No hard byte-memory or unconditional cancellation latency guarantee"
+  ]
+}

@@ -53,10 +53,11 @@ Language-invalid classification awaits an authoritative rule/context contract.
 ## Acceptance gates
 
 Design review is complete for the architecture, API, artifact supplement, and
-validation plan at the commit above. Request explicit Phase 5.0.4 implementation
-authorization before any implementation work. After authorization, independently
-freeze analysis-input digest and cursor golden vectors before production emits
-either. Reuse existing frozen SCC/cycle vectors; do not regenerate them.
+validation plan at the commit above. Subsequent explicit implementation authorization
+was granted. Independent analysis-input digest/cursor values were committed at
+`ab4628c` before production encoding. Prose erratum `c0fdd00` corrects only the
+written domain-byte count, with no vector changes. Existing frozen SCC/cycle
+vectors are reused unchanged.
 Later implementation evidence still requires engineering acceptance. This ADR's
 Design Approved status is not implementation acceptance or release approval.
 DIE-HARDEN-001/002 remain open. No automatic 5.0.5/integration/release.

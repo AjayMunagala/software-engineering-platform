@@ -1,7 +1,8 @@
 # Phase 5.0.4 — Candidate Artifact and Query Supplement
 
-Approved design only; not implemented. Approval covers commit `a2680da36cde620cf436b6ba1473b23f7c18e607`.
-Implementation remains unauthorized. This supplement specializes
+Approved design at commit `a2680da36cde620cf436b6ba1473b23f7c18e607`.
+Implementation was explicitly authorized after `140457d`; acceptance remains pending.
+This supplement specializes
 the Phase 5.0 illustrative models against the actual accepted `die` structs.
 
 ## Input and output

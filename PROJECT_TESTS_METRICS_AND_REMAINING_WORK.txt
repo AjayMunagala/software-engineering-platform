@@ -1850,3 +1850,45 @@ freeze analysis-input digest and cursor vectors before production emits either.
 Reuse the existing frozen SCC/cycle vectors without regeneration.
 Next: request explicit Phase 5.0.4 implementation authorization. No implementation
 or vector generation is started by this documentation-only governance update.
+
+======================================================================
+33. PHASE 5.0.4 IMPLEMENTATION AND VALIDATION — 2026-09-10
+======================================================================
+
+Engineering explicitly authorized implementation after design approval 140457d.
+Independent digest/cursor values committed FIRST at ab4628c. Prose erratum
+c0fdd00 corrects the domain length to 28 bytes; expected vectors are unchanged.
+
+Implemented: opt-in neutral analyzer, iterative SCCs, structural cycle summaries,
+bounded dependency/dependent pages, fingerprint-bound cursors, and forward/reverse
+BFS. Core.Normalize and released Go adapter behavior are unchanged.
+
+Validation:
+  Windows and Ubuntu full regression, vet, shuffle, and race: PASS.
+  No reported data races.
+  die package coverage: 93.9%; new analysis code: 528/551 statements, 95.83%.
+  Conformance coverage: 86.2%; Go adapter coverage: 95.2%.
+  Fuzz executions: Windows 210,549; Ubuntu 203,280; total 413,829, PASS.
+  Independent SCC/reachability/shortest-depth oracles: PASS.
+  207 deterministic cancellation checkpoints: PASS, no partial result.
+  Upstream workers 1/8 and cross-platform canonical output hashes: identical.
+  Deep-chain fixture: 10,000 nodes, PASS.
+
+Exact accepted 100,000-node / 1,000,000-edge fixture characterization:
+  Windows analysis: 6.810243 s; sampled peak heap 755,367,248 bytes.
+  Ubuntu analysis: 4.786344373 s; sampled peak heap 711,763,352 bytes.
+  Input retained in both heap measurements; normalization excluded from timing.
+  GOGC=100; GOMEMLIMIT=1536MiB soft GC target, not a hard memory ceiling.
+  Existing core 30-second / 2-GiB scale gate: PASS on both platforms, unchanged.
+  No new production performance gate is claimed.
+
+Detailed evidence and all final benchmark samples:
+  docs/Validation/DEPENDENCY_GRAPH_ANALYSIS_VALIDATION_REPORT.md
+  docs/Validation/DEPENDENCY_GRAPH_ANALYSIS_RESULTS.json
+
+Current governance supersedes the historical design-only status above:
+  Phase 5.0.4: implementation submitted for engineering acceptance.
+  ADR 0022: Design Approved; implementation acceptance pending.
+  Candidate: 0.1.0; no release or tag promotion.
+  DIE-HARDEN-001 / DIE-HARDEN-002: OPEN, not changed by this phase.
+  Phase 5.0.5, integration, and downstream work: NOT AUTHORIZED.
