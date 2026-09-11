@@ -13,7 +13,8 @@
 - Phase 5.0.4 design: approved at `a2680da36cde620cf436b6ba1473b23f7c18e607`
 - ADR 0022: Accepted on 2026-09-11
 - Phase 5.0.4 implementation: engineering accepted at `2390347512149889f28d86c21a0e1682c991a0a9`; vectors frozen first at `ab4628c`
-- Phase 5.0.5 and later milestones: not authorized
+- Phase 5.0.5 design preparation: authorized on 2026-09-11; proposed package awaits review
+- Phase 5.0.5 implementation/integration testing and later milestones: not authorized
 - Production release: not authorized
 - Date: 2026-09-11
 
@@ -138,7 +139,8 @@ release is authorized by this acceptance.
 ## Phase 5.0.4 - SCC, cycles, and impact
 
 The design package at `a2680da36cde620cf436b6ba1473b23f7c18e607` is approved.
-Implementation is not authorized. Approved package:
+Implementation and validation at `2390347` were accepted; canonical governance
+record is `fca668d`. Approved package:
 
 - `docs/Architecture/DEPENDENCY_GRAPH_ANALYSIS.md`;
 - `docs/Architecture/DEPENDENCY_GRAPH_ANALYSIS_ARTIFACTS.md`;
@@ -146,7 +148,7 @@ Implementation is not authorized. Approved package:
 - `docs/Decisions/0022-dependency-graph-analysis.md` (Accepted);
 - `docs/Validation/DEPENDENCY_GRAPH_ANALYSIS_VALIDATION_PLAN.md`.
 
-Implementation scope, only after separate explicit authorization:
+Accepted implementation scope:
 
 - deterministic SCC analysis;
 - bounded cycle classification;
@@ -159,7 +161,21 @@ Architecture policy, smells, scores, and AI reasoning remain excluded.
 
 ## Phase 5.0.5 - Platform integration
 
-Design and implement integration only after a separate accepted design:
+Design preparation only is authorized on 2026-09-11. Review package:
+
+- [Platform integration architecture](../Architecture/DEPENDENCY_PLATFORM_INTEGRATION.md)
+- [Canonical codec/publication specification](../Architecture/DEPENDENCY_PLATFORM_CODEC.md)
+- [Candidate API](../API/DEPENDENCY_PLATFORM_INTEGRATION_CANDIDATE_API.md)
+- [ADR 0023](../Decisions/0023-dependency-platform-integration.md) — Proposed
+- [Validation architecture and plan](../Validation/DEPENDENCY_PLATFORM_INTEGRATION_VALIDATION_PLAN.md)
+
+The proposal uses a separate opt-in inventory publication capability and dedicated
+repository records. It explicitly defers the optional Repository Service profile
+extension, typed reload and persisted upstream closure because the frozen service
+construction is not extensible in those ways today. These scope choices require
+explicit design review; they are not approved implementation decisions.
+
+Implement integration only after accepted design and separate authorization:
 
 - versioned canonical artifact codec;
 - persistence and runtime wiring through frozen ports;
@@ -207,5 +223,7 @@ validation, engineering acceptance, then commit/release. Phase 5.0.2 is
 closed and accepted. Phase 5.0.3 is also closed and engineering accepted. Only
 Phase 5.0.4 design is approved and its implementation was explicitly authorized.
 Implementation and evidence at `2390347` are engineering accepted; ADR 0022 is
-Accepted. Stop after recording this governance decision. Phase 5.0.5, integration,
-later milestones, and production release remain unauthorized.
+Accepted at governance record `fca668d`. Phase 5.0.5 design preparation only is
+now authorized. Its proposed package must be committed and reviewed; design
+approval and implementation authorization remain separate gates. No implementation,
+integration testing, later milestones, or production release is authorized.

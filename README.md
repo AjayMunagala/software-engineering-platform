@@ -79,7 +79,10 @@ The opt-in analyzer/query implementation and
 [validation evidence](docs/Validation/DEPENDENCY_GRAPH_ANALYSIS_VALIDATION_REPORT.md)
 at commit `2390347512149889f28d86c21a0e1682c991a0a9` are engineering accepted.
 ADR 0022 is Accepted; candidate remains 0.1.0.
-Phase 5.0.5 and release remain unauthorized.
+Phase 5.0.5 [platform integration design](docs/Architecture/DEPENDENCY_PLATFORM_INTEGRATION.md)
+preparation is authorized; the documentation-only proposal awaits review.
+ADR 0023 is Proposed. Implementation, integration testing, and release remain
+unauthorized; both direct-core hardening items remain open.
 
 ## Run RIE
 
@@ -188,6 +191,7 @@ node/edge/SCC/cycle vectors and two-GiB synthetic heap gate are frozen. Phase
 containment-ID vector. Intermediate evidence bounds and nil-context handling
 remain required direct-core release-hardening items. Phase 5.0.3 is engineering
 accepted; Phase 5.0.4 implementation is engineering accepted, not a release.
-Phase 5.0.5 and production release remain unauthorized. Phase 4.1 transport,
+Phase 5.0.5 design preparation only is authorized; implementation and production
+release remain unauthorized. Phase 4.1 transport,
 HTTP health endpoints, REST/gRPC implementation,
 UI, LLM, patch generation, and repository mutation remain unauthorized.

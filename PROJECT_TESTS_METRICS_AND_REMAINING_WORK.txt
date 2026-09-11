@@ -1911,4 +1911,40 @@ topology, and workstation/WSL characterization remain accepted limitations.
 This governance-only update changes no code, test results, or performance gates.
 No new regression, race, fuzz, or benchmark execution is claimed.
 Phase 5.0.5, integration, downstream work, and production release: NOT AUTHORIZED.
+
+======================================================================
+35. PHASE 5.0.5 PLATFORM INTEGRATION DESIGN PREPARATION — 2026-09-11
+======================================================================
+
+Canonical previous acceptance: fca668d. Phase 5.0.4 remains accepted/closed.
+Authorization: DESIGN PREPARATION ONLY. ADR 0023: PROPOSED, awaiting review.
+
+New documentation:
+  docs/Architecture/DEPENDENCY_PLATFORM_INTEGRATION.md
+  docs/Architecture/DEPENDENCY_PLATFORM_CODEC.md
+  docs/API/DEPENDENCY_PLATFORM_INTEGRATION_CANDIDATE_API.md
+  docs/Decisions/0023-dependency-platform-integration.md
+  docs/Validation/DEPENDENCY_PLATFORM_INTEGRATION_VALIDATION_PLAN.md
+
+Proposal: separate opt-in exact-byte dependency inventory publication through
+frozen Persistence/Runtime 1.0.0 capabilities, sealed streaming codec, scoped
+metadata/export/reconciliation and explicit failure/resource limits.
+
+Review decisions called out explicitly:
+  - Dedicated integration repository records; no mixed frozen service history.
+  - No automatic repository-go/v1 profile extension (constructor is fixed).
+  - Logical upstream references remain logical, not invented payload proof/FKs.
+  - Typed graph reload and persisted upstream closure remain deferred.
+
+No production code, new vectors, integration execution, benchmark measurement,
+coverage result or release change is introduced by this design package.
+Documentation validation: PASS for 5 design documents and 18 relative links;
+git diff --check: PASS. No code or integration tests were run (design-only scope).
+Future validation plan includes independent vectors first, fake conformance,
+disposable PostgreSQL/runtime, exact-byte recovery, cross-platform quality and
+separate integration performance characterization after authorization.
+
+Candidate: 0.1.0. DIE-HARDEN-001 and DIE-HARDEN-002 remain OPEN.
+Implementation, integration testing, 5.0.6, 5.0.7 and release: NOT AUTHORIZED.
+Next: engineering review of committed design; then separate implementation gate.
 Stop here; no automatic next-phase design or implementation.
