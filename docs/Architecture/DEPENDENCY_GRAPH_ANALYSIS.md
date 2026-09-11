@@ -5,8 +5,8 @@
 Design approved at `a2680da36cde620cf436b6ba1473b23f7c18e607` and recorded at
 `140457d`. Engineering subsequently authorized Phase 5.0.4 implementation only.
 Phase 5.0.3 is accepted at governance commit `7a04db8`; candidate remains 0.1.0.
-ADR 0022 is Design Approved, not implementation-accepted. Explicit implementation
-authorization was granted; implementation evidence still requires acceptance.
+Engineering accepted implementation and evidence at `2390347` on 2026-09-11.
+ADR 0022 is Accepted. Phase 5.0.5, integration, and release remain unauthorized.
 DIE-HARDEN-001 and DIE-HARDEN-002 remain open.
 
 Review together with `DEPENDENCY_GRAPH_ANALYSIS_ARTIFACTS.md`,

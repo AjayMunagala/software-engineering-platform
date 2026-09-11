@@ -3,8 +3,10 @@
   "phase": "5.0.4",
   "date": "2026-09-10",
   "candidate_version": "0.1.0",
-  "engineering_acceptance": "pending",
-  "adr_0022": "Design Approved",
+  "engineering_acceptance": "accepted",
+  "engineering_acceptance_date": "2026-09-11",
+  "accepted_implementation_commit": "2390347512149889f28d86c21a0e1682c991a0a9",
+  "adr_0022": "Accepted",
   "release_authorized": false,
   "phase_5_0_5_authorized": false,
   "vector_commits": {

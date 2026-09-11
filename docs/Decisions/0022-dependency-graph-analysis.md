@@ -2,12 +2,12 @@
 
 ## Status
 
-Design Approved. Engineering reviewed and approved design commit
-`a2680da36cde620cf436b6ba1473b23f7c18e607`. Implementation is eligible for
-separate authorization. Engineering subsequently explicitly authorized Phase
-5.0.4 implementation, beginning with independent digest/cursor vectors committed
-before production encoding. This ADR remains Design Approved pending implementation
-evidence acceptance; no later milestone or release is authorized.
+Accepted on 2026-09-11. Engineering accepted Phase 5.0.4 implementation and
+validation evidence at `2390347512149889f28d86c21a0e1682c991a0a9` and authorized
+this ADR's promotion. Design commit `a2680da36cde620cf436b6ba1473b23f7c18e607`
+was separately approved before implementation authorization. Independent digest/
+cursor vectors were committed before production encoding.
+No later milestone, integration, or release is authorized.
 Design approval and implementation authorization are separate gates. Phase 5.0.3
 and ADR 0021 remain accepted at governance commit `7a04db8`. Version remains
 candidate 0.1.0. Only the approved Phase 5.0.4 implementation scope is authorized.
@@ -58,6 +58,7 @@ was granted. Independent analysis-input digest/cursor values were committed at
 `ab4628c` before production encoding. Prose erratum `c0fdd00` corrects only the
 written domain-byte count, with no vector changes. Existing frozen SCC/cycle
 vectors are reused unchanged.
-Later implementation evidence still requires engineering acceptance. This ADR's
-Design Approved status is not implementation acceptance or release approval.
+Engineering accepted the implementation and evidence at `2390347` on 2026-09-11.
+This governance update records acceptance only; it changes no implementation,
+contract version, measured result, or performance gate and makes no release.
 DIE-HARDEN-001/002 remain open. No automatic 5.0.5/integration/release.

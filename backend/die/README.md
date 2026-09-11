@@ -9,7 +9,7 @@ It does not import RIE, Go LIE, persistence, PostgreSQL, runtime, Repository
 Service, transports, filesystem readers, network clients, or process execution.
 The accepted Go adapter remains in the separate `die/golang` package.
 Phase 5.0.4 adds opt-in SCC/cycle and bounded query capabilities; implementation
-acceptance is pending. Integration and release remain separately gated.
+at `2390347` is engineering accepted. Integration and release remain unauthorized.
 
 Containment IDs use the frozen ordered fields `kind`, `parent node ID`, and
 `child node ID` with the common uint64-big-endian length-prefixed UTF-8 scheme.

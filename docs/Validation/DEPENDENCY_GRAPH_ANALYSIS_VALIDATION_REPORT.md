@@ -1,8 +1,11 @@
 # Phase 5.0.4 — Dependency Graph Analysis Validation Report
 
-Date: 2026-09-10. Candidate: **0.1.0**. Implementation submitted for engineering
-acceptance; this report does not accept the milestone, promote ADR 0022, authorize
-5.0.5, or authorize a production release. DIE-HARDEN-001/002 remain open.
+Validation date: 2026-09-10. Candidate: **0.1.0**.
+Engineering accepted implementation commit
+[`2390347512149889f28d86c21a0e1682c991a0a9`](https://github.com/AjayMunagala/software-engineering-platform/commit/2390347512149889f28d86c21a0e1682c991a0a9)
+and its submitted evidence on 2026-09-11. ADR 0022 is Accepted. This governance
+update adds no test executions or measurement changes. Phase 5.0.5, integration,
+and production release remain unauthorized. DIE-HARDEN-001/002 remain open.
 
 ## Authorization and identity provenance
 
@@ -225,5 +228,5 @@ report and the separately traceable vector commits above.
   membership/reason records. For very large derived inventories a larger
   MaxInputAuxRecords can be necessary; derived facts are recomputed, never trusted
   or silently dropped to evade that input bound.
-- Candidate API/artifact stays 0.1.0. Engineering acceptance, ADR promotion,
-  integration, downstream phases, and release remain separate decisions.
+- Candidate API/artifact stays 0.1.0. Engineering acceptance and ADR promotion
+  are recorded; integration, downstream phases, and release remain unauthorized.

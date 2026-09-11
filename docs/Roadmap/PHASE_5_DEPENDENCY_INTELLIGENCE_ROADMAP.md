@@ -11,11 +11,11 @@
 - Phase 5.0.3 implementation: engineering accepted at `a0a1a779734b23a0f6c2a8f711130063822a9761`
 - ADR 0021: Accepted; candidate version remains 0.1.0
 - Phase 5.0.4 design: approved at `a2680da36cde620cf436b6ba1473b23f7c18e607`
-- ADR 0022: Design Approved; implementation evidence acceptance pending
-- Phase 5.0.4 implementation: submitted for engineering acceptance; vectors frozen first at `ab4628c`
+- ADR 0022: Accepted on 2026-09-11
+- Phase 5.0.4 implementation: engineering accepted at `2390347512149889f28d86c21a0e1682c991a0a9`; vectors frozen first at `ab4628c`
 - Phase 5.0.5 and later milestones: not authorized
 - Production release: not authorized
-- Date: 2026-09-10
+- Date: 2026-09-11
 
 ## Goal
 
@@ -143,7 +143,7 @@ Implementation is not authorized. Approved package:
 - `docs/Architecture/DEPENDENCY_GRAPH_ANALYSIS.md`;
 - `docs/Architecture/DEPENDENCY_GRAPH_ANALYSIS_ARTIFACTS.md`;
 - `docs/API/DEPENDENCY_GRAPH_ANALYSIS_CANDIDATE_API.md`;
-- `docs/Decisions/0022-dependency-graph-analysis.md` (Design Approved);
+- `docs/Decisions/0022-dependency-graph-analysis.md` (Accepted);
 - `docs/Validation/DEPENDENCY_GRAPH_ANALYSIS_VALIDATION_PLAN.md`.
 
 Implementation scope, only after separate explicit authorization:
@@ -206,5 +206,6 @@ Every milestone is separately gated: design, review, implementation,
 validation, engineering acceptance, then commit/release. Phase 5.0.2 is
 closed and accepted. Phase 5.0.3 is also closed and engineering accepted. Only
 Phase 5.0.4 design is approved and its implementation was explicitly authorized.
-Implementation evidence is submitted for acceptance; ADR 0022 remains Design
-Approved. Phase 5.0.5, later milestones, and production release remain unauthorized.
+Implementation and evidence at `2390347` are engineering accepted; ADR 0022 is
+Accepted. Stop after recording this governance decision. Phase 5.0.5, integration,
+later milestones, and production release remain unauthorized.

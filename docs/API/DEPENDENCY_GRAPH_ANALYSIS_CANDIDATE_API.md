@@ -3,7 +3,8 @@
 Design approved, candidate 0.1.0, at commit `a2680da36cde620cf436b6ba1473b23f7c18e607`.
 Implementation explicitly authorized after design approval recorded at `140457d`.
 Candidate additions live in `backend/die`; accepted `Core` remains unchanged.
-Engineering acceptance of the implementation is pending.
+Engineering accepted implementation `2390347` on 2026-09-11; ADR 0022 is Accepted.
+Candidate stays 0.1.0; no integration, downstream milestone, or release is authorized.
 
 ## Capabilities (proposed signatures)
 

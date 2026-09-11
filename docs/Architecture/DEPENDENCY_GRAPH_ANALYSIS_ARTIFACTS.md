@@ -1,7 +1,8 @@
 # Phase 5.0.4 — Candidate Artifact and Query Supplement
 
 Approved design at commit `a2680da36cde620cf436b6ba1473b23f7c18e607`.
-Implementation was explicitly authorized after `140457d`; acceptance remains pending.
+Implementation was explicitly authorized after `140457d` and engineering accepted
+at `2390347` on 2026-09-11. Candidate remains 0.1.0; no release is authorized.
 This supplement specializes
 the Phase 5.0 illustrative models against the actual accepted `die` structs.
 
