@@ -13,8 +13,9 @@
 - Phase 5.0.4 design: approved at `a2680da36cde620cf436b6ba1473b23f7c18e607`
 - ADR 0022: Accepted on 2026-09-11
 - Phase 5.0.4 implementation: engineering accepted at `2390347512149889f28d86c21a0e1682c991a0a9`; vectors frozen first at `ab4628c`
-- Phase 5.0.5 design preparation: authorized on 2026-09-11; proposed package awaits review
-- Phase 5.0.5 implementation/integration testing and later milestones: not authorized
+- Phase 5.0.5 design at `1b9f4d6`: approved on 2026-09-12; ADR 0023 Design Approved
+- Phase 5.0.5 implementation: authorized, independent vectors first; production encoding awaits vector review
+- PostgreSQL/runtime integration testing and later milestones: not authorized
 - Production release: not authorized
 - Date: 2026-09-11
 
@@ -161,19 +162,22 @@ Architecture policy, smells, scores, and AI reasoning remain excluded.
 
 ## Phase 5.0.5 - Platform integration
 
-Design preparation only is authorized on 2026-09-11. Review package:
+Design at `1b9f4d6` is approved. Implementation is authorized with independent
+[vectors](../API/DEPENDENCY_PLATFORM_GOLDEN_VECTORS.md) first; stop for their review
+before production encoding. PostgreSQL/runtime integration tests remain gated.
+Approved package:
 
 - [Platform integration architecture](../Architecture/DEPENDENCY_PLATFORM_INTEGRATION.md)
 - [Canonical codec/publication specification](../Architecture/DEPENDENCY_PLATFORM_CODEC.md)
 - [Candidate API](../API/DEPENDENCY_PLATFORM_INTEGRATION_CANDIDATE_API.md)
-- [ADR 0023](../Decisions/0023-dependency-platform-integration.md) — Proposed
+- [ADR 0023](../Decisions/0023-dependency-platform-integration.md) — Design Approved
 - [Validation architecture and plan](../Validation/DEPENDENCY_PLATFORM_INTEGRATION_VALIDATION_PLAN.md)
 
 The proposal uses a separate opt-in inventory publication capability and dedicated
 repository records. It explicitly defers the optional Repository Service profile
 extension, typed reload and persisted upstream closure because the frozen service
 construction is not extensible in those ways today. These scope choices require
-explicit design review; they are not approved implementation decisions.
+explicit design review and were accepted in the 2026-09-12 manager decision.
 
 Implement integration only after accepted design and separate authorization:
 
@@ -224,6 +228,7 @@ closed and accepted. Phase 5.0.3 is also closed and engineering accepted. Only
 Phase 5.0.4 design is approved and its implementation was explicitly authorized.
 Implementation and evidence at `2390347` are engineering accepted; ADR 0022 is
 Accepted at governance record `fca668d`. Phase 5.0.5 design preparation only is
-now authorized. Its proposed package must be committed and reviewed; design
-approval and implementation authorization remain separate gates. No implementation,
-integration testing, later milestones, or production release is authorized.
+was authorized and design `1b9f4d6` has now been approved. Implementation is
+authorized with independent vectors first; wait for vector review before production
+encoding. PostgreSQL/runtime integration testing, later milestones and release
+remain unauthorized. Both hardening items remain open.

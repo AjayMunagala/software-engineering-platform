@@ -148,11 +148,11 @@ Detailed milestones are defined in
 - Phase 5.0.4 SCC/cycle/impact design commit `a2680da` is approved;
   ADR 0022 is Accepted. Implementation and validation at `2390347` were engineering
   accepted on 2026-09-11 after the separately approved design and authorization.
-  Governance record is `fca668d`. Phase 5.0.5 design preparation only is now
-  authorized; [the proposed package](../Architecture/DEPENDENCY_PLATFORM_INTEGRATION.md)
-  awaits review and ADR 0023 remains Proposed. Implementation, integration testing,
-  later milestones and release remain unauthorized. Both direct-core hardening
-  items remain open.
+  Governance record is `fca668d`. Phase 5.0.5 [design package](../Architecture/DEPENDENCY_PLATFORM_INTEGRATION.md)
+  at `1b9f4d6` is approved; ADR 0023 is Design Approved. Implementation is authorized
+  with independent vectors first. Production encoding awaits vector review;
+  PostgreSQL/runtime integration testing, later milestones and release remain
+  unauthorized. Both direct-core hardening items remain open.
 
 Detailed milestones are defined in
 `docs/Roadmap/PHASE_5_DEPENDENCY_INTELLIGENCE_ROADMAP.md`.

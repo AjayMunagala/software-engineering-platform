@@ -1,7 +1,9 @@
 # Phase 5.0.5 — Validation Architecture and Plan
 
-2026-09-11. **Design only; execution not authorized.** No new measured results,
-coverage, benchmarks, integration runs, or golden vectors are asserted here.
+Design approved on 2026-09-12. Implementation is authorized with independent
+vectors first. [Vector-only checks](../API/DEPENDENCY_PLATFORM_GOLDEN_VECTORS.md)
+are recorded separately; PostgreSQL/runtime integration testing remains unauthorized.
+No production coverage, benchmarks or integration runs are asserted here.
 See [architecture](../Architecture/DEPENDENCY_PLATFORM_INTEGRATION.md),
 [codec](../Architecture/DEPENDENCY_PLATFORM_CODEC.md),
 [API](../API/DEPENDENCY_PLATFORM_INTEGRATION_CANDIDATE_API.md), and

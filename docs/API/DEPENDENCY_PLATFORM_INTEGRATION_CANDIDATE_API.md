@@ -1,7 +1,8 @@
 # Dependency Platform Integration — Candidate API 0.1.0
 
-2026-09-11. Design-only proposal; none of the declarations below are implemented.
-Design approval and implementation authorization are separate gates.
+Design approved on 2026-09-12 at `1b9f4d6`; implementation authorized with
+independent vectors first. None of the production declarations below are implemented.
+Production encoding awaits vector review; PostgreSQL/runtime tests are not authorized.
 See [architecture](../Architecture/DEPENDENCY_PLATFORM_INTEGRATION.md),
 [codec](../Architecture/DEPENDENCY_PLATFORM_CODEC.md), and
 [validation plan](../Validation/DEPENDENCY_PLATFORM_INTEGRATION_VALIDATION_PLAN.md).

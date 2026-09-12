@@ -1948,3 +1948,28 @@ Candidate: 0.1.0. DIE-HARDEN-001 and DIE-HARDEN-002 remain OPEN.
 Implementation, integration testing, 5.0.6, 5.0.7 and release: NOT AUTHORIZED.
 Next: engineering review of committed design; then separate implementation gate.
 Stop here; no automatic next-phase design or implementation.
+
+======================================================================
+36. PHASE 5.0.5 INDEPENDENT VECTOR FREEZE — 2026-09-12
+======================================================================
+
+Design 1b9f4d6: APPROVED, including all four explicit architectural choices.
+ADR 0023: DESIGN APPROVED (not implementation-accepted).
+Implementation: AUTHORIZED, vectors first; production encoding waits for review.
+
+Independent calculator: experiments/dependency-platform-vectors/calculate.ps1
+Frozen values: experiments/dependency-platform-vectors/vectors.json
+Independent verifier: experiments/dependency-platform-vectors/verify.mjs
+Schema and review record: docs/API/DEPENDENCY_PLATFORM_GOLDEN_VECTORS.md
+
+Checks: PASS, six payload/profile/UUID/manifest vectors; 30 child request IDs;
+five identity mutations; every manifest-byte mutation; final-LF sensitivity;
+two existing frozen digest anchors. Repeated calculator output matches literals.
+PowerShell 7.6.5 / .NET 10.0.11; Node v24.14.1 / OpenSSL 3.5.5 on Windows.
+Complete payload field-order table: 97 fields across 14 serialized models.
+
+No backend or frozen 1.0.0 contract changed. No production codec, database/runtime
+test, performance benchmark, race/fuzz or release execution is claimed.
+Candidate remains 0.1.0; DIE-HARDEN-001 and DIE-HARDEN-002 remain OPEN.
+Next: review vector commit. Stop before production encoding.
+PostgreSQL/runtime integration testing, 5.0.6 and release: NOT AUTHORIZED.

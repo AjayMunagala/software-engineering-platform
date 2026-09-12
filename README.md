@@ -80,9 +80,10 @@ The opt-in analyzer/query implementation and
 at commit `2390347512149889f28d86c21a0e1682c991a0a9` are engineering accepted.
 ADR 0022 is Accepted; candidate remains 0.1.0.
 Phase 5.0.5 [platform integration design](docs/Architecture/DEPENDENCY_PLATFORM_INTEGRATION.md)
-preparation is authorized; the documentation-only proposal awaits review.
-ADR 0023 is Proposed. Implementation, integration testing, and release remain
-unauthorized; both direct-core hardening items remain open.
+is approved at `1b9f4d6`; ADR 0023 is Design Approved. Implementation is authorized,
+starting with [independent vectors](docs/API/DEPENDENCY_PLATFORM_GOLDEN_VECTORS.md).
+Production encoding awaits vector review. PostgreSQL/runtime integration testing
+and release remain unauthorized; both direct-core hardening items remain open.
 
 ## Run RIE
 
@@ -191,7 +192,7 @@ node/edge/SCC/cycle vectors and two-GiB synthetic heap gate are frozen. Phase
 containment-ID vector. Intermediate evidence bounds and nil-context handling
 remain required direct-core release-hardening items. Phase 5.0.3 is engineering
 accepted; Phase 5.0.4 implementation is engineering accepted, not a release.
-Phase 5.0.5 design preparation only is authorized; implementation and production
-release remain unauthorized. Phase 4.1 transport,
+Phase 5.0.5 implementation is authorized with independent vectors first; production
+encoding waits for vector review. Integration testing and release remain gated. Phase 4.1 transport,
 HTTP health endpoints, REST/gRPC implementation,
 UI, LLM, patch generation, and repository mutation remain unauthorized.

@@ -1,7 +1,8 @@
 # Dependency Platform Codec and Publication Specification
 
-Design proposal for Phase 5.0.5, 2026-09-11. No codec, vectors, or implementation
-are created by this document. See [architecture](DEPENDENCY_PLATFORM_INTEGRATION.md)
+Design approved on 2026-09-12 at `1b9f4d6`. Independent
+[vectors](../API/DEPENDENCY_PLATFORM_GOLDEN_VECTORS.md) are frozen for review before
+production encoding. See [architecture](DEPENDENCY_PLATFORM_INTEGRATION.md)
 and [ADR 0023](../Decisions/0023-dependency-platform-integration.md).
 
 ## Version boundaries
@@ -81,7 +82,8 @@ signature, source-freshness proof, authorization token, or cursor authentication
 New schemes use a single frame definition: `S(text)` is uint64 big-endian UTF-8
 byte length followed by exact UTF-8 bytes; `U(n)` is uint64 big-endian; `H(d)` is
 32 raw SHA-256 bytes. All strings are validated, with no implicit trimming or
-case folding. UUID request IDs are canonical lowercase RFC-format strings.
+case folding. Scope/repository/scan IDs are canonical lowercase UUID strings;
+the parent request ID remains bounded opaque text, and child IDs are hex hashes.
 Every preimage starts with `S(domain)`; no NUL suffix. This does not replace
 the different framing of any earlier frozen scheme.
 

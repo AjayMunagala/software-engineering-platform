@@ -2,11 +2,14 @@
 
 ## Status and review package
 
-Design preparation authorized on 2026-09-11. **Proposed for design review only.**
+Design at `1b9f4d6` approved on 2026-09-12, including the four explicit scope choices.
+Implementation authorized with independent vectors first; production encoding
+waits for vector review. See [vector freeze](../API/DEPENDENCY_PLATFORM_GOLDEN_VECTORS.md).
 Canonical previous acceptance: `fca668d`. Phase 5.0.4 is closed; ADR 0022 is
 Accepted. Dependency Intelligence remains candidate `0.1.0`.
-No implementation, integration testing, downstream validation, or release is
-authorized. DIE-HARDEN-001 and DIE-HARDEN-002 remain open.
+PostgreSQL/runtime integration testing, downstream validation, and release remain
+unauthorized. DIE-HARDEN-001 and DIE-HARDEN-002 remain open. The design's future
+execution sequence below does not override these current gates.
 
 Review this document together with:
 

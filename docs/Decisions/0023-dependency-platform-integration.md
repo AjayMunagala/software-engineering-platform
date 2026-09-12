@@ -2,8 +2,11 @@
 
 ## Status
 
-**Proposed**, 2026-09-11. Phase 5.0.5 design preparation only is authorized.
-This ADR is neither design-approved nor implementation-authorized. Phase 5.0.4
+**Design Approved**, 2026-09-12, at reviewed design commit `1b9f4d6`.
+Phase 5.0.5 implementation is authorized, starting with independent vectors.
+Production encoding waits for review of the vector commit. PostgreSQL/runtime
+integration testing remains unauthorized. Full ADR acceptance still requires
+implementation evidence and engineering acceptance. Phase 5.0.4
 and ADR 0022 remain accepted at canonical governance commit `fca668d`.
 Candidate version remains 0.1.0. DIE-HARDEN-001/002 remain open.
 
