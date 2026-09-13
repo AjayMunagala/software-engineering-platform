@@ -82,8 +82,11 @@ ADR 0022 is Accepted; candidate remains 0.1.0.
 Phase 5.0.5 [platform integration design](docs/Architecture/DEPENDENCY_PLATFORM_INTEGRATION.md)
 is approved at `1b9f4d6`; ADR 0023 is Design Approved. Implementation is authorized,
 starting with [independent vectors](docs/API/DEPENDENCY_PLATFORM_GOLDEN_VECTORS.md).
-Production encoding awaits vector review. PostgreSQL/runtime integration testing
+Vectors `3d5afe7` are approved/frozen. Candidate codec and fake-capability bridge
+evidence is submitted for review. PostgreSQL/runtime integration testing
 and release remain unauthorized; both direct-core hardening items remain open.
+See the [local implementation checkpoint](docs/Validation/DEPENDENCY_PLATFORM_FAKE_CAPABILITY_VALIDATION_REPORT.md)
+for passing checks, the retained race-run timing failure and outstanding validation.
 
 ## Run RIE
 
@@ -192,7 +195,7 @@ node/edge/SCC/cycle vectors and two-GiB synthetic heap gate are frozen. Phase
 containment-ID vector. Intermediate evidence bounds and nil-context handling
 remain required direct-core release-hardening items. Phase 5.0.3 is engineering
 accepted; Phase 5.0.4 implementation is engineering accepted, not a release.
-Phase 5.0.5 implementation is authorized with independent vectors first; production
-encoding waits for vector review. Integration testing and release remain gated. Phase 4.1 transport,
+Phase 5.0.5 vectors `3d5afe7` are approved; candidate codec and fake-capability
+implementation are submitted for review. Integration testing and release remain gated. Phase 4.1 transport,
 HTTP health endpoints, REST/gRPC implementation,
 UI, LLM, patch generation, and repository mutation remain unauthorized.

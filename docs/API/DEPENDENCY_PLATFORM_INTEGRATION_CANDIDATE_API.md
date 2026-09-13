@@ -1,8 +1,15 @@
 # Dependency Platform Integration — Candidate API 0.1.0
 
 Design approved on 2026-09-12 at `1b9f4d6`; implementation authorized with
-independent vectors first. None of the production declarations below are implemented.
-Production encoding awaits vector review; PostgreSQL/runtime tests are not authorized.
+independent vectors first. Vectors at `3d5afe7` are approved and frozen.
+Candidate codec and bridge implementation now exists; fake-capability evidence is
+submitted separately. PostgreSQL/runtime tests are not authorized.
+
+Implementation refinement: source revision is limited to 512 UTF-8 bytes to match
+the frozen persistence port, with controls and path separators rejected. Ambiguous
+writes return `Uncertain` carrying the immutable expected publication for recovery.
+Conceptual capability signatures below remain the design boundary; concrete Go
+constructors/getters are documented in the package README and source.
 See [architecture](../Architecture/DEPENDENCY_PLATFORM_INTEGRATION.md),
 [codec](../Architecture/DEPENDENCY_PLATFORM_CODEC.md), and
 [validation plan](../Validation/DEPENDENCY_PLATFORM_INTEGRATION_VALIDATION_PLAN.md).

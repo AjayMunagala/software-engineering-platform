@@ -1,0 +1,29 @@
+{
+  "phase": "5.0.5",
+  "checkpoint": "codec_and_fake_capability_implementation",
+  "date": "2026-09-13",
+  "status": "submitted_for_review_not_phase_acceptance",
+  "design_commit": "1b9f4d6",
+  "independent_vector_commit": "3d5afe7",
+  "implementation_commit": "containing_git_commit",
+  "candidate_version": "0.1.0",
+  "platform": "windows/amd64",
+  "go": "go1.26.2",
+  "git": "2.54.0.windows.1",
+  "coverage_percent": {"codec": 91.2, "integration": 85.6},
+  "vector_verifier": {"status": "pass", "payloads": 6, "child_ids": 30, "identity_mutations": 5},
+  "backend_regression": "pass_with_live_opt_ins_disabled",
+  "backend_vet": "pass",
+  "targeted_race_shuffle_repeats": {"status": "pass", "count": 3},
+  "full_backend_race_attempts": [
+    {"status": "fail", "test": "TestBlockedResourceCloseIsBoundedAndNotReportedStopped", "classification": "timing_assertion_cause_unestablished", "race_reports": 0},
+    {"status": "pass", "race_reports": 0, "live_integration": false}
+  ],
+  "isolated_runtime_unit_rerun": {"status": "pass", "count": 3, "seconds": 4.457},
+  "fuzz": {"codec_executions": 208009, "request_executions": 45242, "status": "pass", "budget_seconds_per_target": 5},
+  "benchmark_empty": {"iterations": 330001, "ns_per_op": 3407, "bytes_per_op": 1921, "allocs_per_op": 44, "method": "single_warm_local_run", "performance_gate": false},
+  "not_run": ["ubuntu", "postgresql_integration", "actual_runtime_integration", "crash_restore", "physical_disk_full_fault_injection", "os_close_remove_fault_injection", "large_fixture_characterization", "core_scale_gate_requalification"],
+  "hardening_open": ["DIE-HARDEN-001", "DIE-HARDEN-002"],
+  "production_release": false,
+  "phase_5_0_6_authorized": false
+}

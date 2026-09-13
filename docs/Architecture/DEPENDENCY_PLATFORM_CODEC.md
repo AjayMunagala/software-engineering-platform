@@ -1,8 +1,9 @@
 # Dependency Platform Codec and Publication Specification
 
 Design approved on 2026-09-12 at `1b9f4d6`. Independent
-[vectors](../API/DEPENDENCY_PLATFORM_GOLDEN_VECTORS.md) are frozen for review before
-production encoding. See [architecture](DEPENDENCY_PLATFORM_INTEGRATION.md)
+[vectors](../API/DEPENDENCY_PLATFORM_GOLDEN_VECTORS.md) at `3d5afe7` were approved
+before production encoding. Candidate implementation awaits evidence review.
+See [architecture](DEPENDENCY_PLATFORM_INTEGRATION.md)
 and [ADR 0023](../Decisions/0023-dependency-platform-integration.md).
 
 ## Version boundaries

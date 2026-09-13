@@ -3,8 +3,9 @@
 ## Status and review package
 
 Design at `1b9f4d6` approved on 2026-09-12, including the four explicit scope choices.
-Implementation authorized with independent vectors first; production encoding
-waits for vector review. See [vector freeze](../API/DEPENDENCY_PLATFORM_GOLDEN_VECTORS.md).
+Implementation authorized; independent vectors `3d5afe7` were approved before
+production encoding. Candidate codec/bridge fake-capability evidence is submitted
+for review. See [vector freeze](../API/DEPENDENCY_PLATFORM_GOLDEN_VECTORS.md).
 Canonical previous acceptance: `fca668d`. Phase 5.0.4 is closed; ADR 0022 is
 Accepted. Dependency Intelligence remains candidate `0.1.0`.
 PostgreSQL/runtime integration testing, downstream validation, and release remain

@@ -4,7 +4,8 @@
 
 **Design Approved**, 2026-09-12, at reviewed design commit `1b9f4d6`.
 Phase 5.0.5 implementation is authorized, starting with independent vectors.
-Production encoding waits for review of the vector commit. PostgreSQL/runtime
+Independent vectors at `3d5afe7` have been reviewed and frozen. Production codec
+and fake-capability implementation evidence are being submitted for review. PostgreSQL/runtime
 integration testing remains unauthorized. Full ADR acceptance still requires
 implementation evidence and engineering acceptance. Phase 5.0.4
 and ADR 0022 remain accepted at canonical governance commit `fca668d`.
