@@ -3,7 +3,8 @@
 Design approved on 2026-09-12 at `1b9f4d6`; implementation authorized with
 independent vectors first. Vectors at `3d5afe7` are approved and frozen.
 Candidate codec and bridge implementation now exists; fake-capability evidence is
-submitted separately. PostgreSQL/runtime tests are not authorized.
+checkpoint-approved at `38dc5e8`. PostgreSQL/runtime validation is now authorized;
+the first real-capability report remains a checkpoint, not phase acceptance.
 
 Implementation refinement: source revision is limited to 512 UTF-8 bytes to match
 the frozen persistence port, with controls and path separators rejected. Ambiguous

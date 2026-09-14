@@ -1,0 +1,34 @@
+{
+  "phase": "5.0.5",
+  "checkpoint": "real_postgresql_runtime_validation",
+  "date": "2026-09-14",
+  "baseline": "38dc5e83014a95e34a8cf7df509ce11fb2741322",
+  "status": "submitted_for_review_phase_incomplete",
+  "platforms": ["windows/amd64", "linux/amd64"],
+  "go": "1.26.2",
+  "postgresql": "18.4",
+  "atlas": "1.2.3",
+  "kernel": "6.18.33.2-microsoft-standard-WSL2",
+  "wsl_memory_bytes": 3953807360,
+  "wsl_swap_bytes": 1073741824,
+  "fixtures": [
+    {"name": "empty", "bytes": 614, "sha256": "2341cdbfd54d1819086af76f07ebb9bf8c4c55dbd6a7e73b395a3114db122088"},
+    {"name": "nonempty_unicode", "bytes": 988, "sha256": "b66500731e027bd4ce83ece85444db13f255c446e668ae568bd6b9fa5d5e5c4d"}
+  ],
+  "both_platforms_pass": ["publication", "verified_export", "lost_publish_reply", "idempotent_retry", "eight_concurrent_instances", "pre_cancellation", "scope_rejection", "expected_digest_mismatch", "stored_certificate", "database_immediate_stop_recovery", "backup_restore", "archive", "purge", "garbage_collection", "runtime_cleanup"],
+  "targeted_race": {"windows": "pass_three_repeats", "ubuntu": "pass_three_repeats"},
+  "ubuntu_regression_vet": "pass_after_stable_source_rerun",
+  "ubuntu_full_backend_race": "pass_no_races_live_opt_ins_disabled",
+  "core_gate": {
+    "windows": {"status": "pass", "seconds": 9.9567845, "sampled_peak_heap_bytes": 1047335432},
+    "ubuntu": {"status": "pass", "seconds": 4.978260343, "sampled_peak_heap_bytes": 1041487208},
+    "threshold_seconds": 30,
+    "threshold_heap_bytes": 2147483648,
+    "hard_process_memory_guarantee": false
+  },
+  "retained_failures": ["initial_real_concurrency_stage_after_publication_rejection_corrected_in_bridge", "preliminary_ubuntu_build_during_source_edit_rerun_on_stable_source"],
+  "remaining": ["physical_disk_full", "os_close_remove_fault_injection", "all_precommit_process_termination_points", "all_cancellation_boundaries", "real_chunk_corruption_matrix", "exhaustive_real_metadata_mutations", "large_publication_characterization"],
+  "hardening_open": ["DIE-HARDEN-001", "DIE-HARDEN-002"],
+  "adr0023": "design_approved_not_final_accepted",
+  "release": false
+}

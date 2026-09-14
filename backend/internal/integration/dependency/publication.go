@@ -231,6 +231,14 @@ func (s *Service) Publish(ctx context.Context, r PublishRequest, inventory die.D
 	staged, stageErr := s.d.Stager.StagePayload(work, stage, counter)
 	closeErr := reader.Close()
 	if stageErr != nil {
+		// Another instance may finish this same scan between Begin and Stage.
+		// The frozen stager then rejects the no-longer-running scan. Accept only
+		// independently reconciled exact publication, never the rejection alone.
+		if translated := safe(stageErr); translated == Missing || translated == Conflict {
+			if reconciled, reconcileErr := s.reconcileDetached(e); reconcileErr == nil {
+				return reconciled, nil
+			}
+		}
 		return Receipt{}, safe(stageErr)
 	}
 	if closeErr != nil {

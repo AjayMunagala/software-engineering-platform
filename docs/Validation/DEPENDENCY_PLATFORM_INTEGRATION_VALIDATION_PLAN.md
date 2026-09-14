@@ -2,7 +2,8 @@
 
 Design approved on 2026-09-12. Implementation is authorized with independent
 vectors first. [Vector-only checks](../API/DEPENDENCY_PLATFORM_GOLDEN_VECTORS.md)
-are recorded separately; PostgreSQL/runtime integration testing remains unauthorized.
+are recorded separately; PostgreSQL/runtime integration testing was authorized
+on 2026-09-14 after approval of implementation checkpoint `38dc5e8`.
 No production coverage, benchmarks or integration runs are asserted here.
 See [architecture](../Architecture/DEPENDENCY_PLATFORM_INTEGRATION.md),
 [codec](../Architecture/DEPENDENCY_PLATFORM_CODEC.md),

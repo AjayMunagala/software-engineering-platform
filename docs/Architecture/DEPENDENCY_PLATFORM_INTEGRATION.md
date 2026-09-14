@@ -8,8 +8,9 @@ production encoding. Candidate codec/bridge fake-capability evidence is submitte
 for review. See [vector freeze](../API/DEPENDENCY_PLATFORM_GOLDEN_VECTORS.md).
 Canonical previous acceptance: `fca668d`. Phase 5.0.4 is closed; ADR 0022 is
 Accepted. Dependency Intelligence remains candidate `0.1.0`.
-PostgreSQL/runtime integration testing, downstream validation, and release remain
-unauthorized. DIE-HARDEN-001 and DIE-HARDEN-002 remain open. The design's future
+PostgreSQL/runtime integration testing is authorized as of 2026-09-14 after the
+`38dc5e8` implementation checkpoint approval. Downstream validation and release
+remain unauthorized. DIE-HARDEN-001 and DIE-HARDEN-002 remain open. The design's future
 execution sequence below does not override these current gates.
 
 Review this document together with:

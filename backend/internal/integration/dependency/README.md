@@ -3,7 +3,8 @@
 This application bridge borrows frozen Persistence Port capabilities and admission.
 It does not own repositories, engines, pools, migrations, runtime startup/shutdown,
 or Repository Service profiles. `FromRuntime` only borrows public capabilities;
-actual runtime integration validation remains gated.
+actual runtime integration validation is authorized and covered by the disposable
+checkpoint harness in `tests/` (not yet final phase acceptance).
 
 Construct a host-owned private `SpoolFactory`, immutable allowlisted `Config`, and
 `Service` with `New`. The host must register dedicated scope/repository records.
@@ -39,5 +40,7 @@ running scan). One publish/export per service instance is admitted; reads can ov
 
 Fake-capability tests cover publication, lost replies, retries, metadata corruption,
 scope isolation, stream consumption, cancellation, spool ownership and cleanup.
-They do not prove PostgreSQL durability or real runtime integration. Candidate
-implementation is submitted for review, not accepted or released.
+Those fake tests alone do not prove PostgreSQL durability or real runtime
+integration. The separate real-capability checkpoint covers small-fixture runtime,
+publication, database restart and restore. Remaining mandatory fault/scale cases
+are listed in its report; final phase acceptance and release remain gated.

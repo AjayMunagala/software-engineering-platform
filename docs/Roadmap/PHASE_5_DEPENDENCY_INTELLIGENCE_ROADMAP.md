@@ -14,7 +14,7 @@
 - ADR 0022: Accepted on 2026-09-11
 - Phase 5.0.4 implementation: engineering accepted at `2390347512149889f28d86c21a0e1682c991a0a9`; vectors frozen first at `ab4628c`
 - Phase 5.0.5 design at `1b9f4d6`: approved on 2026-09-12; ADR 0023 Design Approved
-- Phase 5.0.5 implementation: vectors `3d5afe7` approved/frozen; candidate codec and fake-capability bridge submitted for review; PostgreSQL/runtime validation remains gated
+- Phase 5.0.5 implementation: vectors `3d5afe7` approved/frozen; codec/fake bridge `38dc5e8` checkpoint accepted; real PostgreSQL/runtime validation authorized, first checkpoint submitted; final phase acceptance remains gated
 - PostgreSQL/runtime integration testing and later milestones: not authorized
 - Production release: not authorized
 - Date: 2026-09-11
@@ -229,6 +229,7 @@ Phase 5.0.4 design is approved and its implementation was explicitly authorized.
 Implementation and evidence at `2390347` are engineering accepted; ADR 0022 is
 Accepted at governance record `fca668d`. Phase 5.0.5 design `1b9f4d6` is approved.
 Independent vectors `3d5afe7` were approved before production encoding. Candidate
-codec and fake-capability bridge evidence is submitted for review, not acceptance.
-PostgreSQL/runtime integration testing, later milestones and release
+codec and fake-capability bridge checkpoint `38dc5e8` is accepted. PostgreSQL/runtime
+validation is authorized; its first real-capability checkpoint is submitted for
+review, with remaining mandatory cases explicit. Later milestones and release
 remain unauthorized. Both hardening items remain open.
