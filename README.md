@@ -85,7 +85,9 @@ starting with [independent vectors](docs/API/DEPENDENCY_PLATFORM_GOLDEN_VECTORS.
 Vectors `3d5afe7` are approved/frozen. Candidate codec and fake-capability bridge
 checkpoint `38dc5e8` is accepted. PostgreSQL/runtime validation is authorized;
 the [real-capability checkpoint](docs/Validation/DEPENDENCY_PLATFORM_REAL_CAPABILITY_VALIDATION_REPORT.md)
-records passing cases and remaining mandatory evidence. Release remains unauthorized;
+`dfd551f` is accepted. The [fault-matrix checkpoint](docs/Validation/DEPENDENCY_PLATFORM_FAULT_MATRIX_REPORT.md)
+adds real filesystem failures, boundary interruption/cancellation, storage mutation,
+and large-publication measurements for review. Release remains unauthorized;
 both direct-core hardening items remain open.
 See the [local implementation checkpoint](docs/Validation/DEPENDENCY_PLATFORM_FAKE_CAPABILITY_VALIDATION_REPORT.md)
 for passing checks, the retained race-run timing failure and outstanding validation.

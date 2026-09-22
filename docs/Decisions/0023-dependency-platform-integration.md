@@ -7,7 +7,8 @@ Phase 5.0.5 implementation is authorized, starting with independent vectors.
 Independent vectors at `3d5afe7` have been reviewed and frozen. Production codec
 and fake-capability implementation at `38dc5e8` are checkpoint-approved. PostgreSQL/runtime
 integration validation was authorized on 2026-09-14; the first real-capability
-checkpoint is submitted separately. Full ADR acceptance still requires
+checkpoint `dfd551f` is manager-approved. Remaining fault-injection and large
+publication evidence is now submitted for review. Full ADR acceptance still requires
 implementation evidence and engineering acceptance. Phase 5.0.4
 and ADR 0022 remain accepted at canonical governance commit `fca668d`.
 Candidate version remains 0.1.0. DIE-HARDEN-001/002 remain open.

@@ -29,6 +29,14 @@ export AEGIS_RUNTIME_POSTGRES_PORT="$port" AEGIS_RUNTIME_POSTGRES_DATABASE="$dat
 export GOPROXY=off GOSUMDB=off GOMAXPROCS=4
 cd "$backend_dir"
 platform="${1:-linux}"
+if [[ "$platform" == faults ]]; then
+ "$go_binary" test ./internal/integration/dependency -run '^TestReal(BoundaryMatrix|StorageFaultsAndLargePublication)$' -count=1 -timeout=10m -v
+ exit 0
+fi
+if [[ "$platform" == faults-windows ]]; then
+ powershell.exe -NoProfile -NonInteractive -Command "\$env:AEGIS_DEPENDENCY_DISPOSABLE='1'; \$env:AEGIS_RUNTIME_POSTGRES_PORT='$port'; \$env:AEGIS_RUNTIME_POSTGRES_DATABASE='$database'; \$env:AEGIS_RUNTIME_POSTGRES_USER='die505_runtime'; \$env:GOPROXY='off'; \$env:GOSUMDB='off'; \$env:GOMAXPROCS='4'; Set-Location '$(wslpath -w "$backend_dir")'; go test ./internal/integration/dependency -run '^TestReal(BoundaryMatrix|StorageFaultsAndLargePublication)$' -count=1 -timeout=10m -v; exit \$LASTEXITCODE"
+ exit 0
+fi
 run_validation() {
  if [[ "$platform" == linux ]]; then
   "$go_binary" test ./internal/integration/dependency -run '^TestDisposableDependencyPublication$' -count=1 -timeout=120s -v

@@ -21,3 +21,10 @@ View serialization plus LF for both empty and nonempty Unicode inventories.
 
 This is a checkpoint harness, not the entire Phase 5.0.5 failure matrix. See the
 real-capability report for unexecuted cases and governance status.
+
+The follow-up `faults` and `faults-windows` modes run the boundary, storage mutation
+and 91.4-MB publication matrix. `validate_filesystem_full.sh` runs as root solely
+to create/mount an isolated 16-MiB ext4 image, executes Go tests as postgres, then
+unmounts/removes the generated image. Never substitute a real block device or
+existing directory. The fault-matrix report distinguishes OS-specific coverage,
+constraint-rejected mutations, and observer-only certificate checks.

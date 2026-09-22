@@ -1,0 +1,51 @@
+{
+  "phase": "5.0.5",
+  "date": "2026-09-22",
+  "baseline_commit": "dfd551fdb5ce0ac3273861f1442729870aaf0aa8",
+  "status": "checkpoint_submitted_for_manager_review",
+  "production_code_changed": false,
+  "filesystem_faults": {
+    "platform": "ubuntu",
+    "isolated_ext4_image_bytes": 16777216,
+    "successful_spool_bytes_before_full": 10485760,
+    "os_enospc_confirmed": true,
+    "seal_rejected": true,
+    "closed_descriptor_error": "pass",
+    "unlink_permission_error_and_retry": "pass",
+    "windows_acl_fault": "not_claimed"
+  },
+  "boundary_matrix": {
+    "platforms_passed": ["windows", "ubuntu"],
+    "termination_cases_per_platform": 8,
+    "cancellation_cases_per_platform": 8,
+    "points": ["before_encode", "before_begin_after_seal", "after_begin", "before_stage", "during_stage", "after_stage", "before_publish", "after_publish_before_reply"],
+    "internal_sql_statement_hooks": false
+  },
+  "real_corruption": {"platforms_passed": ["windows", "ubuntu"], "cases": ["flipped_byte", "truncated_chunk", "missing_chunk", "reordered_chunks"], "caller_bytes_on_failure": 0},
+  "metadata": {
+    "committed_mutations_rejected": ["artifact_id", "artifact_name", "artifact_version", "stable_id_scheme", "codec_name", "codec_version", "media_type", "producer_name", "producer_version", "source_revision", "analysis_profile_digest", "security_scope_id"],
+    "constraint_blocked_sqlstate_23503": ["payload_size", "payload_digest", "scan_id", "repository_id"],
+    "stored_certificate_digest": "observer_only_mutation_detected_and_restored",
+    "production_certificate_read_capability": false
+  },
+  "large_fixture": {
+    "nodes": 20000,
+    "evidence_value_bytes_per_node": 4096,
+    "payload_bytes": 91400628,
+    "spool_file_bytes": 91400628,
+    "sha256": "b235618afb7c7d6d61e9cc634a205a7f22f386558618cfcf4bda04080516602f",
+    "sampling_interval_ms": 5,
+    "ubuntu": {"prerequisite_ns": 565452229, "publish_including_encode_ns": 1708338852, "verified_export_ns": 661717661, "sampled_heap_bytes": 338568432, "operation_alloc_bytes": 739455064},
+    "windows": {"prerequisite_ns": 317589900, "publish_including_encode_ns": 2594380400, "verified_export_ns": 3349286100, "sampled_heap_bytes": 489082480, "operation_alloc_bytes": 739515904},
+    "performance_gate": false,
+    "hard_process_memory_bound": false,
+    "rss_measured": false
+  },
+  "retained_failure": "initial_reorder_test_sqlstate_42804_fixed_with_explicit_bytea_casts",
+  "quality": {"windows_regression": "pass", "ubuntu_regression": "pass", "windows_vet": "pass", "ubuntu_vet": "pass", "targeted_race_shuffle_three_repeats_both_platforms": "pass_no_race_reports", "full_backend_race_rerun_this_checkpoint": false},
+  "cleanup": "no_disposable_mounts_or_cluster_directories_remained",
+  "hardening_open": ["DIE-HARDEN-001", "DIE-HARDEN-002"],
+  "tls_production_qualification": false,
+  "adr0023": "design_approved",
+  "release": false
+}
